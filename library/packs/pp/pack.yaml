@@ -1,0 +1,63 @@
+pack_id: pp
+pack_version: 1.0.0
+display_name: "Power Platform Discovery"
+language: pt
+description: >
+  Discovery and sensemaking pack tuned for Power Platform engagements.
+  Vocabulary, question-bank, and deliverable templates aligned with
+  Canvas Apps, Model-driven Apps, Power Automate, Dataverse.
+
+deliverables:
+  - id: discovery-report
+    mandatory: true
+    template: deliverable-templates/discovery-report.template.md
+  - id: executive-report
+    mandatory: true
+    template: deliverable-templates/executive-report.template.md
+  - id: solution-blueprint
+    mandatory: true
+    template: deliverable-templates/solution-blueprint.template.md
+  - id: implementation-spec
+    mandatory: true
+    template: deliverable-templates/implementation-spec.template.md
+  - id: claude-design-brief
+    mandatory: true
+    template: deliverable-templates/claude-design-brief.template.md
+  - id: estimate
+    mandatory: false
+    template: deliverable-templates/estimate.template.md
+
+lenses_config:
+  business:
+    extra_signals: [licensing_baseline, premium_connector_need, sponsor_authority_level]
+  operations:
+    extra_signals: [excel_anchors, sharepoint_lists_anchors, manual_handoffs]
+  user:
+    extra_signals: [personas_count, mobile_need, offline_need]
+  data:
+    extra_signals: [dataverse_vs_sharepoint, master_data_owners, retention_policy]
+  technology:
+    # Active only in Options phase
+    constraints_to_check:
+      - premium_licensing
+      - dataflow_capacity
+      - ALM_environments
+      - dataverse_storage_quota
+      - DLP_policy_compatibility
+  governance:
+    extra_signals: [DLP_policies, environment_strategy, sensitivity_labels, RBAC_complexity]
+  financial:
+    extra_signals: [licensing_cost_baseline, internal_chargeback_model]
+
+domain_knowledge:
+  - domain-knowledge/powerfx-patterns.md
+  - domain-knowledge/screen-patterns.md
+  - domain-knowledge/security-patterns.md
+  - domain-knowledge/delegation-matrix.md
+
+question_bank: question-bank.md
+glossary: glossary.md
+
+decision_tree:
+  source: decision-tree.md
+  consulted_in_phase: options  # never in discovery
