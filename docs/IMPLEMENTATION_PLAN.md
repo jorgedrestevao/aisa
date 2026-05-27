@@ -1508,9 +1508,9 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 
 ## 16. Resume tracking
 
-**State actual**: Fase 3 completa (2026-05-28). `library/packs/pp/` com pack.yaml (6 deliverables), glossary.md (53 termos), question-bank.md (45 perguntas distribuídas pelas 7 lenses), commit `3afbad6`. Fases 1-2: commits `29f98cf`, `ce011bf`.
+**State actual**: Fase 4 completa (2026-05-28). `.claude/skills/` tem 6 skills (lens-business/operations/user + aisa-start/round/status) e `.claude/commands/` tem 7 stubs (start/round/status/frame/options/decide/render), commit `3a4108e`. Fases 1-3: `29f98cf`, `ce011bf`, `3afbad6`.
 
-**Próxima sessão**: arrancar Fase 4 — Discovery skills (3 lenses business/operations/user + skills aisa-start/round/status + 7 command stubs). Ver §4. (Nota: `lenses_config` ficou dentro de `pack.yaml` conforme §3.1.4 — não há ficheiro `lenses-config.yaml` separado.)
+**Próxima sessão**: arrancar Fase 5 — Discovery validation end-to-end com cenário realista (`galp-adv-test`). Ver §5. **Pré-requisito**: as novas slash commands só ficam registadas num arranque fresco de `claude .` em `aisa/`; a validação `/start`→`/round`→`/status` corre nessa sessão fresca. O scenario usa `inputs/Dayly_pending_tickets_Anonimo.xlsx` (copiar de `SPEA v5/inputs/`). (Nota: `lenses_config` ficou dentro de `pack.yaml` conforme §3.1.4.)
 
 **Desvio registado (Fase 1)**: `jq` não está instalado na máquina de build (Windows). O hook `pre-write-guard.sh` é um stub em modo `log` no MVP; adicionou-se um guard que faz no-op gracioso se `jq` estiver ausente (em vez de erro em cada Write/Edit). Decisão durável (instalar jq vs reescrever hook em `.ps1`) adiada para Fase 11, conforme §1.10.
 
@@ -1537,7 +1537,7 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 | 1 — Repo skeleton | ☑ done | 2026-05-28 | 29f98cf | jq missing on build machine → hook stub degrades gracefully (no-op); durable Windows fix deferred to Phase 11 |
 | 2 — Kernel docs | ☑ done | 2026-05-28 | ce011bf | 5 files; jargon-grep (claim ledger/wave/cell/frontmatter) clean; headers OK |
 | 3 — Pack pp foundation | ☑ done | 2026-05-28 | 3afbad6 | glossary 53 / q-bank 45 (7 lenses) / 6 deliverables; lenses_config in pack.yaml; PyYAML missing → YAML checked manually |
-| 4 — Discovery skills (3 lenses) | ☐ todo | — | — | — |
+| 4 — Discovery skills (3 lenses) | ☑ done | 2026-05-28 | 3a4108e | 6 skills + 7 command stubs; structural validation OK; live /start /round /status exec deferred to Phase 5 (needs fresh `claude .` session) |
 | 5 — Discovery validation | ☐ todo | — | — | — |
 | 6 — Restantes lenses | ☐ todo | — | — | — |
 | 7 — Council infrastructure | ☐ todo | — | — | — |
