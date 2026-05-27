@@ -1508,9 +1508,11 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 
 ## 16. Resume tracking
 
-**State actual**: pre-Fase 1.
+**State actual**: Fase 1 completa (2026-05-28). Repo skeleton criado em `C:\Users\jorge.estevao\Documents\Galp\Claude Code Projects\aisa\`, git inicializado, commit `29f98cf`.
 
-**Próxima sessão**: arrancar Fase 1.
+**Próxima sessão**: arrancar Fase 2 — Kernel docs (`library/kernel/{phases,states,orchestration,render-contract,glossary}.md`). Ver §2.
+
+**Desvio registado (Fase 1)**: `jq` não está instalado na máquina de build (Windows). O hook `pre-write-guard.sh` é um stub em modo `log` no MVP; adicionou-se um guard que faz no-op gracioso se `jq` estiver ausente (em vez de erro em cada Write/Edit). Decisão durável (instalar jq vs reescrever hook em `.ps1`) adiada para Fase 11, conforme §1.10.
 
 **Pré-Fase 1 decisões fechadas em 2026-05-27**:
 - Localização `aisa/`: `C:\Users\jorge.estevao\Documents\Galp\Claude Code Projects\aisa\` (sibling de SPEA v5) ✅
@@ -1527,8 +1529,8 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 
 | Fase | Status | Data | Commit hash | Notas |
 |---|---|---|---|---|
-| 0 — Pre-flight | ☐ todo | — | — | Confirm location with Jorge |
-| 1 — Repo skeleton | ☐ todo | — | — | — |
+| 0 — Pre-flight | ☑ done | 2026-05-27 | — | Location confirmed (§0.3/§16); team sign-off closed |
+| 1 — Repo skeleton | ☑ done | 2026-05-28 | 29f98cf | jq missing on build machine → hook stub degrades gracefully (no-op); durable Windows fix deferred to Phase 11 |
 | 2 — Kernel docs | ☐ todo | — | — | — |
 | 3 — Pack pp foundation | ☐ todo | — | — | — |
 | 4 — Discovery skills (3 lenses) | ☐ todo | — | — | — |
