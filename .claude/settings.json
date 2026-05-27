@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "deny": [
+      "Write(./library/**)",
+      "Edit(./library/**)"
+    ],
+    "allow": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-write-guard.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "AISA_KERNEL_VERSION": "0.1.0"
+  }
+}

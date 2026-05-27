@@ -1,0 +1,38 @@
+# Personal Claude Code settings (per-user)
+.claude/settings.local.json
+
+# Environment with real credentials
+.env
+.env.local
+
+# Tenant-specific memory (lives in private repo)
+.claude/agent-memory/_tenant/
+
+# Engagement data (lives in private repo; this folder is mount point)
+projects/*
+!projects/.gitkeep
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+package-lock.json
+
+# Logs
+*.log
