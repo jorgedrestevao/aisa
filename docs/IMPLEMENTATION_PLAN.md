@@ -1508,11 +1508,13 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 
 ## 16. Resume tracking
 
-**State actual**: Fase 1 completa (2026-05-28). Repo skeleton criado em `C:\Users\jorge.estevao\Documents\Galp\Claude Code Projects\aisa\`, git inicializado, commit `29f98cf`.
+**State actual**: Fase 2 completa (2026-05-28). `library/kernel/` populado com os 5 ficheiros (phases, states, orchestration, render-contract, glossary), commit `ce011bf`. Fase 1: commit `29f98cf`.
 
-**Próxima sessão**: arrancar Fase 2 — Kernel docs (`library/kernel/{phases,states,orchestration,render-contract,glossary}.md`). Ver §2.
+**Próxima sessão**: arrancar Fase 3 — Pack `pp` foundation (`library/packs/pp/{pack.yaml, glossary.md, question-bank.md, lenses-config.yaml}`). Ver §3.
 
 **Desvio registado (Fase 1)**: `jq` não está instalado na máquina de build (Windows). O hook `pre-write-guard.sh` é um stub em modo `log` no MVP; adicionou-se um guard que faz no-op gracioso se `jq` estiver ausente (em vez de erro em cada Write/Edit). Decisão durável (instalar jq vs reescrever hook em `.ps1`) adiada para Fase 11, conforme §1.10.
+
+**Nota para Fases 3-10 (writes a `library/`)**: `.claude/settings.json` (criado na Fase 1) declara `deny: Write(./library/**)` + `Edit(./library/**)`. Nesta sessão de build não bloqueou (settings.json foi criado a meio da sessão, não carregado no arranque). Em sessões futuras, onde o settings.json é carregado no arranque, escrever em `library/` (Fases 3-10 populam os packs) pode disparar prompt de permissão. Opções: (a) aprovar os prompts — authoring administrativo é o "sanctioned path" (ver rule `library-readonly.md`); (b) adiar a activação do `deny` para Fase 11, consistente com §0.4 (edits a `library/` permitidos antes da Fase 11) e com o hook só em modo `enforce` na Fase 11. Decisão do Jorge.
 
 **Pré-Fase 1 decisões fechadas em 2026-05-27**:
 - Localização `aisa/`: `C:\Users\jorge.estevao\Documents\Galp\Claude Code Projects\aisa\` (sibling de SPEA v5) ✅
@@ -1531,7 +1533,7 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 |---|---|---|---|---|
 | 0 — Pre-flight | ☑ done | 2026-05-27 | — | Location confirmed (§0.3/§16); team sign-off closed |
 | 1 — Repo skeleton | ☑ done | 2026-05-28 | 29f98cf | jq missing on build machine → hook stub degrades gracefully (no-op); durable Windows fix deferred to Phase 11 |
-| 2 — Kernel docs | ☐ todo | — | — | — |
+| 2 — Kernel docs | ☑ done | 2026-05-28 | ce011bf | 5 files; jargon-grep (claim ledger/wave/cell/frontmatter) clean; headers OK |
 | 3 — Pack pp foundation | ☐ todo | — | — | — |
 | 4 — Discovery skills (3 lenses) | ☐ todo | — | — | — |
 | 5 — Discovery validation | ☐ todo | — | — | — |
