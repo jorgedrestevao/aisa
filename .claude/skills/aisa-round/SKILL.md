@@ -1,0 +1,33 @@
+---
+name: aisa-round
+description: Run a round of lenses in the current phase. In Discovery, runs the lenses sequentially (inline) in the fixed order, or a single named lens.
+---
+
+# aisa-round
+
+## Usage
+
+`/round [lens]`
+
+- No argument: in Discovery, runs the lenses in the fixed order defined in `library/kernel/phases.md`: `business → operations → user → data → governance → financial`. In other phases → stop with: "/round is for Discovery; use /frame, /options, /decide for later phases."
+- `[lens]`: a lens name (e.g., `business`) — runs only that lens.
+
+## Execution steps
+
+1. Read `_state.json` (resolve the engagement root as in `aisa-start`). Read `phase` and `round`.
+2. If `phase != discovery` → stop with the message above.
+3. **Increment the round** (`R-01` → `R-02` → ...). This is the round the lenses will stamp on their rows.
+4. For each lens to run (the full Discovery order, or just the named lens):
+   a. If `.claude/skills/lens-<name>/SKILL.md` does not exist yet → skip it and note "lens `<name>` not yet implemented" (lenses data/governance/financial arrive in a later build phase).
+   b. Otherwise invoke the lens skill (e.g., `Skill: lens-business`) in **inline mode** — it reads `context.json` + the accumulated `shared-understanding.md` + previous lenses' `lens-outputs/` from this round.
+   c. Confirm the lens wrote rows to the SU and a paragraph to `lens-outputs/<lens>.md`.
+5. After all lenses (or the single lens) finish:
+   a. Update `_state.json.round` atomically (tmp → rename).
+   b. Update the SU header `Última actualização` timestamp.
+   c. Append a round summary to `council-log.md`.
+6. Output: "Round `R-NN` complete (lenses run: …). Run `/status` for the summary."
+
+## Notes
+
+- Lenses are idempotent and append-only; re-running a round is safe (it adds a new round's rows, it does not rewrite prior ones).
+- The fixed inline order exists for predictability and debuggability (see `library/kernel/orchestration.md`).
