@@ -1,0 +1,36 @@
+pack_id: outsystems
+pack_version: 0.1.0-skeleton
+display_name: "OutSystems Discovery (skeleton)"
+language: pt
+description: >
+  Skeleton pack for OutSystems engagements. Populated by the engagement
+  team when the first OutSystems discovery starts. See docs/PACK_AUTHORING.md
+  for the populate sequence: glossary → question-bank → decision-tree →
+  deliverable-templates → domain-knowledge.
+
+deliverables: []   # to be filled — start by transplanting from pp and adapting
+
+lenses_config:
+  business:
+    extra_signals: []
+  operations:
+    extra_signals: []
+  user:
+    extra_signals: []
+  data:
+    extra_signals: []
+  technology:
+    constraints_to_check: []   # OutSystems-specific: licensing tier, LifeTime ALM, integration extensions
+  governance:
+    extra_signals: []
+  financial:
+    extra_signals: []
+
+domain_knowledge: []   # to be populated with OutSystems patterns
+
+question_bank: question-bank.md   # to be created
+glossary: glossary.md              # to be created
+
+decision_tree:
+  source: decision-tree.md         # to be created
+  consulted_in_phase: options

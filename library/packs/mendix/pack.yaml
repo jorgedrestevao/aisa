@@ -1,0 +1,35 @@
+pack_id: mendix
+pack_version: 0.1.0-skeleton
+display_name: "Mendix Discovery (skeleton)"
+language: pt
+description: >
+  Skeleton pack for Mendix engagements. Populated by the engagement
+  team when the first Mendix discovery starts. See docs/PACK_AUTHORING.md
+  for the populate sequence.
+
+deliverables: []
+
+lenses_config:
+  business:
+    extra_signals: []
+  operations:
+    extra_signals: []
+  user:
+    extra_signals: []
+  data:
+    extra_signals: []
+  technology:
+    constraints_to_check: []   # Mendix-specific: licensing tier, app cloud tier, REST/SOAP integration limits
+  governance:
+    extra_signals: []
+  financial:
+    extra_signals: []
+
+domain_knowledge: []
+
+question_bank: question-bank.md
+glossary: glossary.md
+
+decision_tree:
+  source: decision-tree.md
+  consulted_in_phase: options

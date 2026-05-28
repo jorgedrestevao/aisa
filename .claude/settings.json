@@ -14,9 +14,38 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/on-su-change.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/synthesis-validate.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/render-validate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/phase-gate-check.sh"
+          }
+        ]
+      }
     ]
   },
   "env": {
-    "AISA_KERNEL_VERSION": "0.1.0"
+    "AISA_KERNEL_VERSION": "0.1.0",
+    "AISA_GUARD_MODE": "log"
   }
 }

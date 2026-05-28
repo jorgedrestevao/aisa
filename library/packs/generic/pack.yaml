@@ -1,0 +1,41 @@
+pack_id: generic
+pack_version: 0.1.0-skeleton
+display_name: "Generic Discovery (no specific low-code/custom platform)"
+language: pt
+description: >
+  Vendor-agnostic skeleton pack. Use when the engagement explicitly
+  must not assume a particular low-code platform — e.g., for early
+  process-redesign or feasibility studies. The technology lens here
+  considers non-platform options (custom code, off-the-shelf SaaS,
+  process change without digitalization) on equal footing.
+
+deliverables: []
+
+lenses_config:
+  business:
+    extra_signals: []
+  operations:
+    extra_signals: []
+  user:
+    extra_signals: []
+  data:
+    extra_signals: []
+  technology:
+    constraints_to_check:
+      - integration_capability        # what existing systems can be reached, with what cost
+      - regulatory_constraints        # residency, security accreditation, etc.
+      - in_house_skill_alignment      # what the team can build and maintain
+      - reversibility                 # how locked-in the option is
+  governance:
+    extra_signals: []
+  financial:
+    extra_signals: []
+
+domain_knowledge: []
+
+question_bank: question-bank.md
+glossary: glossary.md
+
+decision_tree:
+  source: decision-tree.md
+  consulted_in_phase: options

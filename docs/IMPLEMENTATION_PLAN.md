@@ -1508,7 +1508,19 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 
 ## 16. Resume tracking
 
-**State actual**: Fase 7 estrutural completa (2026-05-28). Council-independent mode wired: 7 personas (`business-analyst`, `operations-lead`, `user-advocate`, `data-steward`, `compliance-officer`, `cfo-lens`, `solution-architect`) + `chairman` em `.claude/agents/`; skills `lens-technology` (Options-only), `chairman-synthesis`, `aisa-frame`; `/frame` wired. Personas têm `tools: [Read, Grep, Glob]` (chairman = `[Read, Write, Edit, Grep, Glob]`). Grep no-tech limpo em todos os ficheiros Discovery/Framing (única excepção: `solution-architect.md`, que é a persona que activa lens-technology e é refusada antes de Options). Commit `4ee3938`. Fases 1-6: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `915b9e0`.
+**State actual**: Fases 7-11 estruturais completas em sequência (2026-05-28). MVP estrutural completo; falta apenas live exec end-to-end + Fase 12 (pilot com utilizadores reais).
+
+**Phase 7** — Council-independent mode wired: 8 agents (`business-analyst`, `operations-lead`, `user-advocate`, `data-steward`, `compliance-officer`, `cfo-lens`, `solution-architect`, `chairman`); skills `lens-technology` (Options-only), `chairman-synthesis`, `aisa-frame`. Commit `4ee3938`.
+
+**Phase 8** — Options + Decision + Synthesis: skills `aisa-options` (7 personas em paralelo incl. solution-architect), `aisa-decide` (interactive; auto-runs synthesize), `aisa-synthesize` (5 topic packs); 5 templates em `library/kernel/synthesis-templates/`; commands `/options`, `/decide`, `/synthesize` wired.
+
+**Phase 9** — Render layer: 6 deliverable templates em `library/packs/pp/deliverable-templates/` (incl. `implementation-spec.template.md` novo, e `claude-design-brief.template.md` renomeado de `design-spec.md`); 3 architecture sub-templates em `library/packs/pp/architecture-templates/` (sharepoint-first, dataverse-first, hybrid); skill `aisa-render` com slot-resolution + versioning + render-gaps + --dry-run; `/render` wired.
+
+**Phase 10** — Domain knowledge + decision-tree: transplantados `powerfx-patterns.md` (566 linhas), `screen-patterns.md` (244), `security-patterns.md` (359) de SPEA v5; novo `delegation-matrix.md` (sintetizado a partir de §1 de powerfx-patterns); `decision-tree.md` (3 branches: sharepoint-first, dataverse-first, hybrid; 6 regras + side-effects + missing-inputs protocol).
+
+**Phase 11** — Enterprise readiness: docs `PACK_AUTHORING.md`, `LENS_AUTHORING.md`, `DELIVERABLE_AUTHORING.md`; skeleton packs `outsystems/`, `mendix/`, `generic/` (apenas pack.yaml); 4 hook stubs novos (phase-gate-check, on-su-change, synthesis-validate, render-validate) + `HOOKS.md`; `.claude/settings.json` wired (PostToolUse matchers); `bootstrap.ps1` (junction + AISA_ENGAGEMENTS_ROOT setup); agent-memory `_universal/` seed com 14 ficheiros (2 por persona — anti-patterns + universal-constraints). Vendor-name grep limpo em todos os ficheiros Discovery/Framing-time (única excepção: `solution-architect/anti-patterns.md`, esperado).
+
+Fases 1-6 anteriores: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `915b9e0`.
 
 **Refinement de design (Fase 5)**: modelo de ronda convergido — `_state.round` = última ronda **concluída**; `/start` semeia `R-00`; `/round` incrementa no início. Substitui o exemplo `R-01`-no-/start de §4.1.4 / ONBOARDING §3.2 (ilustrativos). Razão: lógica mais simples/robusta (sempre +1, sem inspeccionar o SU) e `/status` mostra a ronda real.
 
@@ -1517,7 +1529,16 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 - (b) `.claude/settings.json` — regras `deny(library/**)` removidas (ver Nota Fases 3-10 acima).
 - (c) Engagements de teste `galp-adv-test`/`-2` (gitignored) ficam como fixtures defeituosos — o xlsx de teste em `SPEA v5/inputs/` é dataset de triagem de incidentes IT (Dynamics/OutSystems/EMSP, ~157 closed em ~10 dias), não adiantamentos a fornecedores como o cenário fictício do plano §5.1/ONBOARDING §3 sugere. **Não foram refeitos** (decisão do Jorge); o substantivo foi a correcção das skills. Se for útil mais tarde, refazer Discovery com o domínio real do xlsx é uma opção.
 
-**Próxima sessão**: live-test Fase 7 — correr `/frame` no `galp-adv-test-2` em `claude .` fresco para validar (a) que as 6 personas arrancam em paralelo (uma única assistant message com 6 Task calls), (b) que o `frame.md` produzido é uma frase única coerente, (c) que apenas o chairman escreveu no SU (sanity: ver autores das novas linhas no SU vs `lens-outputs/chairman-synthesis-F-01.md`). Após validação, arrancar **Fase 8** (Options + Decision + Synthesis, §8) — `aisa-options` (acrescenta `solution-architect` ao council, 7 agents), `aisa-decide` interactivo, `aisa-synthesize` + 5 templates em `library/kernel/synthesis-templates/`. Precedente: Fase 4 deferiu live exec até Fase 5; Fase 7 segue o mesmo padrão.
+**Próxima sessão**: live exec end-to-end. Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
+
+1. `/round` (Discovery — já validado em Fase 5/6, mas rever em conjunto com os PostToolUse hooks novos).
+2. `/frame` — validar (a) que as 6 personas arrancam em paralelo (uma única assistant message com 6 Task calls), (b) que o `frame.md` produzido é uma frase única coerente, (c) que apenas o chairman escreve no SU (autores das novas linhas vs `lens-outputs/chairman-synthesis-F-01.md`).
+3. `/options` — validar (a) que 7 personas arrancam em paralelo (incl. `solution-architect`), (b) que `options.md` tem ≥3 opções incl. do-nothing + non-tech, (c) que solution-architect consulta `decision-tree.md` + `domain-knowledge/`.
+4. `/decide` — fluxo interactivo; auto-corre `aisa-synthesize`; produz 5 topic packs em `_synthesis/`.
+5. `/render --all` — produz 6 deliverables em `_render/`; `render-gaps.md` deve ser pequeno (ou vazio).
+6. Sanity: grep vendor-name em `_render/discovery-report*.md` e `_render/executive-report*.md` → 0 hits expectados.
+
+Depois disso, **Fase 12 (pilot)** — workshop curto com 2 consultores Galp + 2 engagements paralelos. Esta fase é distribuída (acompanhamento async), não é uma sessão de build.
 
 **Desvio registado (Fase 1)**: `jq` não está instalado na máquina de build (Windows). O hook `pre-write-guard.sh` é um stub em modo `log` no MVP; adicionou-se um guard que faz no-op gracioso se `jq` estiver ausente (em vez de erro em cada Write/Edit). Decisão durável (instalar jq vs reescrever hook em `.ps1`) adiada para Fase 11, conforme §1.10.
 
@@ -1547,12 +1568,12 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 | 4 — Discovery skills (3 lenses) | ☑ done | 2026-05-28 | 3a4108e | 6 skills + 7 command stubs; structural validation OK; live /start /round /status exec deferred to Phase 5 (needs fresh `claude .` session) |
 | 5 — Discovery validation | ☑ done | 2026-05-28 | e4eae7d | galp-adv-test loop OK (SU 6/6/9/0/3, no-tech grep clean); round-model converged (R-00 seed, increment-at-start) |
 | 6 — Restantes lenses | ☑ done | 2026-05-28 | 915b9e0 | galp-adv-test-2 6-lens run: SU 10/10/15/1/6; X-001 Critical conflict (mobile/offline ∧ data sensitivity) detected by governance lens; no-tech clean |
-| 7 — Council infrastructure | ☑ done (structural) | 2026-05-28 | 4ee3938 | 8 agents (7 personas + chairman) + 3 skills (lens-technology, chairman-synthesis, aisa-frame); /frame command wired; no-tech grep clean (solution-architect = expected exception). Live /frame on galp-adv-test-2 deferred to next session per Phase 4 precedent. |
-| 8 — Options + Decision + Synthesis | ☐ todo | — | — | — |
-| 9 — Render + 6 templates | ☐ todo | — | — | — |
-| 10 — Domain knowledge transplant | ☐ todo | — | — | — |
-| 11 — Enterprise readiness | ☐ todo | — | — | — |
-| 12 — Pilot | ☐ todo | — | — | — |
+| 7 — Council infrastructure | ☑ done (structural) | 2026-05-28 | 4ee3938 | 8 agents (7 personas + chairman) + 3 skills (lens-technology, chairman-synthesis, aisa-frame); /frame command wired; no-tech grep clean. |
+| 8 — Options + Decision + Synthesis | ☑ done (structural) | 2026-05-28 | (bundled with 9-11) | 3 skills (aisa-options, aisa-decide, aisa-synthesize) + 5 synthesis templates in library/kernel/synthesis-templates/ + /options /decide /synthesize commands wired. |
+| 9 — Render + 6 templates | ☑ done (structural) | 2026-05-28 | (bundled with 8,10,11) | 6 deliverable templates (incl. new implementation-spec, renamed claude-design-brief) + 3 architecture sub-templates + aisa-render skill (slot-resolution, versioning, render-gaps, --dry-run) + /render wired. |
+| 10 — Domain knowledge transplant | ☑ done (structural) | 2026-05-28 | (bundled) | 3 patterns files transplanted from SPEA v5 (powerfx 566 / screen 244 / security 359 lines) + new delegation-matrix.md + decision-tree.md (3 branches, 6 rules + exclusions + missing-inputs protocol). |
+| 11 — Enterprise readiness | ☑ done (structural) | 2026-05-28 | (bundled) | 3 authoring docs (PACK/LENS/DELIVERABLE) + 3 skeleton packs (outsystems, mendix, generic) + 4 hook stubs (log-mode) + HOOKS.md + settings.json wired + bootstrap.ps1 + 14 agent-memory _universal/ seed files. Live exec deferred. |
+| 12 — Pilot | ☐ todo | — | — | Real-world distributed work with consultants — outside the build sessions. |
 
 ### Como actualizar este tracking
 
