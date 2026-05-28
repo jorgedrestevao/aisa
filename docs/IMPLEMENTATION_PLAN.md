@@ -1508,7 +1508,7 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 
 ## 16. Resume tracking
 
-**State actual**: Fase 6 completa (2026-05-28). As 6 lenses Discovery estão completas. Re-run `galp-adv-test-2` (6 lenses) produziu SU = 10 Confirmed / 10 Assumed / 15 Unknown (4 Critical) / 1 Conflicted (Critical) / 6 Risky; a lens `governance` detectou o conflito **X-001** (mobile/offline ∧ sensibilidade de dados); grep no-tech = 0. Commit `915b9e0`. Fases 1-5: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`.
+**State actual**: Fase 7 estrutural completa (2026-05-28). Council-independent mode wired: 7 personas (`business-analyst`, `operations-lead`, `user-advocate`, `data-steward`, `compliance-officer`, `cfo-lens`, `solution-architect`) + `chairman` em `.claude/agents/`; skills `lens-technology` (Options-only), `chairman-synthesis`, `aisa-frame`; `/frame` wired. Personas têm `tools: [Read, Grep, Glob]` (chairman = `[Read, Write, Edit, Grep, Glob]`). Grep no-tech limpo em todos os ficheiros Discovery/Framing (única excepção: `solution-architect.md`, que é a persona que activa lens-technology e é refusada antes de Options). Commit `4ee3938`. Fases 1-6: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `915b9e0`.
 
 **Refinement de design (Fase 5)**: modelo de ronda convergido — `_state.round` = última ronda **concluída**; `/start` semeia `R-00`; `/round` incrementa no início. Substitui o exemplo `R-01`-no-/start de §4.1.4 / ONBOARDING §3.2 (ilustrativos). Razão: lógica mais simples/robusta (sempre +1, sem inspeccionar o SU) e `/status` mostra a ronda real.
 
@@ -1517,7 +1517,7 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 - (b) `.claude/settings.json` — regras `deny(library/**)` removidas (ver Nota Fases 3-10 acima).
 - (c) Engagements de teste `galp-adv-test`/`-2` (gitignored) ficam como fixtures defeituosos — o xlsx de teste em `SPEA v5/inputs/` é dataset de triagem de incidentes IT (Dynamics/OutSystems/EMSP, ~157 closed em ~10 dias), não adiantamentos a fornecedores como o cenário fictício do plano §5.1/ONBOARDING §3 sugere. **Não foram refeitos** (decisão do Jorge); o substantivo foi a correcção das skills. Se for útil mais tarde, refazer Discovery com o domínio real do xlsx é uma opção.
 
-**Próxima sessão**: arrancar Fase 7 — Council infrastructure: `.claude/agents/` (7 personas + chairman), `lens-technology`, `chairman-synthesis`, e `aisa-frame`. Ver §7. **Nota**: a Fase 7 introduz subagents paralelos via Task tool (modo council-independent) — validar concorrência real e que **apenas o chairman escreve no SU** (agentes têm `tools: [Read, Grep, Glob]`).
+**Próxima sessão**: live-test Fase 7 — correr `/frame` no `galp-adv-test-2` em `claude .` fresco para validar (a) que as 6 personas arrancam em paralelo (uma única assistant message com 6 Task calls), (b) que o `frame.md` produzido é uma frase única coerente, (c) que apenas o chairman escreveu no SU (sanity: ver autores das novas linhas no SU vs `lens-outputs/chairman-synthesis-F-01.md`). Após validação, arrancar **Fase 8** (Options + Decision + Synthesis, §8) — `aisa-options` (acrescenta `solution-architect` ao council, 7 agents), `aisa-decide` interactivo, `aisa-synthesize` + 5 templates em `library/kernel/synthesis-templates/`. Precedente: Fase 4 deferiu live exec até Fase 5; Fase 7 segue o mesmo padrão.
 
 **Desvio registado (Fase 1)**: `jq` não está instalado na máquina de build (Windows). O hook `pre-write-guard.sh` é um stub em modo `log` no MVP; adicionou-se um guard que faz no-op gracioso se `jq` estiver ausente (em vez de erro em cada Write/Edit). Decisão durável (instalar jq vs reescrever hook em `.ps1`) adiada para Fase 11, conforme §1.10.
 
@@ -1547,7 +1547,7 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 | 4 — Discovery skills (3 lenses) | ☑ done | 2026-05-28 | 3a4108e | 6 skills + 7 command stubs; structural validation OK; live /start /round /status exec deferred to Phase 5 (needs fresh `claude .` session) |
 | 5 — Discovery validation | ☑ done | 2026-05-28 | e4eae7d | galp-adv-test loop OK (SU 6/6/9/0/3, no-tech grep clean); round-model converged (R-00 seed, increment-at-start) |
 | 6 — Restantes lenses | ☑ done | 2026-05-28 | 915b9e0 | galp-adv-test-2 6-lens run: SU 10/10/15/1/6; X-001 Critical conflict (mobile/offline ∧ data sensitivity) detected by governance lens; no-tech clean |
-| 7 — Council infrastructure | ☐ todo | — | — | — |
+| 7 — Council infrastructure | ☑ done (structural) | 2026-05-28 | 4ee3938 | 8 agents (7 personas + chairman) + 3 skills (lens-technology, chairman-synthesis, aisa-frame); /frame command wired; no-tech grep clean (solution-architect = expected exception). Live /frame on galp-adv-test-2 deferred to next session per Phase 4 precedent. |
 | 8 — Options + Decision + Synthesis | ☐ todo | — | — | — |
 | 9 — Render + 6 templates | ☐ todo | — | — | — |
 | 10 — Domain knowledge transplant | ☐ todo | — | — | — |
