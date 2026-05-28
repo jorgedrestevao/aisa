@@ -50,11 +50,12 @@ description: Start a new aisa engagement. Captures the literal request + request
      "engagement": "<slug>",
      "pack": "<pack>",
      "phase": "discovery",
-     "round": "R-01",
+     "round": "R-00",
      "aisa_version": "0.1.0",
      "created": "<ISO-8601 timestamp>"
    }
    ```
+   (`round` seeds at `R-00` — no round has run yet. The first `/round` increments it to `R-01`.)
 8. **Write the `shared-understanding.md` skeleton** (the 5 state sections with their column headers, per `library/kernel/states.md`):
    ```markdown
    # Shared Understanding — <slug>
