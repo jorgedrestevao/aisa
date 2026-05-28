@@ -1508,11 +1508,11 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 
 ## 16. Resume tracking
 
-**State actual**: Fase 5 completa (2026-05-28). Discovery loop validado end-to-end no `galp-adv-test` (`/start`→`/round`→`/status`): SU = 6 Confirmed / 6 Assumed / 9 Unknown (3 Critical) / 0 Conflicted / 3 Risky; grep no-tech = 0 hits. Commit `e4eae7d`. Fases 1-4: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`.
+**State actual**: Fase 6 completa (2026-05-28). As 6 lenses Discovery estão completas. Re-run `galp-adv-test-2` (6 lenses) produziu SU = 10 Confirmed / 10 Assumed / 15 Unknown (4 Critical) / 1 Conflicted (Critical) / 6 Risky; a lens `governance` detectou o conflito **X-001** (mobile/offline ∧ sensibilidade de dados); grep no-tech = 0. Commit `915b9e0`. Fases 1-5: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`.
 
 **Refinement de design (Fase 5)**: modelo de ronda convergido — `_state.round` = última ronda **concluída**; `/start` semeia `R-00`; `/round` incrementa no início. Substitui o exemplo `R-01`-no-/start de §4.1.4 / ONBOARDING §3.2 (ilustrativos). Razão: lógica mais simples/robusta (sempre +1, sem inspeccionar o SU) e `/status` mostra a ronda real.
 
-**Próxima sessão**: arrancar Fase 6 — restantes lenses Discovery (data, governance, financial) + re-correr o scenario com 6 lenses (espera-se ≥1 Conflicted Critical: necessidade mobile/offline ∧ sensibilidade de dados — cf. R-003 do galp-adv-test). Ver §6. (Nota: `lenses_config` dentro de `pack.yaml` conforme §3.1.4.)
+**Próxima sessão**: arrancar Fase 7 — Council infrastructure: `.claude/agents/` (7 personas + chairman), `lens-technology`, `chairman-synthesis`, e `aisa-frame`. Ver §7. **Nota**: a Fase 7 introduz subagents paralelos via Task tool (modo council-independent) — validar concorrência real e que **apenas o chairman escreve no SU** (agentes têm `tools: [Read, Grep, Glob]`).
 
 **Desvio registado (Fase 1)**: `jq` não está instalado na máquina de build (Windows). O hook `pre-write-guard.sh` é um stub em modo `log` no MVP; adicionou-se um guard que faz no-op gracioso se `jq` estiver ausente (em vez de erro em cada Write/Edit). Decisão durável (instalar jq vs reescrever hook em `.ps1`) adiada para Fase 11, conforme §1.10.
 
@@ -1541,7 +1541,7 @@ User dá pedido vago "queremos digitalizar coisas". Discovery deve produzir muit
 | 3 — Pack pp foundation | ☑ done | 2026-05-28 | 3afbad6 | glossary 53 / q-bank 45 (7 lenses) / 6 deliverables; lenses_config in pack.yaml; PyYAML missing → YAML checked manually |
 | 4 — Discovery skills (3 lenses) | ☑ done | 2026-05-28 | 3a4108e | 6 skills + 7 command stubs; structural validation OK; live /start /round /status exec deferred to Phase 5 (needs fresh `claude .` session) |
 | 5 — Discovery validation | ☑ done | 2026-05-28 | e4eae7d | galp-adv-test loop OK (SU 6/6/9/0/3, no-tech grep clean); round-model converged (R-00 seed, increment-at-start) |
-| 6 — Restantes lenses | ☐ todo | — | — | — |
+| 6 — Restantes lenses | ☑ done | 2026-05-28 | 915b9e0 | galp-adv-test-2 6-lens run: SU 10/10/15/1/6; X-001 Critical conflict (mobile/offline ∧ data sensitivity) detected by governance lens; no-tech clean |
 | 7 — Council infrastructure | ☐ todo | — | — | — |
 | 8 — Options + Decision + Synthesis | ☐ todo | — | — | — |
 | 9 — Render + 6 templates | ☐ todo | — | — | — |
