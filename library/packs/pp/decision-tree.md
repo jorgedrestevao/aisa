@@ -35,6 +35,33 @@ The Inputs are SU claims emitted by the Discovery lenses. If an input is missing
 
 ---
 
+## R0 — Hard gates (run before scoring)
+
+Any branch that fails a hard gate is removed from the option set entirely (move it to "Alternatives Considered" in deliverables with the failing condition documented). Apply R0 BEFORE running R1–R6.
+
+**`sharepoint-first` disqualified if ANY of:**
+- `max_volume_per_entity` > 30,000 rows (list-view threshold degrades severely; even archive flows cannot rescue this).
+- Cross-list joins required (>1 N-N relationship traversed in queries).
+- `formula_count` > 100 across calculated columns (delegation breaks; per-column formula limits compound).
+- Financial precision > 2 decimals required (SharePoint Currency caps at 2 decimals).
+- Audit trail required for regulatory compliance (SharePoint has no native immutable audit; PA-based audit can be tampered).
+- Multi-stage approval (>3 states in any state machine) — Content Approval can't model it.
+
+**`dataverse-first` disqualified if ANY of:**
+- Premium licensing explicitly rejected by the client (Per User / Per App not viable in their commercial frame).
+- External non-Microsoft integrations > 3 (per-integration premium connector cost compounds).
+- Sub-second real-time performance required (Dataverse latency is typically 200ms–2s — not fit-for-purpose for trading-floor-style scenarios).
+
+**`hybrid` disqualified if:**
+- The same disqualifications that kill *both* `sharepoint-first` AND `dataverse-first` for the project's profile — there's nothing for the hybrid to lean on.
+- The team's `admin_team_capability` is `keyuser` only — managing two backends is beyond keyuser capability.
+
+If all three branches are disqualified, the option set must include "Custom web app outside Power Platform" or "Process change without digitalisation" as the proposed paths forward.
+
+The thresholds above mirror the platform hard limits documented in [`domain-knowledge/sharepoint-reference.md`](domain-knowledge/sharepoint-reference.md), [`domain-knowledge/dataverse-reference.md`](domain-knowledge/dataverse-reference.md), and [`domain-knowledge/azure-sql-reference.md`](domain-knowledge/azure-sql-reference.md). When in doubt, defer to the reference file — these are platform constraints, not preferences.
+
+---
+
 ## R1 — Adequação ao volume
 
 - IF `max_volume_per_entity` ≤ 5000 → A=adequada, B=forte, C=forte
@@ -67,6 +94,23 @@ The Inputs are SU claims emitted by the Discovery lenses. If an input is missing
 
 - IF `max_volume_per_entity` ≤ 5000 AND `requires_audit_trail` = false → A=alta, B=baixa, C=média
 - ELSE → A=alta, B=baixa, C=média
+
+---
+
+## Hybrid trigger
+
+When the top two branches (after R0–R6) come out within a narrow margin AND the engagement has a heterogeneous entity profile, prefer the hybrid branch:
+
+```
+entities_simple  = entities where volume < 5,000 AND no complex calculations
+entities_complex = entities where volume > 10,000 OR has financial formulas
+
+IF entities_simple.count >= 2 AND entities_complex.count >= 2 →
+  Propose hybrid: simple entities on SharePoint/Dataverse-light, complex entities on Dataverse/Azure-SQL.
+  Document the split in the option's "scope per backend" section.
+```
+
+This is one of the two cases where `hybrid` should jump to top recommendation. The other is when the engagement profile literally requires it (e.g., document-heavy attachments + structured business data — SharePoint for files, Dataverse for records).
 
 ---
 

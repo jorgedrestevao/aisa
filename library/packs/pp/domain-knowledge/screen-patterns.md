@@ -197,7 +197,9 @@ Detailed Canvas responsiveness patterns are documented in Microsoft's Power Apps
 
 ---
 
-## 14 · Screen Count Guidelines
+## 14 · Screen Count Guidelines and Field-Count Caps
+
+### Screen count
 
 | App size | Screens | Notes |
 |---|---|---|
@@ -207,6 +209,29 @@ Detailed Canvas responsiveness patterns are documented in Microsoft's Power Apps
 | Very large | 16+ | Consider splitting into multiple apps OR using Model-Driven |
 
 **Rule:** if screen count > 15, evaluate Model-Driven App as alternative.
+
+### Field-count thresholds per form screen
+
+The full screen-consolidation decision tree lives in [`screen-consolidation-rules.md`](screen-consolidation-rules.md). The thresholds it produces and the hard caps it enforces are mirrored here for quick reference:
+
+| Editable fields on the entity | Recommended layout |
+|---|---|
+| ≤ 8 editable + ≤ 4 read-only | Single form screen |
+| 9–16 editable | Single form screen with sections / tabs |
+| > 16 editable | Multi-step form (wizard) OR split into sub-screens |
+
+### Hard caps (any violation is a Conflicted SU row)
+
+- Max **3 entities** writable on a single screen.
+- Max **12 editable fields** visible simultaneously (use tabs / sections — see §12).
+- Max **5 action buttons** (split: primary visible + secondary overflow).
+
+### Naming convention (entity-prefixed)
+
+- Gallery: `[Entity]ListScreen`
+- Form: `[Entity]FormScreen`
+- Dashboard: `[Entity]DashboardScreen` or `DashboardScreen` (cross-entity)
+- Approval: NOT a separate screen — action on `[Entity]FormScreen` (see §5).
 
 ---
 

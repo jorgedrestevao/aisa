@@ -348,6 +348,39 @@ ITEM-LEVEL (if applicable):
  Edit: [All items | Only their own]
 ```
 
+### Azure SQL RLS — role-specific column views
+
+When the architecture uses Azure SQL, Row-Level Security (see [`azure-sql-reference.md`](azure-sql-reference.md) § Row-Level Security) gives row filtering, but **column hiding** is best implemented with role-specific views. Pattern:
+
+```sql
+-- Comercial view: omit financial columns, restrict to own records
+CREATE OR ALTER VIEW [dbo].[vw_app_quote_comercial] AS
+SELECT [cr_quoteid], [cr_name], [cr_status], [cr_ownerid], [cr_createdon]
+-- cr_totalvalue, cr_margin intentionally excluded
+FROM [dbo].[slv_quote]
+WHERE [cr_ownerid] = CAST(SESSION_CONTEXT(N'user_email') AS NVARCHAR(255));
+
+-- Full view for Manager / Finance / Admin
+CREATE OR ALTER VIEW [dbo].[vw_app_quote_full] AS
+SELECT * FROM [dbo].[slv_quote];
+```
+
+The Canvas App selects which view to bind per role at `App.OnStart`:
+
+```powerfx
+Set(varQuoteSource,
+ Switch(varCurrentUserRole,
+  "Comercial", vw_app_quote_comercial,
+  "Manager", vw_app_quote_full,
+  "Finance", vw_app_quote_full,
+  "Admin",   vw_app_quote_full,
+  Blank
+ )
+)
+```
+
+This is enforced server-side (the view definition simply doesn't expose the columns) — defence-in-depth over Power Fx `If()` masks alone.
+
 ### Audit Trail mandatory columns
 
 Every audited entity MUST have:

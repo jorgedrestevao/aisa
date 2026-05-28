@@ -54,6 +54,15 @@ domain_knowledge:
   - domain-knowledge/screen-patterns.md
   - domain-knowledge/security-patterns.md
   - domain-knowledge/delegation-matrix.md
+  # Transplanted 2026-05-28 — references repo (with old vocabulary stripped)
+  - domain-knowledge/excel-patterns.md
+  - domain-knowledge/dataverse-reference.md
+  - domain-knowledge/azure-sql-reference.md
+  - domain-knowledge/sharepoint-reference.md
+  - domain-knowledge/anonymization.md
+  - domain-knowledge/flows-patterns.md
+  - domain-knowledge/estimation-model.md
+  - domain-knowledge/screen-consolidation-rules.md
 
 question_bank: question-bank.md
 glossary: glossary.md
