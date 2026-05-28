@@ -1,9 +1,6 @@
 {
   "permissions": {
-    "deny": [
-      "Write(./library/**)",
-      "Edit(./library/**)"
-    ],
+    "deny": [],
     "allow": []
   },
   "hooks": {

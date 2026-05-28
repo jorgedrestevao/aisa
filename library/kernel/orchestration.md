@@ -7,6 +7,21 @@ Each phase declares its mode in [`phases.md`](phases.md):
 - **`inline`**: lenses run sequentially in the current thread, sharing accumulated context. Used in Discovery.
 - **`council-independent`**: each lens runs as a Task subagent (concurrent), seeing only `context.json` + a thematic Shared Understanding excerpt. The chairman synthesizes outputs. Used in Framing/Options/Decision.
 
+## Reading input documents
+
+Lenses (and council agents) treat everything under `<engagement>/inputs/` as **primary evidence** and must open and parse it — never cite it by filename alone. Pick the tool by format:
+
+| Format | How to read |
+|---|---|
+| `.md`, `.txt`, `.json`, `.csv` | read directly |
+| `.xlsx`, `.xlsm` | the `xlsx` skill, or `openpyxl` / `pandas` (profile: sheets, columns, row counts, value distributions, date ranges) |
+| `.pdf` | the `pdf` skill |
+| `.docx` | the `docx` skill |
+| `.pptx` | the `pptx` skill |
+| images | read directly (vision) |
+
+**Rule**: never record a `Confirmed` or `Assumed` row that cites an input you have not actually opened. Cite the specific value, column, or passage you found. If an input is anonymized/obfuscated, the structure (columns, counts, dates, distributions) is still valid evidence.
+
 ## Inline mode
 
 - Order is fixed in `phases.md`: `business → operations → user → data → governance → financial` (Discovery).
