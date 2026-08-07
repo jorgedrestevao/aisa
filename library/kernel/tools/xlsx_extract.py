@@ -36,7 +36,7 @@ except ImportError:  # pragma: no cover
     print("xlsx_extract.py requires openpyxl (pip install openpyxl)", file=sys.stderr)
     sys.exit(2)
 
-TOOL_VERSION = "1.0.0"
+TOOL_VERSION = "1.1.0"
 ARTEFACT_ID = "aisa.capture.extraction"
 
 MAX_TOP_VALUES = 5
@@ -776,6 +776,10 @@ def _unquote_sheet(sheet: str | None) -> str | None:
 class Replayer:
     """Fixed check battery over one workbook + its extraction JSON. No general evaluation."""
 
+    # a column only has a policeable fill-down convention above these:
+    CONVENTION_MIN_FORMULAS = 8
+    CONVENTION_MIN_COVERAGE = 0.6
+
     def __init__(self, wb_data, extraction: dict):
         self.wb = wb_data
         self.x = extraction
@@ -787,6 +791,22 @@ class Replayer:
         self.criterion_cols: set[tuple[str, str]] = set()   # (sheet, col letter) feeding lookup values
         self.checked_cells = 0
         self.skipped_empty = 0
+        # simple named ranges ('Sheet'!$A$1:$B$9 style) resolved for lookup replay;
+        # ambiguous names (same name, several targets) are dropped, never guessed
+        self.names: dict[str, str] = {}
+        seen: dict[str, set] = defaultdict(set)
+        for nr in (extraction.get("workbook", {}) or {}).get("named_ranges", []):
+            if not isinstance(nr, dict) or not nr.get("name") or not nr.get("target"):
+                continue
+            seen[str(nr["name"]).casefold()].add(str(nr["target"]))
+        for name, targets in seen.items():
+            if len(targets) == 1:
+                target = next(iter(targets))
+                if "#REF!" not in target and (RANGE_ARG_RE.fullmatch(target) or SINGLE_CELL_RE.fullmatch(target)):
+                    self.names[name] = target
+
+    def _deref_name(self, arg: str) -> str:
+        return self.names.get(arg.strip().casefold(), arg)
 
     # -- resolution helpers ------------------------------------------------
     def sheet_meta(self, name: str) -> dict | None:
@@ -796,7 +816,7 @@ class Replayer:
         return None
 
     def resolve_cell(self, default_sheet: str, arg: str):
-        m = SINGLE_CELL_RE.fullmatch(arg)
+        m = SINGLE_CELL_RE.fullmatch(self._deref_name(arg))
         if not m:
             return None, None
         sheet = _unquote_sheet(m.group("sheet")) or default_sheet
@@ -808,6 +828,7 @@ class Replayer:
 
     def materialize(self, default_sheet: str, arg: str):
         """Range arg -> (sheet, first_col_idx, width, [(row, first_col_value)...]) or None."""
+        arg = self._deref_name(arg)
         m = RANGE_ARG_RE.fullmatch(arg)
         if not m:
             sc = SINGLE_CELL_RE.fullmatch(arg)
@@ -859,14 +880,34 @@ class Replayer:
 
     @staticmethod
     def values_equal(a, b) -> bool:
-        if a in (None, "") and b in (None, ""):
+        empties = (None, "")
+        if a in empties and b in empties:
             return True
+        # Excel: a reference to an empty cell evaluates to 0 — indistinguishable on replay
+        for x, y in ((a, b), (b, a)):
+            if x in empties and isinstance(y, (int, float)) and not isinstance(y, bool) and y == 0:
+                return True
         if isinstance(a, (int, float)) and isinstance(b, (int, float)) \
                 and not isinstance(a, bool) and not isinstance(b, bool):
             return abs(a - b) < 1e-6
         if isinstance(a, (dt.datetime, dt.date)) and isinstance(b, (dt.datetime, dt.date)):
             return str(a) == str(b)
         return a == b
+
+    @staticmethod
+    def _covers_whole_formula(formula: str, call: str) -> bool:
+        """True when the lookup call IS the formula (allowing IFERROR/IFNA wrappers and
+        leading +). Multi-call formulas (=INDEX(a)+INDEX(b)) cannot be compared against
+        the stored total — stored-vs-recomputed is claimed only for whole-formula calls."""
+        f = formula.strip().lstrip("=").lstrip("+").strip()
+        for _ in range(3):
+            if f.upper().startswith(("IFERROR(", "IFNA(")) and f.endswith(")"):
+                args = split_args("X(" + f[f.index("(") + 1:])
+                if args:
+                    f = args[0].strip().lstrip("+").strip()
+                    continue
+            break
+        return f == call.strip()
 
     # -- battery checks ----------------------------------------------------
     def run(self) -> None:
@@ -878,7 +919,8 @@ class Replayer:
         self.check_orphans()
 
     def _mark_not_replayable(self, sheet_name, coord, raw, reason) -> bool:
-        pattern = f"{reason}: {short(raw, 100)}"
+        generic = re.sub(r"\$?[A-Z]{1,3}\$?\d+", "<ref>", short(raw, 100))  # collapse per-cell variants
+        pattern = f"{reason}: {generic}"
         self.not_replayable[pattern] += 1
         self.nr_example.setdefault(pattern, f"{sheet_name}!{coord}")
         return True
@@ -983,7 +1025,7 @@ class Replayer:
                         "— silent lookup failure", "high"))
                 else:
                     misses_by_col[col_key].append((coord, needle))
-            elif not volatile:
+            elif not volatile and self._covers_whole_formula(formula, call):
                 target_val = self.wb[t_sheet].cell(row=raw_row, column=t_first + idx - 1).value
                 if not self.values_equal(stored, target_val):
                     stale_by_col[col_key].append((coord, stored, target_val))
@@ -1022,9 +1064,10 @@ class Replayer:
             for call in find_calls(formula, fname):
                 if fname == "INDEX" and "MATCH(" not in call.upper():
                     continue
-                handled_x = self._replay_xlookup(sheet_name, coord, call, stored, volatile, stale_by_col, misses_by_col) \
+                whole = self._covers_whole_formula(formula, call)
+                handled_x = self._replay_xlookup(sheet_name, coord, call, stored, volatile, whole, stale_by_col, misses_by_col) \
                     if fname == "XLOOKUP" else \
-                    self._replay_index_match(sheet_name, coord, call, stored, volatile, stale_by_col, misses_by_col)
+                    self._replay_index_match(sheet_name, coord, call, stored, volatile, whole, stale_by_col, misses_by_col)
                 handled = handled or handled_x
         if not handled and not find_calls(formula, "VLOOKUP") and not find_calls(formula, "COUNTIF"):
             pass  # column matched lookup keywords only via dominant pattern; nothing claimable per-cell
@@ -1048,7 +1091,7 @@ class Replayer:
             return val
         return _UNSUPPORTED
 
-    def _replay_xlookup(self, sheet_name, coord, call, stored, volatile, stale_by_col, misses_by_col) -> bool:
+    def _replay_xlookup(self, sheet_name, coord, call, stored, volatile, whole, stale_by_col, misses_by_col) -> bool:
         args = split_args(call)
         if len(args) < 3:
             return self._mark_not_replayable(sheet_name, coord, call, "unsupported XLOOKUP arity") and False
@@ -1078,13 +1121,13 @@ class Replayer:
                     "raw match fails; succeeds only after TRIM — silent lookup failure", "high"))
             else:
                 misses_by_col[col_key].append((coord, needle))
-        elif not volatile:
+        elif not volatile and whole:
             got = self.wb[r_sheet].cell(row=raw_row, column=r_first).value
             if not self.values_equal(stored, got):
                 stale_by_col[col_key].append((coord, stored, got))
         return True
 
-    def _replay_index_match(self, sheet_name, coord, call, stored, volatile, stale_by_col, misses_by_col) -> bool:
+    def _replay_index_match(self, sheet_name, coord, call, stored, volatile, whole, stale_by_col, misses_by_col) -> bool:
         args = split_args(call)
         if len(args) < 2:
             return False
@@ -1118,7 +1161,7 @@ class Replayer:
                     "raw match fails; succeeds only after TRIM — silent lookup failure", "high"))
             else:
                 misses_by_col[col_key].append((coord, needle))
-        elif not volatile:
+        elif not volatile and whole:
             offset = raw_row - rows[0][0]
             got = self.wb[i_sheet].cell(row=index_rng[3][0][0] + offset, column=i_first).value
             if not self.values_equal(stored, got):
@@ -1198,22 +1241,33 @@ class Replayer:
                             "low"))
 
     def _cf_thresholds(self) -> dict[tuple[str, str], set[int]]:
+        """Day thresholds per (sheet, column), taken ONLY from direct comparisons
+        against a cell of that same column (e.g. 'I5>=30' -> ('Sheet','I'): {30})."""
         out: dict[tuple[str, str], set[int]] = defaultdict(set)
         for sheet in self.x["sheets"]:
             for rule in sheet.get("conditional_formatting", []):
                 if not isinstance(rule, dict) or rule.get("error"):
                     continue
-                cols = set(re.findall(r"\$?([A-Z]{1,3})\$?\d+", str(rule.get("range", ""))))
                 for f in rule.get("formulas", []):
-                    for n in re.findall(r"[<>]=?\s*(\d+)", str(f)):
-                        for c in cols:
-                            out[(sheet["name"], c)].add(int(n))
+                    for m in re.finditer(r"\$?([A-Z]{1,3})\$?\d+\s*[<>]=?\s*(\d+)\b", str(f)):
+                        n = int(m.group(2))
+                        if 0 < n <= 400:
+                            out[(sheet["name"], m.group(1))].add(n)
         return out
+
+    @staticmethod
+    def _is_series(ages: list) -> bool:
+        """Monotonic date column with volume = a time-series/log axis, not a register."""
+        if len(ages) < 30:
+            return False
+        vals = [a for a, _, _ in ages]
+        up = sum(1 for i in range(1, len(vals)) if vals[i] <= vals[i - 1])
+        down = sum(1 for i in range(1, len(vals)) if vals[i] >= vals[i - 1])
+        return max(up, down) >= 0.95 * (len(vals) - 1)
 
     def check_staleness(self) -> None:
         today = dt.date.today()
         cf_thresholds = self._cf_thresholds()
-        all_cf_days = sorted({d for days in cf_thresholds.values() for d in days if 0 < d <= 400})
         for sheet in self.x["sheets"]:
             if sheet["name"] not in self.wb.sheetnames:
                 continue
@@ -1238,26 +1292,35 @@ class Replayer:
                         ages.append(((today - d).days, f"{col['column']}{r}", key_val))
                 if not ages:
                     continue
-                bands = sorted(set(FIXED_AGE_BANDS) | set(all_cf_days))
+                own_days = sorted(d for d in cf_thresholds.get((sheet["name"], col["column"]), set()))
+                # thresholds on a derived aging column also apply to the date column feeding it —
+                # only the direct case is claimed; indirect feeds stay unclaimed (no check = no claim)
+                bands = sorted(set(FIXED_AGE_BANDS) | set(own_days))
                 dist = {f">={b}d": sum(1 for a, _, _ in ages if a >= b) for b in bands}
                 future = sum(1 for a, _, _ in ages if a < 0)
+                future_ratio = future / len(ages)
+                is_series = self._is_series(ages)
                 oldest = sorted(ages, reverse=True)[:MAX_OLDEST_ROWS]
                 oldest_txt = "; ".join(
                     f"{a}d @{c}" + (f" ({short(k, 24)})" if k not in (None, "") else "")
                     for a, c, k in oldest)
-                max_cf = max(all_cf_days) if all_cf_days else None
+                max_cf = max(own_days) if own_days else None
                 beyond_cf = dist.get(f">={max_cf}d") if max_cf else None
                 severity = "info"
-                if not archive_like and not closing_like:
-                    if dist.get(">=120d"):
+                if (not archive_like and not closing_like and len(ages) >= 5
+                        and future_ratio <= 0.2 and not is_series):
+                    if beyond_cf or dist.get(">=120d"):
                         severity = "medium"
-                    elif beyond_cf:
-                        severity = "medium"
+                notes = []
+                if future:
+                    notes.append(f"{future} in the future" + (" (forward/curve column)" if future_ratio > 0.2 else ""))
+                if is_series:
+                    notes.append("monotonic dates (time-series axis, not a register)")
                 found = (f"{len(ages)} dated rows; distribution {dist}"
-                         + (f"; {future} in the future" if future else "")
+                         + ("; " + "; ".join(notes) if notes else "")
                          + f"; oldest: {oldest_txt}")
-                expected = ("rows within the alerting thresholds present in conditional formatting "
-                            f"(max {max_cf}d)" if max_cf else "recent activity")
+                expected = (f"rows within this column's conditional-formatting thresholds (max {max_cf}d)"
+                            if max_cf else "recent activity")
                 self.findings.append(Finding(
                     "staleness",
                     f"{sheet['name']}!{col['column']} ({header})",
@@ -1283,11 +1346,23 @@ class Replayer:
             return f"{letter}{rows[0]}"
         return f"{letter}{rows[0]}:{letter}{rows[-1]} ({len(cells)} cells)"
 
+    def _has_convention(self, f: dict) -> bool:
+        """True when the column provably follows one fill-down pattern worth policing."""
+        return (f.get("count", 0) >= self.CONVENTION_MIN_FORMULAS
+                and f.get("dominant_count", 0) / max(1, f.get("count", 1)) >= self.CONVENTION_MIN_COVERAGE)
+
     def check_pattern_exceptions(self) -> None:
         for sheet in self.x["sheets"]:
+            no_convention_cols = []
             for col in sheet["columns"]:
                 f = col.get("formula")
                 if not f:
+                    continue
+                if not self._has_convention(f):
+                    # model-style column (each row its own formula): no provable
+                    # convention -> no per-cell exception claims (no check = no claim)
+                    if f.get("count", 0) > 0 and col["class"] == "derived":
+                        no_convention_cols.append(col["column"])
                     continue
                 exc = f.get("exceptions", {})
                 loc = f"{sheet['name']}!{col['column']}"
@@ -1319,6 +1394,14 @@ class Replayer:
                         f"{sheet['name']}!{self._cell_span([e['cell'] for e in stray])}",
                         f"typed column {loc}",
                         f"{len(stray)} stray formula(s) in a manual column ({examples})", "low"))
+            if no_convention_cols:
+                cols = ", ".join(no_convention_cols[:12]) + ("…" if len(no_convention_cols) > 12 else "")
+                self.findings.append(Finding(
+                    "pattern exceptions", f"{sheet['name']} (columns {cols})",
+                    "columns follow a fill-down convention",
+                    f"{len(no_convention_cols)} derived column(s) have no dominant pattern "
+                    "(model-style sheet: each row its own formula) — per-cell exception "
+                    "checks suppressed for them", "info"))
 
     def check_orphans(self) -> None:
         known = set(self.wb.sheetnames)
@@ -1328,10 +1411,18 @@ class Replayer:
                     "orphan references", f"{sheet['name']} (formulas)",
                     "formula references resolve to sheets in this workbook",
                     f"referenced sheet '{unknown}' does not exist", "high"))
+        seen_broken: set[tuple] = set()
         for nr in self.x.get("workbook", {}).get("named_ranges", []):
             if isinstance(nr, dict) and "#REF!" in str(nr.get("target", "")):
+                key = (nr.get("name"), nr.get("target"))
+                if key in seen_broken:
+                    continue
+                seen_broken.add(key)
+                scopes = [str(o.get("scope")) for o in self.x["workbook"]["named_ranges"]
+                          if isinstance(o, dict) and (o.get("name"), o.get("target")) == key]
                 self.findings.append(Finding(
-                    "orphan references", f"named range '{nr.get('name')}'",
+                    "orphan references",
+                    f"named range '{nr.get('name')}' (scope: {', '.join(scopes)})",
                     "named range points at a live range",
                     f"target is broken: {nr.get('target')}", "medium"))
         for (t_sheet, t_col) in sorted(self.lookup_targets):
