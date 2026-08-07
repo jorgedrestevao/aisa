@@ -20,6 +20,7 @@ description: Run a round of lenses in the current phase. In Discovery, runs the 
 4. For each lens to run (the full Discovery order, or just the named lens):
    a. If `.claude/skills/lens-<name>/SKILL.md` does not exist yet → skip it and note "lens `<name>` not yet implemented" (lenses data/governance/financial arrive in a later build phase).
    b. Otherwise invoke the lens skill (e.g., `Skill: lens-business`) in **inline mode** — it reads `context.json` + the accumulated `shared-understanding.md` + previous lenses' `lens-outputs/` from this round.
+      > **MUST:** Call the `Skill` tool with `skill="lens-{name}"` for each lens. Never read `SKILL.md` files directly and run the analysis yourself — doing so bypasses the `pre-lens-order-check` hook that enforces sequential ordering.
    c. Confirm the lens wrote rows to the SU and a paragraph to `lens-outputs/<lens>.md`.
 5. After all lenses (or the single lens) finish:
    a. Persist `_state.json.round` = the round just run (atomically, tmp → rename). It therefore always holds the most recent completed round = the engagement's current round.
