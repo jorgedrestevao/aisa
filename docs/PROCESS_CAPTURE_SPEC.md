@@ -1,6 +1,6 @@
 # Process Capture Module — Spec v1.0
 
-> Status: SPEC — not yet built.
+> Status: BUILT — commit `99fd032` (2026-08-07). Acceptance gate §10.6 passed against the `dpt-galp-jp` pilot.
 > Motivation: pilot (`dpt-galp-jp`) showed the as-is process logic lives largely *inside* the input Excel
 > (formulas, manual columns, color-coding), but the current pipeline captures it accidentally — each lens
 > re-parses inputs ad-hoc, 6× per round, with no guarantee of depth or consistency. This module makes
