@@ -93,3 +93,4 @@ description: Start a new aisa engagement. Captures the literal request + request
    ```
 9. Write `council-log.md` with a header (`# Council Log — <slug>`) and `decisions.md` with a header (`# Decisions — <slug>`).
 10. Output: "Engagement `<slug>` created (pack: `<pack>`). Phase: discovery. Next: `/round` to run Discovery, or `/round business` lens-by-lens."
+11. **Process capture**: if `inputs/` contains supported files (`.xlsx`/`.xlsm`) → invoke the `aisa-capture` skill (L1 extract → L3 replay → L2 process model into `_capture/`) and report its summary. No supported files → skip silently.
