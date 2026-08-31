@@ -41,7 +41,7 @@ Lenses (and council agents) treat everything under `<engagement>/inputs/` as **p
   - Reads all agent outputs.
   - Identifies overlaps, gaps, contradictions.
   - Writes new rows to the Shared Understanding.
-  - Writes `chairman-synthesis-R<NN>.md` in `lens-outputs/`.
+  - Writes `chairman-synthesis-<round>.md` in `lens-outputs/` (`F-<NN>` in Framing, `O-<NN>` in Options, `D-<NN>` in Decision).
 
 ## Why parallel (not sequential isolated)
 

@@ -4,6 +4,8 @@
 > Âmbito: repositório completo (docs, kernel, packs, skills, agents, commands, hooks, settings, bootstrap)
 > Método: leitura integral da documentação de base (ARCHITECTURE, PHILOSOPHY, ONBOARDING, IMPLEMENTATION_PLAN, MIGRATION, authoring guides) cruzada ficheiro-a-ficheiro com a implementação real, incluindo verificação programática (modos git dos hooks, slots declarados vs usados nos templates, greps de vocabulário vendor no kernel).
 > Estado do build à data: fases 1–11 marcadas "done (structural)" no `IMPLEMENTATION_PLAN.md §16`; validação live end-to-end (`/frame` → `/render`) por executar; Fase 12 (pilot) por fazer.
+>
+> **Actualização 2026-08-31**: o passo 1 da sequência (§5) foi aplicado neste branch — **G-01, G-02, G-13, G-14, G-23 e G-24 corrigidos** (marcados ✅ abaixo).
 
 ---
 
@@ -46,11 +48,13 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
 - **Contexto**: o `IMPLEMENTATION_PLAN.md §0.4` previa activar o enforce na Fase 11; a Fase 11 está marcada `done (structural)` mas o switch nunca foi ligado. O `HOOKS.md` admite honestamente o modo log-only — mas o CLAUDE.md, as rules e o ARCHITECTURE §9.1 afirmam o contrário.
 - **Impacto**: qualquer sessão pode editar `library/` sem bloqueio; a documentação induz falsa confiança no único invariante "não negociável" do sistema.
 - **Correcção sugerida**: com o build terminado, ligar o enforce (`AISA_GUARD_MODE=enforce` no `settings.json.env` + repor `deny: [Write(./library/**), Edit(./library/**)]`). Alternativa mínima: corrigir CLAUDE.md/rules para declararem log-only até v0.2.0.
+- **✅ Corrigido (2026-08-31)**: `AISA_GUARD_MODE=enforce` por defeito (settings `env` + fail-closed no próprio script), deny rules repostas em `settings.json`, mensagem de bloqueio limpa, `HOOKS.md` e `.env.example` actualizados. Testado: enforce bloqueia `library/` (exit 2), deixa passar paths fora, log mode apenas avisa.
 
 #### G-02 · 4 dos 5 hooks não são executáveis (committed como 100644)
 - **Evidência**: `git ls-files --stage .claude/hooks/` → apenas `pre-write-guard.sh` é `100755`; `on-su-change.sh`, `phase-gate-check.sh`, `synthesis-validate.sh`, `render-validate.sh` são `100644`. O próprio `HOOKS.md` instrui "Mark executable (`chmod +x`)".
 - **Impacto**: em Unix/macOS, todos os `Write|Edit` disparam 3 hooks que falham com *permission denied* (ruído em todas as escritas do engagement) e o matcher `Skill` idem — i.e., toda a observabilidade de soft gates prevista está inoperante fora do Windows.
 - **Correcção**: `git update-index --chmod=+x .claude/hooks/*.sh` + commit.
+- **✅ Corrigido (2026-08-31)**: os 4 hooks estão agora `100755` no índice git; sintaxe validada (`bash -n`).
 
 #### G-03 · O onboarding depende de `/answer`, que não existe
 - **Evidência**: `docs/ONBOARDING.md:236-242` (4 invocações de `/answer` + descrição do efeito Unknown→Confirmed com `was U-NNN`), `:252`, `:336`. Não existe `.claude/commands/answer.md` nem skill correspondente.
@@ -121,11 +125,13 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
 - **Evidência**: `chairman-synthesis/SKILL.md` e `chairman.md` → `chairman-synthesis-R<NN>.md`; `aisa-frame:37` → `chairman-synthesis-F-<NN>.md`; `aisa-options:34` → `chairman-synthesis-O-<NN>.md`.
 - **Impacto**: em runtime o LLM recebe instruções conflituantes sobre o mesmo output; a auditabilidade entre rondas fragmenta-se.
 - **Correcção**: canonizar `chairman-synthesis-<F|O|D>-<NN>.md` nos 3 ficheiros (+ ARCHITECTURE §4.4).
+- **✅ Corrigido (2026-08-31)**: canonizado `chairman-synthesis-<round>.md` (`F-<NN>`/`O-<NN>`/`D-<NN>`) em `chairman-synthesis/SKILL.md`, `chairman.md`, `library/kernel/orchestration.md` e `ARCHITECTURE.md` §4.4/§6.
 
 #### G-14 · Output do solution-architect não bate com o parser do chairman
 - **Evidência**: `chairman-synthesis/SKILL.md:39` parseia 6 secções fixas, incluindo `Proposal`; `solution-architect.md` devolve `### Options (Options phase) / Architecture (Decision phase)` em vez de `### Proposal`.
 - **Impacto**: warning de parser garantido em todas as rondas de Options (ou, pior, secção ignorada na síntese).
 - **Correcção**: renomear a secção para `Proposal` no agent (ou ensinar o alias ao chairman).
+- **✅ Corrigido (2026-08-31)**: secção renomeada para `### Proposal` em `solution-architect.md`, com a distinção Options/Decision preservada na descrição do conteúdo.
 
 #### G-15 · `decision-tree.md`: regras degeneradas e inputs não declarados
 - **Evidência**:
@@ -172,8 +178,8 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
 
 | Id | Achado | Evidência |
 |---|---|---|
-| G-23 | Resíduo de rascunho ("… — **wait,** in Options they *may* read…") no meio de uma regra normativa | `aisa-options/SKILL.md:132` |
-| G-24 | Nota obsoleta: "lenses data/governance/financial arrive in a later build phase" (existem desde a Fase 6) | `aisa-round/SKILL.md:21` |
+| G-23 | ✅ Corrigido (2026-08-31) — Resíduo de rascunho ("… — **wait,** in Options they *may* read…") no meio de uma regra normativa; nota reescrita (e corrigida: em council-independent as personas não veem o output do solution-architect in-flight) | `aisa-options/SKILL.md:132` |
+| G-24 | ✅ Corrigido (2026-08-31) — Nota obsoleta: "lenses data/governance/financial arrive in a later build phase" (existem desde a Fase 6); reescrita como guarda para instalações truncadas | `aisa-round/SKILL.md:21` |
 | G-25 | `states.md` lista "industry-standard claim" como evidência de **Confirmed**, contradizendo a decision rule logo abaixo ("based on typical engagements" → Assumed); e a tabela de transições não tem nenhum caminho para *sair* de Confirmed (ex.: Confirmed→Conflicted quando surge fonte contraditória) | `library/kernel/states.md:9,17,23-31` |
 | G-26 | `phases.md` lista "solution-architect" (agent) como *lens* da Decision — mistura as duas taxonomias (a lens é `technology`) | `library/kernel/phases.md:74` |
 | G-27 | `HOOKS.md` descreve matchers que não correspondem ao `settings.json` (phase-gate-check: "on `aisa-frame\|aisa-options\|aisa-decide`" vs matcher real `Skill`; on-su-change: "to `shared-understanding.md`" vs matcher amplo `Write\|Edit` com filtro interno) | `.claude/hooks/HOOKS.md:8-9` vs `.claude/settings.json:18-44` |
@@ -199,7 +205,7 @@ Dois padrões explicam ~80% dos achados:
 
 | Ordem | Âmbito | Achados | Esforço |
 |---|---|---|---|
-| 1 | Correcções mecânicas: chmod dos hooks; decidir e aplicar enforce (ou corrigir docs); limpar resíduos; canonizar nome do log do chairman; secção `Proposal` do solution-architect | G-02, G-01, G-23, G-24, G-13, G-14 | ~1 sessão |
+| 1 | Correcções mecânicas: chmod dos hooks; decidir e aplicar enforce (ou corrigir docs); limpar resíduos; canonizar nome do log do chairman; secção `Proposal` do solution-architect | G-02, G-01, G-23, G-24, G-13, G-14 | ✅ aplicado (2026-08-31, neste branch) |
 | 2 | Decisões de design da fase Decision: modelo council vs interactivo; linha D-NNN no SU; caminho non-tech/do-nothing no synthesize/render | G-05, G-06, G-07 | ~1 sessão (requer decisão do sponsor) |
 | 3 | Fechar o loop do utilizador: `/answer` + `/resume` | G-03, G-04 | ~1 sessão |
 | 4 | Passe editorial pré-pilot: ARCHITECTURE (rename, árvore §6, changelog, exemplos), ONBOARDING (R-00, .md, /status), MIGRATION §6.4 | G-08, G-09, G-10, G-21, G-22, G-30 | 1-2 sessões |

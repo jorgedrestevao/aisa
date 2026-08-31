@@ -10,7 +10,7 @@ description: Synthesize N parallel council-persona outputs into Shared Understan
 You are executing the **chairman** role described in `.claude/agents/chairman.md` — neutral synthesizer of the council. The personas (business-analyst, operations-lead, user-advocate, data-steward, compliance-officer, cfo-lens, and, from Options onward, solution-architect) ran in parallel as Task subagents in the calling skill (`aisa-frame` / `aisa-options` / `aisa-decide`). They returned their structured proposals (see persona agent files for the schema). You now read them all side by side and produce:
 
 1. New rows in `<engagement>/shared-understanding.md`.
-2. A synthesis audit log at `<engagement>/lens-outputs/chairman-synthesis-R<NN>.md`.
+2. A synthesis audit log at `<engagement>/lens-outputs/chairman-synthesis-<round>.md`, where `<round>` is the current round id from `_state.json` (`F-<NN>` in Framing, `O-<NN>` in Options, `D-<NN>` in Decision — e.g., `chairman-synthesis-F-01.md`).
 3. The phase artefact:
    - **Framing** → `<engagement>/frame.md`
    - **Options** → `<engagement>/options.md`
@@ -146,10 +146,10 @@ The `aisa-decide` skill flips this draft to the final `D-NNN` (removing the comm
 
 ### Step 7 — Write the synthesis audit log
 
-Write `<engagement>/lens-outputs/chairman-synthesis-R<NN>.md`:
+Write `<engagement>/lens-outputs/chairman-synthesis-<round>.md` (e.g., `chairman-synthesis-F-01.md`):
 
 ```markdown
-# Chairman Synthesis — Round <R-NN> / Phase <phase>
+# Chairman Synthesis — Round <round> / Phase <phase>
 
 ## Personas heard
 - <comma-separated list of persona names that returned>
@@ -181,4 +181,4 @@ Write `<engagement>/lens-outputs/chairman-synthesis-R<NN>.md`:
 
 1. Update `_state.json.round` to the current round (atomically). For Framing rounds use the `F-NN` form, Options `O-NN`, Decision `D-NN`; the calling skill (`aisa-frame` etc.) is responsible for the prefix, but if you find the prefix already correct in `_state.json`, leave it alone.
 2. Append a one-line summary to `<engagement>/council-log.md`: round, `agent: chairman`, what was produced.
-3. Return control to the calling skill with: "Chairman synthesis complete for `<phase>` round `<R-NN>`. Wrote `<N>` SU rows; phase artefact `<frame.md | options.md | decisions.md draft>`."
+3. Return control to the calling skill with: "Chairman synthesis complete for `<phase>` round `<round>`. Wrote `<N>` SU rows; phase artefact `<frame.md | options.md | decisions.md draft>`."

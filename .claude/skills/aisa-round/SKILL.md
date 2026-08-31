@@ -18,7 +18,7 @@ description: Run a round of lenses in the current phase. In Discovery, runs the 
 2. If `phase != discovery` → stop with the message above.
 3. **Determine the round to run**: increment `_state.json.round` by one (`R-00`→`R-01`, `R-01`→`R-02`, ...). The lenses stamp **this** round on their rows. `aisa-start` seeds `R-00` (no round run yet), so the first `/round` runs `R-01`.
 4. For each lens to run (the full Discovery order, or just the named lens):
-   a. If `.claude/skills/lens-<name>/SKILL.md` does not exist yet → skip it and note "lens `<name>` not yet implemented" (lenses data/governance/financial arrive in a later build phase).
+   a. If `.claude/skills/lens-<name>/SKILL.md` does not exist → skip it and note "lens `<name>` not installed". (All 6 Discovery lenses ship with aisa; this guard only matters for trimmed or customized installs.)
    b. Otherwise invoke the lens skill (e.g., `Skill: lens-business`) in **inline mode** — it reads `context.json` + the accumulated `shared-understanding.md` + previous lenses' `lens-outputs/` from this round.
    c. Confirm the lens wrote rows to the SU and a paragraph to `lens-outputs/<lens>.md`.
 5. After all lenses (or the single lens) finish:

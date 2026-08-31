@@ -1529,6 +1529,13 @@ Fases 1-6 anteriores: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `91
 - (b) `.claude/settings.json` — regras `deny(library/**)` removidas (ver Nota Fases 3-10 acima).
 - (c) Engagements de teste `galp-adv-test`/`-2` (gitignored) ficam como fixtures defeituosos — o xlsx de teste em `SPEA v5/inputs/` é dataset de triagem de incidentes IT (Dynamics/OutSystems/EMSP, ~157 closed em ~10 dias), não adiantamentos a fornecedores como o cenário fictício do plano §5.1/ONBOARDING §3 sugere. **Não foram refeitos** (decisão do Jorge); o substantivo foi a correcção das skills. Se for útil mais tarde, refazer Discovery com o domínio real do xlsx é uma opção.
 
+**Correcções mecânicas pós-análise (2026-08-31, branch `claude/repo-gaps-analysis-02922z`)** — ver `docs/GAP_ANALYSIS.md` (§5, passo 1):
+- (a) Hooks `on-su-change` / `phase-gate-check` / `synthesis-validate` / `render-validate` marcados executáveis no git (estavam `100644` → falhavam com *permission denied* em Unix a cada Write/Edit).
+- (b) **Guard `library/` ligado** (fecha o item adiado da Fase 11, §0.4): `AISA_GUARD_MODE=enforce` por defeito em `.claude/settings.json` env, script `pre-write-guard.sh` fail-closed (unset ⇒ enforce), deny rules `Write/Edit(./library/**)` repostas. Edição administrativa de `library/`: out-of-band via git (sanctioned path) ou `AISA_GUARD_MODE=log` temporário.
+- (c) Nome do log do chairman canonizado: `chairman-synthesis-<F|O|D>-<NN>.md` (chairman-synthesis skill, chairman.md, kernel orchestration.md, ARCHITECTURE §4.4/§6 — antes divergiam entre `R<NN>`, `F-<NN>` e `O-<NN>`).
+- (d) Output do `solution-architect` alinhado com o parser do chairman-synthesis (secção `### Proposal`).
+- (e) Resíduos removidos: nota de rascunho no `aisa-options` ("— wait, …") reescrita; nota obsoleta no `aisa-round` ("lenses … arrive in a later build phase") corrigida.
+
 **Próxima sessão**: live exec end-to-end. Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
 
 1. `/round` (Discovery — já validado em Fase 5/6, mas rever em conjunto com os PostToolUse hooks novos).

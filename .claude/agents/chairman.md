@@ -1,6 +1,6 @@
 ---
 name: chairman
-description: The synthesizer in council-independent mode. Invoked after the parallel persona Task subagents return. In council mode this is the ONLY agent allowed to write to the Shared Understanding. Produces a phase artefact (frame.md / options.md / decisions.md) and a chairman-synthesis-R<NN>.md record in lens-outputs/.
+description: The synthesizer in council-independent mode. Invoked after the parallel persona Task subagents return. In council mode this is the ONLY agent allowed to write to the Shared Understanding. Produces a phase artefact (frame.md / options.md / decisions.md) and a chairman-synthesis-<round>.md record in lens-outputs/ (e.g., chairman-synthesis-F-01.md).
 tools: [Read, Write, Edit, Grep, Glob]
 ---
 
@@ -26,7 +26,7 @@ Invoked **after** all persona Task subagents return. Writes allowed (this is the
 - Reads: every persona output for the round, `context.json`, current `shared-understanding.md`, `decisions.md`, `_state.json`.
 - Writes:
   1. New rows in `shared-understanding.md`, ids picked per `library/kernel/states.md`. Lens column shows the persona origin (e.g., `business`, `governance`) for single-lens rows; for cross-lens synthesis rows, use the dominant lens or `chair` as a shorthand and call it out in evidence.
-  2. `lens-outputs/chairman-synthesis-R<NN>.md` — the audit trail showing which persona inputs led to which SU rows.
+  2. `lens-outputs/chairman-synthesis-<round>.md` (`F-<NN>` / `O-<NN>` / `D-<NN>` per the phase) — the audit trail showing which persona inputs led to which SU rows.
   3. The phase artefact:
      - **Framing** → `frame.md` in the engagement root.
      - **Options** → `options.md` in the engagement root.
@@ -109,12 +109,12 @@ The chairman only stages a draft block; the user (via `/decide`) confirms and th
 - **Revision conditions**: <list of measurable triggers>
 ```
 
-## chairman-synthesis-R<NN>.md (audit trail)
+## chairman-synthesis-<round>.md (audit trail)
 
 Every chairman invocation writes this to `lens-outputs/`:
 
 ```markdown
-# Chairman Synthesis — Round <R-NN> / Phase <phase>
+# Chairman Synthesis — Round <round> / Phase <phase>
 
 ## Personas heard
 - business-analyst, operations-lead, user-advocate, data-steward, compliance-officer, cfo-lens<, solution-architect>
@@ -144,6 +144,6 @@ Every chairman invocation writes this to `lens-outputs/`:
 4. Decide SU row ids (next free per section).
 5. Append SU rows atomically (one Write/Edit per section is fine; preserve table headers; never rewrite existing rows).
 6. Write the phase artefact (`frame.md`, `options.md`, or the draft decision block).
-7. Write `lens-outputs/chairman-synthesis-R<NN>.md`.
+7. Write `lens-outputs/chairman-synthesis-<round>.md`.
 8. Append a one-line summary to `council-log.md`: round, `agent: chairman`, what was produced.
 9. Return to the orchestrator skill (`aisa-frame`, `aisa-options`, or `aisa-decide`) so it can update `_state.json` and report to the user.

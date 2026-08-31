@@ -129,5 +129,5 @@ If options feel incomplete or the architect missed a branch, re-run `/options` (
 ## Notes
 
 - **Concurrency**: the 7 personas must launch in a single assistant message (one message with 7 parallel Task tool uses), mirroring `aisa-frame`.
-- **solution-architect is the lone vendor-naming surface.** The other 6 personas continue to obey `no-tech-mention-before-options.md` — wait, in Options they *may* read a vendor name in solution-architect's output, but their own returns must continue to describe *needs and constraints*, not vendor choices. The chairman, when synthesising, may name a vendor only when it appears in a solution-architect anchor; for cross-lens rows that aren't pinned to that anchor, stay technology-neutral.
+- **solution-architect is the lone vendor-naming surface.** The other 6 personas keep returning *needs and constraints*, never vendor choices, per `.claude/rules/no-tech-mention-before-options.md` (they run isolated and never see the solution-architect's output in-flight). The chairman, when synthesising, may name a vendor only where it is anchored to a solution-architect output; cross-lens rows not pinned to such an anchor stay technology-neutral.
 - **Idempotence**: re-running `/options` produces O-02, O-03, …. The previous `options.md` is overwritten; each round's `chairman-synthesis-O-<NN>.md` is preserved.

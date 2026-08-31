@@ -1,6 +1,9 @@
 {
   "permissions": {
-    "deny": [],
+    "deny": [
+      "Write(./library/**)",
+      "Edit(./library/**)"
+    ],
     "allow": []
   },
   "hooks": {
@@ -46,6 +49,6 @@
   },
   "env": {
     "AISA_KERNEL_VERSION": "0.1.0",
-    "AISA_GUARD_MODE": "log"
+    "AISA_GUARD_MODE": "enforce"
   }
 }

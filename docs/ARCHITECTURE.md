@@ -280,7 +280,7 @@ O `council-log.md` tem o detalhe por ronda: que lens correu, que linhas adiciono
 ### 4.4 Quem escreve no SU (writer rules)
 
 - **Modo `inline` (Discovery)**: a lens activa escreve directamente as suas rows no SU e o respectivo `lens-outputs/<lens>.md`. Cada lens corre uma a uma, vê o que as anteriores escreveram.
-- **Modo `council-independent` (Framing / Options / Decision)**: **apenas o `chairman` escreve no SU.** Os 6/7 agentes via Task tool não têm tool Write (declarado em §7.3 `tools: [Read, Grep, Glob]`). Cada agente devolve a sua contribuição como retorno da Task call; o chairman recebe-as todas, sintetiza, e escreve rows novas + um `chairman-synthesis-R<NN>.md` em `lens-outputs/`.
+- **Modo `council-independent` (Framing / Options / Decision)**: **apenas o `chairman` escreve no SU.** Os 6/7 agentes via Task tool não têm tool Write (declarado em §7.3 `tools: [Read, Grep, Glob]`). Cada agente devolve a sua contribuição como retorno da Task call; o chairman recebe-as todas, sintetiza, e escreve rows novas + um `chairman-synthesis-<ronda>.md` (`F-<NN>` / `O-<NN>` / `D-<NN>`) em `lens-outputs/`.
 
 ### 4.5 Decisões no SU
 
@@ -497,7 +497,7 @@ aisa/                                              # greenfield repo
 #   ├── lens-outputs/                            # prose por lens (consumido por synthesis)
 #   │   ├── business.md, operations.md, user.md
 #   │   ├── data.md, technology.md, governance.md, financial.md
-#   │   └── chairman-synthesis-R<NN>.md          # outputs do chairman em modo council
+#   │   └── chairman-synthesis-<F|O|D>-<NN>.md   # outputs do chairman em modo council
 #   ├── _synthesis/                              # topic packs intermédios (auto-gerado em /decide)
 #   │   ├── business-story.md
 #   │   ├── as-is.md
