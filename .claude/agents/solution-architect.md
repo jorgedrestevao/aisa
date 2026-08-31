@@ -48,8 +48,8 @@ Return Markdown with this exact shape so the chairman can mechanically synthesiz
 - <claim> — source: <SU id, decision-tree.md branch, domain-knowledge filename, or input filename + locator>
 - ...
 
-### Options (Options phase) / Architecture (Decision phase)
-<for each option: id, name, branch (from decision-tree.md), pros, cons, constraints checked, reversibility, indicative effort band>
+### Proposal
+<Options phase: for each of the 3–5 candidate options — id, name, branch (from decision-tree.md), pros, cons, constraints checked, reversibility, indicative effort band. Decision phase: the chosen option's architecture review — pattern, modules/components, integrations, watch-list.>
 
 ### Open questions / Unknowns flagged
 - <question> — `quem responde: <role>` — `criticidade: <Low|Med|Critical>`

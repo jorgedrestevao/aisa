@@ -41,7 +41,7 @@ Lenses (and council agents) treat everything under `<engagement>/inputs/` as **p
   - Reads all agent outputs.
   - Identifies overlaps, gaps, contradictions.
   - Writes new rows to the Shared Understanding.
-  - Writes `chairman-synthesis-R<NN>.md` in `lens-outputs/`.
+  - Writes `chairman-synthesis-<round>.md` in `lens-outputs/` (`F-<NN>` in Framing, `O-<NN>` in Options, `D-<NN>` in Decision).
 
 ## Why parallel (not sequential isolated)
 
@@ -56,7 +56,7 @@ Karpathy's full pattern includes peer review (each agent comments on the neighbo
 - Discovery: ~6 lenses × ~2-3 rounds = 12-18 LLM passes (inline, cheaper per pass).
 - Framing: 6 agents + 1 chairman = 7 passes (council).
 - Options: 7 agents + 1 chairman = 8 passes (council, technology enters).
-- Decision: 1 chairman + auto synthesize (5 topic packs) = 6 passes.
+- Decision: interactive (user-driven) + optional 1 solution-architect review (`/decide --consult`) + auto synthesize (5 topic packs) = 5-7 passes.
 - Render: 6 deliverables × 1 composition pass = 6 passes.
 
 **Total per engagement**: ~40-50 LLM passes.

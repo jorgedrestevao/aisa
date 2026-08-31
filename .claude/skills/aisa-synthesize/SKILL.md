@@ -40,6 +40,8 @@ description: Produce the 5 topic packs in <engagement>/_synthesis/ from the Shar
 | `risks-and-assumptions.md` | SU sections `Risky` + `Assumed` + `Unknown` (Critical only) + `decisions.md` (Accepted risks + Revision conditions) |
 | `financial-story.md` | SU rows where `lens ∈ {financial}` + `lens-outputs/financial.md` + `decisions.md` (cost/timeline anchors) |
 
+**Non-technology / do-nothing decisions**: `architecture-story.md` is still produced, but it describes the chosen intervention — process-change scope, roles affected, the do-nothing baseline and its revision triggers — instead of a platform architecture. No architecture template is read, and the no-vendor rule then applies to this pack too.
+
 ## Execution steps
 
 ### For each topic to synthesise:

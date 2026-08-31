@@ -64,6 +64,7 @@ The aisa engagement progresses through 4 phases. Each phase declares its mode of
 
 **Outputs**:
 - `options.md` with a pros/cons matrix.
+- Optional: `_simulation/options-comparison_v<NN>.md` (via `/simulate`) — a per-option projection (screens, effort band, risks, constraints) plus the value-of-information list of decision-flipping Unknowns.
 
 ---
 
@@ -71,9 +72,9 @@ The aisa engagement progresses through 4 phases. Each phase declares its mode of
 
 **Goal**: Capture choice + justification + alternatives + risks + revision conditions. Auto-trigger synthesis.
 
-**Lenses active**: solution-architect + chairman.
+**Lenses active**: none by default — the decision is the **user's**. `lens-technology` (via the solution-architect agent) may be consulted ad-hoc with `/decide --consult` for an advisory review of the chosen option.
 
-**Mode**: `council-independent`.
+**Mode**: `interactive` (user-driven). No council synthesis runs in Decision — the council's work ended at Options; here the user chooses and justifies.
 
 **Entry criteria**:
 - Phase 3 options reviewed by sponsor.
@@ -83,8 +84,9 @@ The aisa engagement progresses through 4 phases. Each phase declares its mode of
 - `/synthesize` auto-ran successfully (5 topic packs in `_synthesis/`).
 
 **Outputs**:
-- `decisions.md` (D-NNN entries).
+- `decisions.md` (D-NNN entries) + the matching `D-NNN` row in the SU `## Confirmed`.
 - `_synthesis/{business-story, as-is, architecture-story, risks-and-assumptions, financial-story}.md`.
+- For engagements with a UI component: `_blueprint/ux-blueprint_v<NN>.yaml` (via `/blueprint`, per `blueprint-contract.md`) — iterated with the business until approved (its approval is itself a D-NNN).
 - Render-ready state.
 
 ---

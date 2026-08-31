@@ -1529,7 +1529,23 @@ Fases 1-6 anteriores: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `91
 - (b) `.claude/settings.json` — regras `deny(library/**)` removidas (ver Nota Fases 3-10 acima).
 - (c) Engagements de teste `galp-adv-test`/`-2` (gitignored) ficam como fixtures defeituosos — o xlsx de teste em `SPEA v5/inputs/` é dataset de triagem de incidentes IT (Dynamics/OutSystems/EMSP, ~157 closed em ~10 dias), não adiantamentos a fornecedores como o cenário fictício do plano §5.1/ONBOARDING §3 sugere. **Não foram refeitos** (decisão do Jorge); o substantivo foi a correcção das skills. Se for útil mais tarde, refazer Discovery com o domínio real do xlsx é uma opção.
 
-**Próxima sessão**: live exec end-to-end. Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
+**Correcções mecânicas pós-análise (2026-08-31, branch `claude/repo-gaps-analysis-02922z`)** — ver `docs/GAP_ANALYSIS.md` (§5, passo 1):
+- (a) Hooks `on-su-change` / `phase-gate-check` / `synthesis-validate` / `render-validate` marcados executáveis no git (estavam `100644` → falhavam com *permission denied* em Unix a cada Write/Edit).
+- (b) **Guard `library/` ligado** (fecha o item adiado da Fase 11, §0.4): `AISA_GUARD_MODE=enforce` por defeito em `.claude/settings.json` env, script `pre-write-guard.sh` fail-closed (unset ⇒ enforce), deny rules `Write/Edit(./library/**)` repostas. Edição administrativa de `library/`: out-of-band via git (sanctioned path) ou `AISA_GUARD_MODE=log` temporário.
+- (c) Nome do log do chairman canonizado: `chairman-synthesis-<F|O|D>-<NN>.md` (chairman-synthesis skill, chairman.md, kernel orchestration.md, ARCHITECTURE §4.4/§6 — antes divergiam entre `R<NN>`, `F-<NN>` e `O-<NN>`).
+- (d) Output do `solution-architect` alinhado com o parser do chairman-synthesis (secção `### Proposal`).
+- (e) Resíduos removidos: nota de rascunho no `aisa-options` ("— wait, …") reescrita; nota obsoleta no `aisa-round` ("lenses … arrive in a later build phase") corrigida.
+
+**Next-level build (2026-08-31, branch `claude/repo-gaps-analysis-02922z`)** — ver `docs/NEXT_LEVEL_PLAN.md`:
+- Vaga 1 (fechar o loop): skill+comando `/answer` (transições de estado + answers.md), comando `/resume`, Decision interativa com `--consult` opcional + row D-NNN no SU (phases/orchestration/chairman alinhados), caminho non-tech no render (`applies_to` + fallbacks).
+- Vaga 2 (contrato + wedge): `/blueprint` (kernel `blueprint-contract.md`, skill `aisa-blueprint`, re-sourcing de claude-design-brief e implementation-spec) e `/simulate` (comparação de opções + value-of-information em `_simulation/`).
+- Pack pp v1.1.0: R4–R6 do decision-tree reescritas + inputs_used completado; sinais de Discovery neutralizados; novo `delivery-conventions.md` (naming, ALM, stamping `su:` para traceability futura).
+
+**Live exec end-to-end — FEITO (2026-08-31, engagement fixture `galp-adv-val`)** — sequência completa `/start → /round → /answer ×10 → /frame (6 personas paralelas) → /options (7 personas) → /simulate → /decide → /synthesize → /blueprint → /render --all` validada; 6/6 deliverables, 0 gaps required, vendor-grep limpo, R0 do decision-tree e protocolo missing-inputs exercitados em produção. 3 defeitos corrigidos (excertos de council passam a incluir resoluções; aisa-status --check 6 ficheiros kernel; nota sobre Task async). Evidência completa: `docs/LIVE_VALIDATION_REPORT.md`. O engagement fixture fica gitignored (projects/).
+
+**Plano v3 criado (2026-08-31)**: `docs/V3_IMPLEMENTATION_PLAN.md` — build autónomo das 5 peças epistémicas (metabolismo, economia da pergunta, pré-mortem+dialética, multiverso, biografias) em 4 vagas (v2.2→v3.0), com drafts completos das skills novas, defaults de calibração e gerador de fixture. Pode correr em paralelo com a Fase 12 ou depois dela.
+
+**Próxima sessão**: **Fase 12 — pilot** com 2 consultores (1 engagement PP real; retro alimenta os TODO(team) do delivery-conventions + thresholds do decision-tree + agent-memory). Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
 
 1. `/round` (Discovery — já validado em Fase 5/6, mas rever em conjunto com os PostToolUse hooks novos).
 2. `/frame` — validar (a) que as 6 personas arrancam em paralelo (uma única assistant message com 6 Task calls), (b) que o `frame.md` produzido é uma frase única coerente, (c) que apenas o chairman escreve no SU (autores das novas linhas vs `lens-outputs/chairman-synthesis-F-01.md`).
@@ -1573,7 +1589,7 @@ Depois disso, **Fase 12 (pilot)** — workshop curto com 2 consultores Galp + 2 
 | 9 — Render + 6 templates | ☑ done (structural) | 2026-05-28 | (bundled with 8,10,11) | 6 deliverable templates (incl. new implementation-spec, renamed claude-design-brief) + 3 architecture sub-templates + aisa-render skill (slot-resolution, versioning, render-gaps, --dry-run) + /render wired. |
 | 10 — Domain knowledge transplant | ☑ done (structural) | 2026-05-28 | (bundled) | 3 patterns files transplanted from SPEA v5 (powerfx 566 / screen 244 / security 359 lines) + new delegation-matrix.md + decision-tree.md (3 branches, 6 rules + exclusions + missing-inputs protocol). |
 | 11 — Enterprise readiness | ☑ done (structural) | 2026-05-28 | (bundled) | 3 authoring docs (PACK/LENS/DELIVERABLE) + 3 skeleton packs (outsystems, mendix, generic) + 4 hook stubs (log-mode) + HOOKS.md + settings.json wired + bootstrap.ps1 + 14 agent-memory _universal/ seed files. Live exec deferred. |
-| 12 — Pilot | ☐ todo | — | — | Real-world distributed work with consultants — outside the build sessions. |
+| 12 — Pilot | ☐ todo | — | — | Real-world distributed work with consultants — outside the build sessions. Pré-requisito (live exec) FEITO 2026-08-31 — ver LIVE_VALIDATION_REPORT.md. |
 
 ### Como actualizar este tracking
 

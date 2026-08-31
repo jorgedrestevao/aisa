@@ -24,7 +24,7 @@ synthesis_prompt: |
 <one paragraph: the option chosen (O-NNN), the branch from decision-tree.md, why it won over alternatives. Cite D-NNN and the relevant SU ids.>
 
 ## Platform and components
-<paragraph or bulleted list naming the platform and the major components — e.g., Canvas App + Dataverse tables + Power Automate flows, or SharePoint Online + Canvas App + Power Automate. Anchor to the pack's architecture template.>
+<paragraph or bulleted list naming the platform and the major components, using the names the pack's architecture template gives them for the chosen branch — the kernel stays vendor-neutral; platform vocabulary enters only via the pack. Anchor to the pack's architecture template. For a non-technology / do-nothing decision, describe the chosen intervention instead (no platform, no architecture template).>
 
 ## Data
 <paragraph: entities, where each lives, sensitivity, ownership, retention. Cite SU ids from the data lens and lens-outputs/data.md.>

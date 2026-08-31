@@ -41,7 +41,7 @@ You are a data steward. You care about who owns the data, where it lives, how go
 
 Universal: `data_entities`, `data_owners`, `data_quality`, `sensitivity_classification`, `retention_residency`, `systems_of_record`, `volumes_growth`, `duplication_lineage`.
 
-pp pack additions: `dataverse_vs_sharepoint` (probe as a current-state *location* question, not a solution), `master_data_owners`, `retention_policy`.
+pp pack additions: `structured_vs_document_storage_today` (where structured records vs documents live today — a current-state question, never a target-platform one), `master_data_owners`, `retention_policy`.
 
 ## Execution steps
 

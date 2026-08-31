@@ -1,6 +1,8 @@
 # Render Contract — Kernel v0.1.0
 
-## Pipeline: Decision → Synthesize → Render
+## Pipeline: Decision → (Blueprint) → Synthesize → Render
+
+For engagements with a UI component, the Decision phase includes the blueprint loop before final render: `/decide` → `/blueprint` → prototype (external) → business feedback (`/answer`) → blueprint vN → approval (D-NNN) → `/synthesize` → `/render --all`. See [`blueprint-contract.md`](blueprint-contract.md).
 
 ```
 shared-understanding.md  ──┐
@@ -42,6 +44,10 @@ Reads the topic packs + decisions + the pack's `deliverable-templates/<deliverab
 - `v01`, `v02`, ... — `/render` always produces the next available version.
 - Never overwrites existing files (user edits to v01 are preserved).
 - `_render/<slug>_<deliverable>_v<NN>.<ext>` is the filename pattern.
+
+### Applicability by decision type
+
+`pack.yaml` may declare `applies_to` per deliverable (`all` or a list such as `[technology]`). For a non-technology / do-nothing decision, only `applies_to: all` deliverables render; the rest are skipped with a logged reason (a skip is not a gap). `architecture-story.md` is still synthesized but describes the chosen intervention, not a platform architecture. Missing `applies_to` defaults to `all`.
 
 ### Output formats
 

@@ -30,7 +30,7 @@ Each row in the Shared Understanding (`shared-understanding.md`) is in **exactly
 | Assumed | Confirmed | Validation done |
 | Risky | Confirmed | Mitigation implemented or risk realized & resolved |
 
-Append rule: when a row transitions, the new row references the old id (`was U-007`). The old row stays for audit.
+Append rule: when a row transitions, the new row references the old id (`was U-007`). The old row stays for audit, and gains a ` — resolved → <new-id>` marker in its last column (the one sanctioned edit). Status counting treats marked rows as resolved, not open. The `/answer` skill applies these transitions; the verbatim answer is kept in `answers.md`.
 
 ## Schema of Shared Understanding rows
 
