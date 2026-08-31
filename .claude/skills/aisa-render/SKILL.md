@@ -10,7 +10,7 @@ description: Render the 6 (or a specific) deliverable(s) for the engagement, by 
 `/render [<deliverable>|--all] [--dry-run]`
 
 - `<deliverable>`: render only one — `discovery-report`, `executive-report`, `solution-blueprint`, `implementation-spec`, `claude-design-brief`, `estimate`.
-- `--all`: render every deliverable declared in `library/packs/<pack>/pack.yaml`. This is the default after `/decide` → `/synthesize`.
+- `--all`: render every deliverable declared in `library/packs/<pack>/pack.yaml` **that applies to the decision type** (see *Applicability by decision type* below). This is the default after `/decide` → `/synthesize`.
 - `--dry-run`: resolve slots and surface gaps without writing to `_render/`. Useful for debugging templates without bumping versions.
 
 ## Phase gate (soft)
@@ -18,6 +18,14 @@ description: Render the 6 (or a specific) deliverable(s) for the engagement, by 
 The engagement should be at `phase == decision` with `_synthesis/` populated (5 topic packs). Earlier `/render` attempts are allowed but most slots will be empty and `render-gaps.md` will scream. See `.claude/rules/render-on-decision-only.md`.
 
 If `phase != decision` AND `--dry-run` is **not** set → stop with: "Render before /decide is forbidden by `.claude/rules/render-on-decision-only.md`. Use `--dry-run` to preview, or finish the engagement first."
+
+## Applicability by decision type
+
+`pack.yaml` may declare `applies_to` per deliverable (`all`, or a list such as `[technology]`). Read the decision type from the final `D-NNN` block in `decisions.md` (`Branch (if technology)`: a decision-tree branch = technology decision; `non-technology` / `do-nothing` otherwise):
+
+- **Technology decision** → render every declared deliverable.
+- **Non-technology / do-nothing decision** → render only deliverables with `applies_to: all` (typically discovery-report, executive-report, estimate). Skip the others and log each skip to `render-log.md` with the reason (`not applicable: non-technology decision`) — a skip is **not** a gap and must not pollute `render-gaps.md`.
+- A deliverable without `applies_to` defaults to `all` (backwards compatible with older packs).
 
 ## Inputs (read)
 
@@ -49,6 +57,8 @@ For each `{{slot}}` in a template, resolve in this order (per `library/kernel/re
 If none of the above yields a value AND the slot is `required` → log a gap, render the slot as `> ⚠️ missing: <slot> (see render-gaps.md)`, and continue. If the slot is `optional` → render an empty section heading or omit per template guidance.
 
 Sub-template includes (`{{>> path/to/sub.md}}`) recursively resolve the same way, with the sub-template's own slot_sources.
+
+When the decision is non-technology/do-nothing and a still-applicable template includes `{{>> architecture-templates/…}}` (e.g., the estimate), replace the include with a one-line note — `> Decisão non-technology / do-nothing — sem sub-template arquitectural (ver decisions.md#D-NNN)` — and do not log a gap.
 
 ## Versioning
 

@@ -19,9 +19,19 @@ inputs_used:
   - delivery_timeline_weeks      # integer — committed delivery window (business + financial)
   - admin_team_capability        # enum: keyuser | internal_power_platform | partner_delivery (operations)
   - existing_sharepoint          # boolean — solution must integrate with an existing SharePoint footprint
+  - user_count                   # expected app users (business lens) — licensing scale
+  - premium_licensing_rejected   # boolean — client explicitly rejects premium licensing (financial/business)
+  - external_integrations_count  # non-Microsoft integrations needed (technology/operations)
+  - formula_count                # calculated columns / formula load inherited from the legacy tool (data/operations)
+  - financial_precision_decimals # required decimal precision for money fields (financial/data)
+  - approval_stages_max          # max states in any approval state machine (operations/governance)
+  - realtime_required            # boolean — sub-second interactive requirement (operations/user)
+  - entity_profile               # counts of simple vs complex entities (data) — feeds the hybrid trigger
 ---
 
 # Decision Tree — Power Platform Architectural Branches
+
+> **Changelog 2026-08-31**: R4–R6 reescritas — as versões anteriores tinham veredictos idênticos nos dois ramos do IF/ELSE (defeito de edição, ver `docs/GAP_ANALYSIS.md` G-15); `inputs_used` completado com os inputs que R0 e o hybrid-trigger já usavam sem declarar. **Thresholds a validar com a equipa na primeira retro do pilot.**
 
 This tree is the **only** Discovery-output-driven mechanism the solution architect uses to shortlist architectural branches for the `pp` pack. It is consulted in the **Options phase** and never before. Each rule maps a condition over the listed inputs to a per-branch verdict; the solution architect aggregates verdicts across the rules and assigns scores (`forte`, `adequada`, `intermédia`, `inadequada`, etc.). The branching is then proposed as 3–5 options for the chairman to synthesise into `options.md`.
 
@@ -81,19 +91,20 @@ The thresholds above mirror the platform hard limits documented in [`domain-know
 
 ## R4 — Custo de licenciamento
 
-- IF `requires_audit_trail` = true OR `relational_integrity_required` = true → A=mínimo, B=alto, C=médio
-- ELSE → A=mínimo, B=alto, C=médio
+- IF `premium_licensing_rejected` = true → A=mínimo, B=inviável (R0 aplica-se), C=inviável (R0 aplica-se)
+- IF `user_count` ≤ 20 → A=mínimo (coberto por M365 standard), B=médio (Power Apps Per App torna o premium comportável a esta escala), C=médio
+- ELSE → A=mínimo, B=alto (premium per-user para todos os utilizadores da app), C=alto (qualquer presença de Dataverse obriga licenciamento premium — o lado SharePoint do hybrid não o evita)
 
 ## R5 — Manutenção contínua
 
-- IF `admin_team_capability` = keyuser → A=baixa, B=alta, C=alta
-- IF `admin_team_capability` = internal_power_platform → A=baixa, B=média, C=média-alta
-- ELSE → A=baixa, B=média, C=média-alta
+- IF `admin_team_capability` = keyuser → A=baixa, B=alta, C=alta (dois backends estão além de keyuser — ver também R0)
+- IF `admin_team_capability` = internal_power_platform → A=baixa, B=média, C=média-alta (o custo do hybrid é a fronteira entre backends, não cada backend)
+- IF `admin_team_capability` = partner_delivery → A=baixa, B=baixa-média (o parceiro absorve a curva Dataverse), C=média
 
 ## R6 — Reversibilidade se errar
 
-- IF `max_volume_per_entity` ≤ 5000 AND `requires_audit_trail` = false → A=alta, B=baixa, C=média
-- ELSE → A=alta, B=baixa, C=média
+- IF `max_volume_per_entity` ≤ 5000 AND `requires_audit_trail` = false → A=alta (listas pequenas exportam trivialmente), B=média (schema premium, mas dados pequenos migram num dia), C=baixa (dois backends para desmontar)
+- ELSE → A=média (export volumoso de listas é doloroso mas viável), B=baixa (migração de schema + histórico auditado preso ao premium), C=baixa (dois backends + histórico repartido entre eles)
 
 ---
 

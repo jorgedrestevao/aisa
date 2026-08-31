@@ -1,20 +1,21 @@
 ---
 name: chairman-synthesis
-description: Synthesize N parallel council-persona outputs into Shared Understanding rows, an audit-trail synthesis log, and the phase artefact (frame.md / options.md / decision draft). Invoked by aisa-frame, aisa-options, and aisa-decide after their persona Task subagents return. The only writer to the Shared Understanding in council-independent mode.
+description: Synthesize N parallel council-persona outputs into Shared Understanding rows, an audit-trail synthesis log, and the phase artefact (frame.md / options.md). Invoked by aisa-frame and aisa-options after their persona Task subagents return. The only writer to the Shared Understanding in council-independent mode. (Decision is user-driven — see aisa-decide; no council synthesis runs there.)
 ---
 
 # chairman-synthesis
 
 ## Role
 
-You are executing the **chairman** role described in `.claude/agents/chairman.md` — neutral synthesizer of the council. The personas (business-analyst, operations-lead, user-advocate, data-steward, compliance-officer, cfo-lens, and, from Options onward, solution-architect) ran in parallel as Task subagents in the calling skill (`aisa-frame` / `aisa-options` / `aisa-decide`). They returned their structured proposals (see persona agent files for the schema). You now read them all side by side and produce:
+You are executing the **chairman** role described in `.claude/agents/chairman.md` — neutral synthesizer of the council. The personas (business-analyst, operations-lead, user-advocate, data-steward, compliance-officer, cfo-lens, and, in Options, solution-architect) ran in parallel as Task subagents in the calling skill (`aisa-frame` / `aisa-options`). They returned their structured proposals (see persona agent files for the schema). You now read them all side by side and produce:
 
 1. New rows in `<engagement>/shared-understanding.md`.
-2. A synthesis audit log at `<engagement>/lens-outputs/chairman-synthesis-<round>.md`, where `<round>` is the current round id from `_state.json` (`F-<NN>` in Framing, `O-<NN>` in Options, `D-<NN>` in Decision — e.g., `chairman-synthesis-F-01.md`).
+2. A synthesis audit log at `<engagement>/lens-outputs/chairman-synthesis-<round>.md`, where `<round>` is the current round id from `_state.json` (`F-<NN>` in Framing, `O-<NN>` in Options — e.g., `chairman-synthesis-F-01.md`).
 3. The phase artefact:
    - **Framing** → `<engagement>/frame.md`
    - **Options** → `<engagement>/options.md`
-   - **Decision** → a draft block staged at the bottom of `<engagement>/decisions.md` (the user-driven `aisa-decide` finalises D-NNN).
+
+(The Decision phase runs no council synthesis: `/decide` is user-driven and writes `decisions.md` itself.)
 
 ## Inputs
 
@@ -128,22 +129,6 @@ Synthesize the single sentence from the overlap of `Headline` and `Proposal` sec
 
 Must include **at least**: one do-nothing baseline; one non-technology option; one or more technology options as proposed by the solution-architect. If solution-architect did not provide enough variety → call it out in `Summary` and add an open question.
 
-#### Decision → append a draft block to `<engagement>/decisions.md`
-
-```markdown
-
-<!-- chairman-draft-decision: do not finalize without /decide -->
-## D-<NNN> (draft) — <decision title>
-
-- **Chosen option**: <O-NNN + name>
-- **Justification**: <paragraph anchored on SU ids>
-- **Alternatives considered**: <list of other O-NNN with one-line "why not">
-- **Accepted risks**: <list pointing to R-NNN rows>
-- **Revision conditions**: <measurable triggers — e.g., "if monthly volume exceeds 200, re-evaluate against O-003">
-```
-
-The `aisa-decide` skill flips this draft to the final `D-NNN` (removing the comment marker) once the user confirms.
-
 ### Step 7 — Write the synthesis audit log
 
 Write `<engagement>/lens-outputs/chairman-synthesis-<round>.md` (e.g., `chairman-synthesis-F-01.md`):
@@ -179,6 +164,6 @@ Write `<engagement>/lens-outputs/chairman-synthesis-<round>.md` (e.g., `chairman
 
 ### Step 8 — Update state and log
 
-1. Update `_state.json.round` to the current round (atomically). For Framing rounds use the `F-NN` form, Options `O-NN`, Decision `D-NN`; the calling skill (`aisa-frame` etc.) is responsible for the prefix, but if you find the prefix already correct in `_state.json`, leave it alone.
+1. Update `_state.json.round` to the current round (atomically). For Framing rounds use the `F-NN` form, Options `O-NN`; the calling skill (`aisa-frame` / `aisa-options`) is responsible for the prefix, but if you find the prefix already correct in `_state.json`, leave it alone.
 2. Append a one-line summary to `<engagement>/council-log.md`: round, `agent: chairman`, what was produced.
 3. Return control to the calling skill with: "Chairman synthesis complete for `<phase>` round `<round>`. Wrote `<N>` SU rows; phase artefact `<frame.md | options.md | decisions.md draft>`."

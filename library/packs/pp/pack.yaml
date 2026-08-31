@@ -1,5 +1,5 @@
 pack_id: pp
-pack_version: 1.0.0
+pack_version: 1.1.0
 display_name: "Power Platform Discovery"
 language: pt
 description: >
@@ -8,34 +8,45 @@ description: >
   Canvas Apps, Model-driven Apps, Power Automate, Dataverse.
 
 deliverables:
+  # applies_to: which decision types the deliverable makes sense for.
+  # "all" = technology AND non-technology/do-nothing decisions; [technology] = skipped
+  # (with a logged reason, not a gap) when the decision is non-tech. Default: all.
   - id: discovery-report
     mandatory: true
+    applies_to: all
     template: deliverable-templates/discovery-report.template.md
   - id: executive-report
     mandatory: true
+    applies_to: all
     template: deliverable-templates/executive-report.template.md
   - id: solution-blueprint
     mandatory: true
+    applies_to: [technology]
     template: deliverable-templates/solution-blueprint.template.md
   - id: implementation-spec
     mandatory: true
+    applies_to: [technology]
     template: deliverable-templates/implementation-spec.template.md
   - id: claude-design-brief
     mandatory: true
+    applies_to: [technology]
     template: deliverable-templates/claude-design-brief.template.md
   - id: estimate
     mandatory: false
+    applies_to: all
     template: deliverable-templates/estimate.template.md
 
 lenses_config:
   business:
-    extra_signals: [licensing_baseline, premium_connector_need, sponsor_authority_level]
+    # Discovery signals stay vendor-neutral (see .claude/rules/no-tech-mention-before-options.md);
+    # the PP mapping happens in Options via lens-technology.
+    extra_signals: [licensing_baseline, integration_licensing_exposure, sponsor_authority_level]
   operations:
     extra_signals: [excel_anchors, sharepoint_lists_anchors, manual_handoffs]
   user:
     extra_signals: [personas_count, mobile_need, offline_need]
   data:
-    extra_signals: [dataverse_vs_sharepoint, master_data_owners, retention_policy]
+    extra_signals: [structured_vs_document_storage_today, master_data_owners, retention_policy]
   technology:
     # Active only in Options phase
     constraints_to_check:
@@ -63,6 +74,8 @@ domain_knowledge:
   - domain-knowledge/flows-patterns.md
   - domain-knowledge/estimation-model.md
   - domain-knowledge/screen-consolidation-rules.md
+  # Team delivery conventions (naming, ALM, traceability stamping) — added 2026-08-31
+  - domain-knowledge/delivery-conventions.md
 
 question_bank: question-bank.md
 glossary: glossary.md

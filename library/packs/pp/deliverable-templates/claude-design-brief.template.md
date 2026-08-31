@@ -5,6 +5,7 @@ audience: claude-design
 required_slots:
   - solution_name
   - chosen_architecture
+  - approved_blueprint
   - canvas_app_pages
   - page_navigation_map
   - persona_users
@@ -16,10 +17,11 @@ sub_templates:
   - architecture-templates/{{chosen_architecture}}.md
 slot_sources:
   chosen_architecture: decisions.md# D-NNN — Branch (if technology)
-  canvas_app_pages: _synthesis/architecture-story.md# Platform and components
-  page_navigation_map: _synthesis/as-is.md# End-to-end process today
-  persona_users: _synthesis/as-is.md# Personas and their experience
-  ux_requirements: _synthesis/as-is.md# Top friction points, Personas and their experience
+  approved_blueprint: decisions.md# D-NNN — Blueprint bp-v<NN> aprovado
+  canvas_app_pages: _blueprint/ux-blueprint_v<approved>.yaml# screens
+  page_navigation_map: _blueprint/ux-blueprint_v<approved>.yaml# navigation
+  persona_users: _blueprint/ux-blueprint_v<approved>.yaml# personas
+  ux_requirements: _blueprint/ux-blueprint_v<approved>.yaml# screens (purpose, density, ui_states) + excluded_from_ui
   brand_guidance: context.json# brand_guidance (if captured)
   accessibility_notes: shared-understanding.md# lens=user (rows about accessibility/language)
 ---
@@ -27,6 +29,8 @@ slot_sources:
 # Claude Design Brief — {{solution_name}}
 
 > Input para Claude Design (mockups high-fidelity da Canvas App). Especificação UI/UX detalhada que permite a geração de mockups directamente — Power FX validado, screens com paleta consistente, RBAC implementado.
+>
+> **Fonte primária**: o blueprint aprovado (`_blueprint/ux-blueprint_v<NN>.yaml`, ver `library/kernel/blueprint-contract.md`) — este brief é a projeção legível dele. Sem blueprint aprovado, o slot `approved_blueprint` falha e o gap é registado: corre `/blueprint` primeiro.
 
 ## 1. Contexto e Arquitectura
 {{>> architecture-templates/{{chosen_architecture}}.md}}

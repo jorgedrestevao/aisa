@@ -32,6 +32,7 @@ description: Start a new aisa engagement. Captures the literal request + request
    ├── lens-outputs/             (empty)
    ├── council-log.md            (header only)
    ├── decisions.md              (empty header)
+   ├── answers.md                (header only — filled by /answer)
    └── inputs/                   (any captured docs)
    ```
 6. **Write `context.json`**:
@@ -91,5 +92,5 @@ description: Start a new aisa engagement. Captures the literal request + request
    | id | lens | risco | impacto | mitigação proposta | ronda |
    |----|------|-------|---------|--------------------|-------|
    ```
-9. Write `council-log.md` with a header (`# Council Log — <slug>`) and `decisions.md` with a header (`# Decisions — <slug>`).
+9. Write `council-log.md` with a header (`# Council Log — <slug>`), `decisions.md` with a header (`# Decisions — <slug>`), and `answers.md` with a header (`# Answers — <slug>`).
 10. Output: "Engagement `<slug>` created (pack: `<pack>`). Phase: discovery. Next: `/round` to run Discovery, or `/round business` lens-by-lens."

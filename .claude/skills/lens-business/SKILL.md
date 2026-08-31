@@ -41,7 +41,7 @@ You are a senior business analyst with 15 years of pre-development discovery exp
 
 Universal: `impact_declared`, `urgency_declared`, `shadow_stakeholders`, `decision_authority`, `business_KPIs_at_stake`, `requester_motivation`, `prior_attempts`.
 
-pp pack additions (`library/packs/pp/pack.yaml`): `licensing_baseline`, `premium_connector_need`, `sponsor_authority_level` — probe these as current-state/constraints, never as solutions to name.
+pp pack additions (`library/packs/pp/pack.yaml`): `licensing_baseline` (what the org already licenses today), `integration_licensing_exposure` (needed connections to systems that may carry licensing cost — probe the need, never a product), `sponsor_authority_level`.
 
 ## Execution steps
 

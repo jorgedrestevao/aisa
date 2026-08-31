@@ -18,7 +18,7 @@ optional_slots:
 slot_sources:
   chosen_architecture: decisions.md# D-NNN — Branch (if technology)
   entities_to_create: _synthesis/architecture-story.md# Data
-  screens_to_build: _synthesis/architecture-story.md# Platform and components
+  screens_to_build: _blueprint/ux-blueprint_v<approved>.yaml# screens (fallback: _synthesis/architecture-story.md# Platform and components)
   flows_to_implement: _synthesis/architecture-story.md# Platform and components, Integrations
   security_roles: _synthesis/architecture-story.md# Security model
   integrations: _synthesis/architecture-story.md# Integrations
