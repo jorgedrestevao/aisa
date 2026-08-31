@@ -2,7 +2,8 @@
 
 > Data: 2026-08-31 · Branch: `claude/repo-gaps-analysis-02922z`
 > Companion: `docs/GAP_ANALYSIS.md` (auditoria), `docs/UX_BLUEPRINT_PROPOSAL.md` (desenho da camada UX)
-> Estado: **Vagas 1–2 implementadas neste branch** (ver §3); Vaga 3 planeada; pendências do sponsor em §5.
+> Estado: **Vagas 1–2 implementadas neste branch** (ver §3); validação live feita; pendências do sponsor em §5.
+> **Sequela**: o build da v3 (5 peças epistémicas) tem plano de execução autónoma próprio em `docs/V3_IMPLEMENTATION_PLAN.md`.
 
 ---
 

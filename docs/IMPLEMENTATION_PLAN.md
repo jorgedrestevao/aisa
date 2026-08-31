@@ -1543,6 +1543,8 @@ Fases 1-6 anteriores: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `91
 
 **Live exec end-to-end — FEITO (2026-08-31, engagement fixture `galp-adv-val`)** — sequência completa `/start → /round → /answer ×10 → /frame (6 personas paralelas) → /options (7 personas) → /simulate → /decide → /synthesize → /blueprint → /render --all` validada; 6/6 deliverables, 0 gaps required, vendor-grep limpo, R0 do decision-tree e protocolo missing-inputs exercitados em produção. 3 defeitos corrigidos (excertos de council passam a incluir resoluções; aisa-status --check 6 ficheiros kernel; nota sobre Task async). Evidência completa: `docs/LIVE_VALIDATION_REPORT.md`. O engagement fixture fica gitignored (projects/).
 
+**Plano v3 criado (2026-08-31)**: `docs/V3_IMPLEMENTATION_PLAN.md` — build autónomo das 5 peças epistémicas (metabolismo, economia da pergunta, pré-mortem+dialética, multiverso, biografias) em 4 vagas (v2.2→v3.0), com drafts completos das skills novas, defaults de calibração e gerador de fixture. Pode correr em paralelo com a Fase 12 ou depois dela.
+
 **Próxima sessão**: **Fase 12 — pilot** com 2 consultores (1 engagement PP real; retro alimenta os TODO(team) do delivery-conventions + thresholds do decision-tree + agent-memory). Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
 
 1. `/round` (Discovery — já validado em Fase 5/6, mas rever em conjunto com os PostToolUse hooks novos).
