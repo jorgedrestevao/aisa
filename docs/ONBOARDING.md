@@ -114,7 +114,7 @@ claude .
 No Claude Code, executar:
 
 ```
-/aisa-status --check
+/status --check
 ```
 
 Output esperado:
@@ -165,11 +165,12 @@ O `aisa-start` vai:
      "engagement": "galp-adv",
      "pack": "pp",
      "phase": "discovery",
-     "round": "R-01",
+     "round": "R-00",
      "aisa_version": "0.1.0",
      "created": "2026-05-27T14:00:00Z"
    }
    ```
+   (`round: R-00` = nenhuma ronda corrida ainda; o primeiro `/round` corre e regista `R-01`.)
 5. Output esperado:
    > `Engagement galp-adv criado. Phase: discovery. Próximo passo: /round (corre Discovery completo) ou /round business (lens-a-lens).`
 
@@ -293,6 +294,8 @@ Os 7 agentes (agora incluindo solution-architect / lens-technology) correm em pa
 
 Cada opção vem com prós, contras, e referências aos constraints do SU (ex: opção 3 referencia A-001 "tenant tem E5" como pre-requisito a confirmar).
 
+**Opcional — `/simulate`**: antes de decidir, projeta as opções lado-a-lado (ecrãs/intervenção, banda de esforço, riscos, constraints) e lista os Unknowns *decision-flipping* — os que vale a pena resolver com o sponsor antes do `/decide`. Output em `_simulation/options-comparison_v01.md`.
+
 ### 3.9 Passo 8 — `/decide`
 
 ```
@@ -315,6 +318,14 @@ Tudo registado em `decisions.md` (D-002).
 - `risks-and-assumptions.md`
 - `financial-story.md`
 
+### 3.9b Passo 8b (apps com UI) — `/blueprint`
+
+```
+/blueprint
+```
+
+Produz `_blueprint/ux-blueprint_v01.yaml` — a arquitectura de ecrãs desenhada a partir do SU + regras do pack (`screen-consolidation-rules.md`), com proveniência (`su_refs`) em todos os nós. Geras o protótipo a partir dele (Claude Design ou outro), validas com o negócio, registas o feedback com `/answer`, re-corres `/blueprint --refresh` (v02, ...) e, quando o sponsor aprovar, a aprovação fica como D-NNN. O `claude-design-brief` e o `implementation-spec` renderizam a partir do blueprint **aprovado**. Ver `library/kernel/blueprint-contract.md`.
+
 ### 3.10 Passo 9 — `/render --all`
 
 ```
@@ -324,14 +335,16 @@ Tudo registado em `decisions.md` (D-002).
 Lê `_synthesis/` + `decisions.md` + templates de `library/packs/pp/deliverable-templates/`. Produz em `_render/`:
 
 ```
-galp-adv_discovery-report_v01.docx        (cliente)
-galp-adv_executive-report_v01.docx        (C-suite)
-galp-adv_solution-blueprint_v01.docx      (technical leadership)
+galp-adv_discovery-report_v01.md          (cliente)
+galp-adv_executive-report_v01.md          (C-suite)
+galp-adv_solution-blueprint_v01.md        (technical leadership)
 galp-adv_implementation-spec_v01.md       (PP maker)
 galp-adv_claude-design-brief_v01.md       (Claude Design)
-galp-adv_estimate_v01.docx                (sponsor + procurement)
+galp-adv_estimate_v01.md                  (sponsor + procurement)
 render-gaps.md                            (warnings se algum slot ficou vazio)
 ```
+
+> O render produz **markdown**; a conversão para .docx (para entrega formal ao cliente) é um passo manual via Pandoc/Word por agora. Numa decisão non-technology/do-nothing, só os deliverables `applies_to: all` são produzidos (discovery-report, executive-report, estimate) — os restantes são saltados com razão registada em `render-log.md`.
 
 Se `render-gaps.md` está vazio → tudo OK. Se tem entradas → render-validate sinaliza qual slot/topic precisa de mais conteúdo; tu corres /round ou /answer adicional, depois /synthesize + /render outra vez (produz v02).
 

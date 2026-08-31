@@ -86,7 +86,7 @@ Organise by lens (the 7 in `library/kernel/glossary.md`). 5–8 questions per le
 
 ### Lens signal extensions
 
-Each Discovery lens has universal signals defined in its `SKILL.md`. Packs may *add* signals via `lenses_config.<lens>.extra_signals` — these are pack-specific things the lens should probe in this domain (e.g., for `pp`: `licensing_baseline`, `premium_connector_need`).
+Each Discovery lens has universal signals defined in its `SKILL.md`. Packs may *add* signals via `lenses_config.<lens>.extra_signals` — these are pack-specific things the lens should probe in this domain (e.g., for `pp`: `licensing_baseline`, `integration_licensing_exposure`). Discovery signals must stay vendor-neutral — name needs and current state, never target products (see `.claude/rules/no-tech-mention-before-options.md`).
 
 For `technology`, packs declare `constraints_to_check` — the architectural constraints the solution-architect must verify against each option (e.g., `premium_licensing`, `dataflow_capacity`, `dataverse_storage_quota`).
 

@@ -1536,7 +1536,12 @@ Fases 1-6 anteriores: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `91
 - (d) Output do `solution-architect` alinhado com o parser do chairman-synthesis (secção `### Proposal`).
 - (e) Resíduos removidos: nota de rascunho no `aisa-options` ("— wait, …") reescrita; nota obsoleta no `aisa-round` ("lenses … arrive in a later build phase") corrigida.
 
-**Próxima sessão**: live exec end-to-end. Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
+**Next-level build (2026-08-31, branch `claude/repo-gaps-analysis-02922z`)** — ver `docs/NEXT_LEVEL_PLAN.md`:
+- Vaga 1 (fechar o loop): skill+comando `/answer` (transições de estado + answers.md), comando `/resume`, Decision interativa com `--consult` opcional + row D-NNN no SU (phases/orchestration/chairman alinhados), caminho non-tech no render (`applies_to` + fallbacks).
+- Vaga 2 (contrato + wedge): `/blueprint` (kernel `blueprint-contract.md`, skill `aisa-blueprint`, re-sourcing de claude-design-brief e implementation-spec) e `/simulate` (comparação de opções + value-of-information em `_simulation/`).
+- Pack pp v1.1.0: R4–R6 do decision-tree reescritas + inputs_used completado; sinais de Discovery neutralizados; novo `delivery-conventions.md` (naming, ALM, stamping `su:` para traceability futura).
+
+**Próxima sessão**: live exec end-to-end (agora incluindo `/answer`, `/simulate` e `/blueprint` na sequência). Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
 
 1. `/round` (Discovery — já validado em Fase 5/6, mas rever em conjunto com os PostToolUse hooks novos).
 2. `/frame` — validar (a) que as 6 personas arrancam em paralelo (uma única assistant message com 6 Task calls), (b) que o `frame.md` produzido é uma frase única coerente, (c) que apenas o chairman escreve no SU (autores das novas linhas vs `lens-outputs/chairman-synthesis-F-01.md`).

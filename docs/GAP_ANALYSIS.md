@@ -6,6 +6,8 @@
 > Estado do build à data: fases 1–11 marcadas "done (structural)" no `IMPLEMENTATION_PLAN.md §16`; validação live end-to-end (`/frame` → `/render`) por executar; Fase 12 (pilot) por fazer.
 >
 > **Actualização 2026-08-31**: o passo 1 da sequência (§5) foi aplicado neste branch — **G-01, G-02, G-13, G-14, G-23 e G-24 corrigidos** (marcados ✅ abaixo).
+>
+> **Actualização 2026-08-31 (2)**: passos 2 e 3 aplicados + parte do backlog — **G-03, G-04, G-05, G-06, G-07, G-15, G-16, G-21, G-22 e G-32 corrigidos**. Ver `docs/NEXT_LEVEL_PLAN.md §3` para o âmbito completo (inclui `/blueprint`, `/simulate` e pack pp v1.1.0).
 
 ---
 
@@ -60,11 +62,13 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
 - **Evidência**: `docs/ONBOARDING.md:236-242` (4 invocações de `/answer` + descrição do efeito Unknown→Confirmed com `was U-NNN`), `:252`, `:336`. Não existe `.claude/commands/answer.md` nem skill correspondente.
 - **Impacto**: o passo 4 do walkthrough — o mecanismo central de progressão do Shared Understanding (resolver Unknowns/Conflicted com o sponsor) — não tem dono. Nenhuma skill descreve o procedimento de transição de estado fora do council; o consultor novo fica num beco sem saída no primeiro engagement.
 - **Correcção**: criar `aisa-answer` (skill) + `/answer` (command) implementando as transições de `library/kernel/states.md`; ou, no mínimo, reescrever o ONBOARDING com o procedimento manual de edição do SU.
+- **✅ Corrigido (2026-08-31)**: skill `aisa-answer` + comando `/answer` criados; transições com marcador `resolved →`, resposta verbatim em `answers.md` (criado pelo `/start`); `aisa-status` distingue abertas de resolvidas; `states.md` clarificado.
 
 #### G-04 · `/resume` e `/export` documentados mas inexistentes
 - **Evidência**: `CLAUDE.md:43` (tabela de slash commands inclui `/resume`), `ARCHITECTURE.md:725-726` (`/resume`, `/export`), e a própria skill `aisa-start/SKILL.md:20` responde "Engagement already exists. **Use /resume**". Não existem `commands/resume.md` nem `commands/export.md`.
 - **Impacto**: o erro mais comum do `/start` aponta para um comando que não existe.
 - **Correcção**: `/resume` é trivial (ler `_state.json` + delegar em `aisa-status`); `/export` pode ser removido das docs até existir.
+- **✅ Corrigido (2026-08-31)**: comando `/resume` criado (delega em `aisa-status` + próximo comando exato).
 
 #### G-05 · Fase Decision: três especificações contraditórias (council vs interactivo)
 - **Evidência**:
@@ -74,16 +78,19 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
   - `aisa-decide/SKILL.md:20`: "**Mode**: interactive (user-driven)" — não lança nenhum Task subagent, nunca invoca `chairman-synthesis`, e refere o draft do chairman com um revelador "(if it did)" (`:110`).
 - **Impacto**: o princípio 4 do CLAUDE.md ("council-independent in Framing/Options/**Decision**") não é verdade na Decision; o draft do chairman nunca é criado; quem ler o kernel espera um comportamento que não acontece.
 - **Correcção**: decidir o modelo — a implementação interactiva é defensável (a decisão é do humano) — e alinhar `phases.md`, `orchestration.md`, `chairman-synthesis`, os mandates dos agents e o CLAUDE.md com o que ficar decidido.
+- **✅ Corrigido (2026-08-31)**: modelo decidido — Decision interativa (user-driven) com `/decide --consult` opcional (1 review do solution-architect); council só em Framing/Options. Alinhados phases.md, orchestration.md, chairman-synthesis, chairman.md, aisa-decide e CLAUDE.md; draft do chairman removido.
 
 #### G-06 · `/decide` não escreve a linha `D-NNN` no Shared Understanding
 - **Evidência**: `ARCHITECTURE.md §4.5` ("Cada `/decide` cria **uma linha em `## Confirmed`** com `id: D-NNN`... Mantém o SU completo") vs `aisa-decide/SKILL.md` → Outputs: `_state.json`, bloco em `decisions.md`, `_synthesis/`, `council-log.md` — o SU só é tocado para novos riscos.
 - **Impacto**: viola a regra `shared-understanding-as-source-of-truth` ("SU é o documento autoritativo; deliverables renderizam de SU + decisions"): a decisão — o compromisso mais importante do engagement — fica fora do artefacto vivo; `/status` não a mostra.
 - **Correcção**: acrescentar ao `aisa-decide` o passo de append da linha `D-NNN` em `## Confirmed` com cross-ref `decisions.md#D-NNN`.
+- **✅ Corrigido (2026-08-31)**: `aisa-decide` passo 4b escreve a row `D-NNN` no `## Confirmed`.
 
 #### G-07 · Decisão não-tecnológica ou do-nothing quebra o pipeline synthesize→render
 - **Evidência**: o sistema **obriga** a propor do-nothing + non-tech (`aisa-options:94,103`, `decision-tree.md` §final, `chairman.md`). Mas: `architecture-story.template.md` exige como fonte "the pack's chosen architecture template (`architecture-templates/<branch>.md`)"; `solution-blueprint`, `claude-design-brief` e `estimate` embutem `{{>> architecture-templates/{{chosen_architecture}}.md}}`; para `chosen_architecture = "non-technology"` ou `"do-nothing"` esse ficheiro não existe. Nenhum contrato define que deliverables se aplicam nesse cenário — `ARCHITECTURE §5` afirma que "toda a engagement bem-sucedida termina com 6 entregas".
 - **Impacto**: escolher a opção que o próprio sistema faz questão de pôr na mesa produz um render com gaps estruturais (ou falha), sem orientação. É um cenário de 1.º pilot perfeitamente plausível.
 - **Correcção**: declarar no `pack.yaml` a aplicabilidade de cada deliverable por tipo de decisão (ex.: non-tech → discovery-report + executive-report + estimate) e definir fallback nos templates/`aisa-render` quando o branch não é tecnológico.
+- **✅ Corrigido (2026-08-31)**: `applies_to` por deliverable no pack.yaml (v1.1.0); `aisa-render` filtra por tipo de decisão (skip ≠ gap) e substitui o sub-template arquitetural por nota em decisões non-tech; `aisa-synthesize`/render-contract com fallback do architecture-story.
 
 ### 3.2 P1 — Importantes
 
@@ -138,12 +145,14 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
   - `R4` (`:82`): `IF ... → A=mínimo, B=alto, C=médio / ELSE → A=mínimo, B=alto, C=médio` — veredictos idênticos nos dois ramos (regra no-op; provável erro de edição). `R6` (`:93`) idem; `R5` tem o 2.º e 3.º ramos idênticos.
   - Os hard gates `R0` e o "Hybrid trigger" usam condições (`formula_count`, cross-list joins, precisão financeira >2 decimais, multi-stage approval, rejeição de premium licensing, >3 integrações externas, real-time, `entities_simple/complex`) que **não estão** em `inputs_used` no frontmatter — logo o protocolo "input em falta → STOP + Unknown" não cobre exactamente as regras mais destrutivas (as que eliminam branches).
 - **Correcção**: rever os veredictos de R4-R6 (presumivelmente deviam variar); completar `inputs_used` com as condições de R0/Hybrid.
+- **✅ Corrigido (2026-08-31)**: R4–R6 reescritas com lógica diferenciada (licensing por escala/rejeição de premium; manutenção por capability; reversibilidade por volume/audit); `inputs_used` completado com 8 inputs; changelog no ficheiro; **thresholds a validar na retro do pilot**.
 
 #### G-16 · Vocabulário de solução PP dentro do Discovery e do kernel
 - **Evidência**:
   - `packs/pp/pack.yaml:31,38` — `extra_signals` das lenses de **Discovery** incluem `premium_connector_need`, `licensing_baseline`, `dataverse_vs_sharepoint`: vocabulário da solução Microsoft a orientar lentes que "MUST NOT name vendors" (a rule permite nomear o *estado actual*, mas `dataverse_vs_sharepoint`/`premium_connector` são conceitos do *destino* PP — enviesam a descoberta para PP antes de Options, contra o princípio 1 e contra a promessa de opções OutSystems/non-tech em pé de igualdade).
   - `library/kernel/synthesis-templates/architecture-story.template.md:27` nomeia "Canvas App + Dataverse tables + Power Automate flows, or SharePoint Online..." — no **kernel**, que o plano (§15) exige vendor-clean ("Grep `library/kernel/` por Power|Dataverse|Canvas → 0 hits").
 - **Correcção**: renomear os sinais de Discovery para forma neutra (ex.: `structured_vs_document_storage_today`, `integration_licensing_exposure`) mantendo o mapeamento PP no pack; mover os exemplos do template do kernel para o pack.
+- **✅ Corrigido (2026-08-31)**: sinais renomeados no pack.yaml + lens-business + lens-data; exemplo vendorizado do kernel `architecture-story.template.md` substituído por formulação neutra.
 
 #### G-17 · Colisões de prefixos de id (rondas vs linhas vs opções)
 - **Evidência**: rondas `R-01/F-01/O-01/D-01` vs linhas Risky `R-001`, opções `O-001`, decisões `D-001` — os pares R/R, O/O, D/D distinguem-se apenas pelo número de dígitos. `aisa-decide` pede "which open **R-NNN** risks" numa tabela cuja coluna `ronda` contém `R-01`.
@@ -169,10 +178,12 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
 
 #### G-21 · ONBOARDING desactualizado face ao modelo de rondas R-00
 - **Evidência**: `ONBOARDING.md:168` mostra `/start` a semear `"round": "R-01"`; o modelo convergido na Fase 5 (plano §16: "`/start` semeia R-00; `/round` incrementa no início") está correcto nas skills mas o ONBOARDING nunca foi corrigido (o plano até anota que o exemplo ficou "ilustrativo" — num doc de onboarding, é um erro à espera de confundir).
+- **✅ Corrigido (2026-08-31)**: ONBOARDING §3.2 corrigido para `R-00` com nota do modelo de rondas.
 
 #### G-22 · ONBOARDING promete `.docx`; o render produz `.md`
 - **Evidência**: `ONBOARDING.md:327-333` lista `galp-adv_discovery-report_v01.docx` etc.; `aisa-render` escreve exclusivamente `.md` (`render-contract.md`: "Conversion to .docx via Pandoc (post-render step, **optional in MVP**)") e não existe nenhum passo/hook de conversão. Também `:117` usa `/aisa-status --check` (o comando é `/status --check`).
 - **Correcção**: ONBOARDING realista (outputs `.md` + conversão manual via Pandoc/Word) até existir o passo de conversão.
+- **✅ Corrigido (2026-08-31)**: ONBOARDING corrigido (.md + nota Pandoc + comportamento non-tech).
 
 ### 3.3 P2 — Menores / cosméticos
 
@@ -187,7 +198,7 @@ Severidade: **P0** = quebra a experiência actual ou contradiz um princípio inv
 | G-29 | Mitigação do "risco principal" do MVP promete "`/status` mostra preview de cada deliverable em tempo real" — `aisa-status` não faz previews | `docs/ARCHITECTURE.md:1027-1028` |
 | G-30 | Exemplo de `D-001` no §4.5 é a escolha tecnológica; no sistema real `D-001` é o frame (aisa-frame §8, phases.md) — exemplo desactualizado | `docs/ARCHITECTURE.md:287-291` |
 | G-31 | Robustez do guard quando passar a enforce: os globs `*/library/*`, `./library/*`, `library/*` não cobrem paths Windows com backslashes; o deny de settings (quando reposto) só cobre o path relativo | `.claude/hooks/pre-write-guard.sh:27` |
-| G-32 | `docs/ISSUES.md` referido no troubleshooting e na Fase 12 não existe ainda | `docs/ONBOARDING.md:395`, plano `:1440` |
+| G-32 | ✅ Corrigido (2026-08-31) — `docs/ISSUES.md` criado (stub) | `docs/ONBOARDING.md:395`, plano `:1440` |
 | G-33 | `.env.example` e ONBOARDING §2.3 assumem configuração MCP; não existe `.mcp.json` (v. G-09) | `.env.example`, `docs/ONBOARDING.md:95-104` |
 
 ---
@@ -206,9 +217,9 @@ Dois padrões explicam ~80% dos achados:
 | Ordem | Âmbito | Achados | Esforço |
 |---|---|---|---|
 | 1 | Correcções mecânicas: chmod dos hooks; decidir e aplicar enforce (ou corrigir docs); limpar resíduos; canonizar nome do log do chairman; secção `Proposal` do solution-architect | G-02, G-01, G-23, G-24, G-13, G-14 | ✅ aplicado (2026-08-31, neste branch) |
-| 2 | Decisões de design da fase Decision: modelo council vs interactivo; linha D-NNN no SU; caminho non-tech/do-nothing no synthesize/render | G-05, G-06, G-07 | ~1 sessão (requer decisão do sponsor) |
-| 3 | Fechar o loop do utilizador: `/answer` + `/resume` | G-03, G-04 | ~1 sessão |
+| 2 | Decisões de design da fase Decision: modelo council vs interactivo; linha D-NNN no SU; caminho non-tech/do-nothing no synthesize/render | G-05, G-06, G-07 | ✅ aplicado (2026-08-31) |
+| 3 | Fechar o loop do utilizador: `/answer` + `/resume` | G-03, G-04 | ✅ aplicado (2026-08-31) |
 | 4 | Passe editorial pré-pilot: ARCHITECTURE (rename, árvore §6, changelog, exemplos), ONBOARDING (R-00, .md, /status), MIGRATION §6.4 | G-08, G-09, G-10, G-21, G-22, G-30 | 1-2 sessões |
-| 5 | Backlog v0.2.0: decision-tree (regras + inputs), sinais neutros de Discovery, prefixos de ronda, tenant, bootstrap, validação de packs, transições de estado | G-15, G-16, G-17, G-18, G-19, G-20, G-25 | planeável |
+| 5 | Backlog v0.2.0: prefixos de ronda, tenant, bootstrap, validação de packs, transições de estado (G-15 e G-16 já aplicados) | G-17, G-18, G-19, G-20, G-25 | planeável |
 
 Só depois do passo 4 faz sentido arrancar a **validação live end-to-end** e a **Fase 12 (pilot)** — os consultores do pilot vão ler exactamente os documentos hoje desalinhados.
