@@ -59,7 +59,7 @@ If a soft criterion is red and no `--override` was passed → stop with a one-li
 
 ### 4. Compose thematic Shared Understanding excerpts
 
-Same slicing as `aisa-frame` for the first 6 personas. Add a 7th excerpt for `solution-architect`:
+Same slicing as `aisa-frame` for the first 6 personas — including the mandatory "Resoluções já fechadas (não re-litigar)" block in every excerpt. Add a 7th excerpt for `solution-architect`:
 
 | Persona | Slice |
 |---|---|

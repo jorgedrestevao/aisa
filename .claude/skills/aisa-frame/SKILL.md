@@ -85,7 +85,7 @@ For each of the 6 personas, slice the SU into a thematic excerpt:
 | compliance-officer | All rows where `lens = governance` + every Conflicted row + every row touching audit/access control |
 | cfo-lens | All rows where `lens = financial` + any row touching cost, volume × time anchors |
 
-Each excerpt is a Markdown fragment with the section headers preserved. Save each as a transient file under `<engagement>/lens-outputs/_council-prep/F-<NN>-<persona>.md` so the audit trail can show what each agent saw. Save the union of these into the council-log too.
+Each excerpt is a Markdown fragment with the section headers preserved. **Every excerpt must ALSO include the resolved rows and their resolutions** (rows marked `resolved →` plus the `C-` rows carrying `(was …)`), under a heading "Resoluções já fechadas (não re-litigar)" — otherwise personas whose slice missed a resolution re-raise closed conflicts (observed in live validation). Save each as a transient file under `<engagement>/lens-outputs/_council-prep/F-<NN>-<persona>.md` so the audit trail can show what each agent saw. Save the union of these into the council-log too.
 
 **solution-architect is NOT invoked in Framing.** Do not launch it. (Its own agent file refuses if called pre-Options.)
 

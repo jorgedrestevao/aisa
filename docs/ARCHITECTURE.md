@@ -12,6 +12,17 @@
 
 ## Changelog
 
+### v2.1.0 — 2026-08-31 (build next-level + passe editorial)
+
+Actualizações após o build registado em `docs/NEXT_LEVEL_PLAN.md` e a auditoria `docs/GAP_ANALYSIS.md`:
+
+- **Enforcement ligado**: `library/` read-only é agora hard-enforced (hook em modo enforce + deny rules) — §9.1 é verdade.
+- **Comandos novos**: `/answer` (transições de estado), `/resume`, `/simulate` (comparação de opções + value-of-information), `/blueprint` (arquitectura de ecrãs com proveniência; contrato em `library/kernel/blueprint-contract.md`).
+- **Fase Decision**: modo `interactive` (user-driven) com `--consult` opcional — o council corre em Framing/Options apenas. §3.1/§4.4 actualizados.
+- **Deliverables por tipo de decisão**: `applies_to` no pack.yaml; decisões non-tech/do-nothing renderizam só os aplicáveis.
+- **Pack pp v1.1.0**: decision-tree R4–R6 reescritas, sinais de Discovery neutralizados, novo `delivery-conventions.md`.
+- **Editorial**: o sistema antecessor passa a ser referido como **SPEA v2 (aisa v1)** em todo o documento — o rename global de v2.0.0 tinha deixado antecessor e sucessor ambos como "aisa"; árvore §6 actualizada ao estado real do repo.
+
 ### v2.0.0 — 2026-05-28 (rebranding: predev → aisa v2.0)
 
 Decisão de continuidade de brand: o produto continua a chamar-se `aisa` (não há renomeação para `predev`). O que muda é a arquitectura interna (major rewrite vs aisa v1). Renames aplicados:
@@ -20,9 +31,9 @@ Decisão de continuidade de brand: o produto continua a chamar-se `aisa` (não h
 - Versão: bump para v2.0.0 (marca o corte arquitectural vs v1)
 - Repositório: `aisa/` (sibling de SPEA v5; SPEA v5 fica como aisa v1 legacy)
 - Repositório privado: `aisa-engagements-galp/`
-- Skill names: removido prefix (`start`, `round`, `synthesize`, `render`, etc. — sem prefix `aisa-` por elegância; aisa é o único pipeline do workspace)
+- Skill names: removido prefix (`start`, `round`, `synthesize`, `render`, etc.) **[não aplicado no build — as skills mantêm o prefixo `aisa-`; os nomes curtos são os comandos]**
 - Env vars: `AISA_ENGAGEMENTS_ROOT`, `AISA_GUARD_MODE`, `AISA_KERNEL_VERSION`
-- `MIGRATION_FROM_AISA.md` → `UPGRADE_V1_TO_V2.md` (reflecte upgrade dentro da aisa, não migração para outro produto)
+- `MIGRATION_FROM_AISA.md` → `UPGRADE_V1_TO_V2.md` **[não aplicado — o ficheiro mantém o nome original]**
 - Pasta de design: `predev-design/` → `aisa-design/`
 
 Conteúdo arquitectural inalterado vs v0.2.0 — só naming/branding.
@@ -51,11 +62,11 @@ Documento inicial baseado em 10 decisões da sessão de brainstorm.
 
 `aisa` é uma plataforma de **discovery e sensemaking organizacional** que antecede qualquer escolha tecnológica em projectos de digitalização (Power Platform, OutSystems, Mendix, custom). Resolve o problema de raiz: a maioria dos projectos falha em **discovery**, não em implementação — desalinhamento entre stakeholders, entendimento incompleto do problema, contexto fragmentado, e selecção tecnológica prematura.
 
-`aisa` substitui `aisa` (SPEA v2). O aisa actual é estruturalmente over-engineered: força reasoning determinístico em cima de um LLM probabilístico através de um kernel com dezenas de invariantes (Ledger, claims tipadas, coherence-cells, event-order gates, YAML frontmatter mandatório). Dois runs com input idêntico produziram outputs divergentes e ambos não-conformes — o que prova que o problema é estrutural, não implementacional.
+O aisa v2 substitui o **SPEA v2 (aisa v1)**. O sistema anterior é estruturalmente over-engineered: força reasoning determinístico em cima de um LLM probabilístico através de um kernel com dezenas de invariantes (Ledger, claims tipadas, coherence-cells, event-order gates, YAML frontmatter mandatório). Dois runs com input idêntico produziram outputs divergentes e ambos não-conformes — o que prova que o problema é estrutural, não implementacional.
 
 A nova arquitectura inverte a filosofia, conforme a `proposta_conceptual_operational_discovery`:
 
-| aisa (rejeitado)                              | aisa (adoptado)                                 |
+| SPEA v2 / aisa v1 (rejeitado)                 | aisa v2 (adoptado)                              |
 |-----------------------------------------------|---------------------------------------------------|
 | AI como motor determinístico                  | AI como facilitador de discovery                  |
 | Governance pesada com 20+ cells em waves      | 7 lenses + 4 fases + 6 entregas canónicas         |
@@ -87,9 +98,9 @@ Technology Selection → Implementation
 
 A maioria dos projectos falha entre `Need` e `Implementation` porque os passos intermédios são saltados. Não é problema de capacidade técnica — é problema de **entendimento compartilhado**.
 
-### 1.2 Porque o aisa falhou estruturalmente
+### 1.2 Porque o SPEA v2 (aisa v1) falhou estruturalmente
 
-O aisa tentou resolver isto com um kernel formal — `cells`, `waves`, `Claim Ledger`, `event ordering`, `coherence-cells`, `YAML frontmatter por output`. Em produção real, dois runs com **input idêntico e modelo idêntico** divergiram nos seguintes pontos (documentado em `aisa-output/dayly_pending_tickets_anonimo_20260527_2050/_diff/` e `..._20260527_2051/_diff/`):
+O aisa v1 tentou resolver isto com um kernel formal — `cells`, `waves`, `Claim Ledger`, `event ordering`, `coherence-cells`, `YAML frontmatter por output`. Em produção real, dois runs com **input idêntico e modelo idêntico** divergiram nos seguintes pontos (documentado em `aisa-output/dayly_pending_tickets_anonimo_20260527_2050/_diff/` e `..._20260527_2051/_diff/`):
 
 | Critério | RUN-A | RUN-B |
 |---|---|---|
@@ -147,9 +158,9 @@ A engagement progride em 4 fases declaradas em `library/kernel/phases.md`:
 | Fase | Objectivo | Lenses activas | Modo | Output da fase |
 |---|---|---|---|---|
 | **Discovery** | Mapear contexto operacional, stakeholders sombra, as-is process, constraints. Não menciona tecnologia. | business → operations → user → data → governance → financial (**ordem fixa, sequencial**) | inline | SU populado em estados `Confirmed/Assumed/Unknown/Conflicted/Risky` + `lens-outputs/<lens>.md` por lens |
-| **Framing** | Sintetizar uma frase única de problema, validada pelo sponsor. Detectar contradições críticas. | (subset relevante das 6) + chairman | council-independent | `frame.md` + `contradictions.md` resolvidas |
+| **Framing** | Sintetizar uma frase única de problema, validada pelo sponsor. Detectar contradições críticas. | as 6 lenses de Discovery (via personas) + chairman | council-independent | `frame.md` + Conflicted rows no SU |
 | **Options** | Gerar opções (não-fazer / process change / use existing better / PP / alt). Avaliar cada uma contra constraints e critérios. | technology (entra aqui pela 1.ª vez) + chairman | council-independent | `options.md` com prós/contras matriciais |
-| **Decision** | Escolher, justificar, registar alternativas, riscos, condições de revisão. Renderizar as 6 entregas canónicas. | solution-architect + chairman | council-independent | `decisions.md` + 6 deliverables em `_render/` |
+| **Decision** | Escolher, justificar, registar alternativas, riscos, condições de revisão. Blueprint UX (engagements com UI). Renderizar as entregas. | o utilizador decide; lens-technology consultável (`/decide --consult`) | interactive | `decisions.md` + row D-NNN no SU + `_blueprint/` + deliverables em `_render/` |
 
 **Soft gates entre fases:**
 
@@ -209,7 +220,7 @@ Duas formas de invocar uma lens, **declaradas pela fase**:
 
 **Peer review**: omitido no MVP. O padrão Karpathy completo inclui peer review (cada agente comenta o do vizinho antes do chairman), adicionando ~50% de custo. Adicionamos em v2 só se observarmos group-think em produção (improvável dado o isolation completo).
 
-Custo: Discovery = ~6 LLM passes por ronda (uma por lens, sequencial). Framing/Options/Decision = ~7-8 LLM passes (6 agentes em paralelo + chairman + às vezes lens-technology). Pacote total por engagement: ~30-50 LLM passes (vs 100+ no aisa pp-consulting). Mais barato, mais correcto.
+Custo: Discovery = ~6 LLM passes por ronda (uma por lens, sequencial). Framing/Options/Decision = ~7-8 LLM passes (6 agentes em paralelo + chairman + às vezes lens-technology). Pacote total por engagement: ~30-50 LLM passes (vs 100+ no aisa v1 pp-consulting). Mais barato, mais correcto.
 
 ---
 
@@ -280,14 +291,15 @@ O `council-log.md` tem o detalhe por ronda: que lens correu, que linhas adiciono
 ### 4.4 Quem escreve no SU (writer rules)
 
 - **Modo `inline` (Discovery)**: a lens activa escreve directamente as suas rows no SU e o respectivo `lens-outputs/<lens>.md`. Cada lens corre uma a uma, vê o que as anteriores escreveram.
-- **Modo `council-independent` (Framing / Options / Decision)**: **apenas o `chairman` escreve no SU.** Os 6/7 agentes via Task tool não têm tool Write (declarado em §7.3 `tools: [Read, Grep, Glob]`). Cada agente devolve a sua contribuição como retorno da Task call; o chairman recebe-as todas, sintetiza, e escreve rows novas + um `chairman-synthesis-<ronda>.md` (`F-<NN>` / `O-<NN>` / `D-<NN>`) em `lens-outputs/`.
+- **Modo `council-independent` (Framing / Options)**: **apenas o `chairman` escreve no SU.** Na Decision (interactiva) é a skill `aisa-decide` que escreve, guiada pelo utilizador. Os 6/7 agentes via Task tool não têm tool Write (declarado em §7.3 `tools: [Read, Grep, Glob]`). Cada agente devolve a sua contribuição como retorno da Task call; o chairman recebe-as todas, sintetiza, e escreve rows novas + um `chairman-synthesis-<ronda>.md` (`F-<NN>` / `O-<NN>` / `D-<NN>`) em `lens-outputs/`.
 
 ### 4.5 Decisões no SU
 
 Cada `/decide` cria **uma linha em `## Confirmed`** com `id: D-NNN` cross-referenciada ao detalhe em `decisions.md`. Mantém o SU completo (entendimento + compromissos) sem duplicar conteúdo. Exemplo:
 
 ```markdown
-| D-001 | solution-architect | Escolhida Power Platform Premium com Dataverse + Canvas Apps; ver decisions.md#D-001 | decisions.md#D-001 | R-08 |
+| D-001 | chair | Frame validado pelo sponsor; ver decisions.md#D-001 | decisions.md#D-001 | F-01 |
+| D-002 | chair | Escolhida a opção O-003 (branch dataverse-first); ver decisions.md#D-002 | decisions.md#D-002 | D-01 |
 ```
 
 ---
@@ -366,164 +378,81 @@ Mesmo que o user message original não tenha mencionado explicitamente, em qualq
 ## 6. Estrutura do Repositório
 
 ```
-aisa/                                              # greenfield repo
-├── README.md                                        # entry point enterprise
+aisa/                                              # repo 1 — partilhável dentro da empresa
+├── README.md
 ├── CLAUDE.md                                        # princípios (lean, sem invariantes)
-├── .mcp.json                                        # MCP team-shared (Jira, SharePoint, Graph)
-├── .worktreeinclude
+├── .env.example                                     # AISA_* + placeholders MCP
+├── bootstrap.ps1                                    # setup Windows (junction + env var)
 │
-├── .claude/                                         # toda a config Claude Code
-│   ├── settings.json                                # permissions + hooks + env + model
-│   ├── settings.local.json                          # personal (gitignored)
-│   │
-│   ├── rules/                                       # 3-4 princípios curtos, path-gated
+├── .claude/
+│   ├── settings.json                                # deny Write/Edit(library/**) + hooks + env (enforce)
+│   ├── rules/                                       # 4 princípios curtos, path-gated
 │   │   ├── library-readonly.md
 │   │   ├── no-tech-mention-before-options.md
 │   │   ├── shared-understanding-as-source-of-truth.md
 │   │   └── render-on-decision-only.md
-│   │
-│   ├── skills/                                      # skills reutilizáveis
-│   │   ├── lens-business/SKILL.md
-│   │   ├── lens-operations/SKILL.md
-│   │   ├── lens-user/SKILL.md
-│   │   ├── lens-data/SKILL.md
-│   │   ├── lens-technology/SKILL.md
-│   │   ├── lens-governance/SKILL.md
-│   │   ├── lens-financial/SKILL.md
-│   │   ├── contradiction-scan/SKILL.md
-│   │   ├── gap-scan/SKILL.md
+│   ├── skills/
+│   │   ├── lens-{business,operations,user,data,technology,governance,financial}/SKILL.md
 │   │   ├── chairman-synthesis/SKILL.md
-│   │   ├── aisa-start/SKILL.md
-│   │   ├── aisa-round/SKILL.md
-│   │   ├── aisa-status/SKILL.md
-│   │   ├── aisa-frame/SKILL.md
-│   │   ├── aisa-options/SKILL.md
-│   │   ├── aisa-decide/SKILL.md
-│   │   └── aisa-render/SKILL.md
-│   │
-│   ├── commands/                                    # entry points finos
-│   │   ├── start.md
-│   │   ├── round.md
-│   │   ├── status.md
-│   │   ├── frame.md
-│   │   ├── options.md
-│   │   ├── decide.md
-│   │   └── render.md
-│   │
-│   ├── agents/                                      # personas independentes (council)
-│   │   ├── business-analyst.md
-│   │   ├── operations-lead.md
-│   │   ├── user-advocate.md
-│   │   ├── data-steward.md
-│   │   ├── solution-architect.md
-│   │   ├── compliance-officer.md
-│   │   ├── cfo-lens.md
+│   │   └── aisa-{start,round,answer,status,frame,options,simulate,decide,synthesize,blueprint,render}/SKILL.md
+│   ├── commands/                                    # thin entry points
+│   │   └── {start,round,answer,status,frame,options,simulate,decide,synthesize,blueprint,render,resume}.md
+│   ├── agents/                                      # personas council-independent
+│   │   ├── business-analyst.md · operations-lead.md · user-advocate.md · data-steward.md
+│   │   ├── solution-architect.md · compliance-officer.md · cfo-lens.md
 │   │   └── chairman.md
-│   │
-│   ├── agent-memory/                                # memória institucional
-│   │   ├── business-analyst/
-│   │   ├── operations-lead/
-│   │   ├── user-advocate/
-│   │   ├── data-steward/
-│   │   ├── solution-architect/
-│   │   ├── compliance-officer/
-│   │   ├── cfo-lens/
-│   │   └── chairman/
-│   │
-│   ├── output-styles/                               # formatting custom (opcional)
-│   │   └── client-ready.md
-│   │
-│   └── hooks/                                       # enforcement programático
-│       ├── pre-write-guard.sh                       # library/ read-only
-│       ├── on-su-change.sh                          # auto contradiction-scan trigger
-│       ├── phase-gate-check.sh                      # advisory soft gates
-│       └── render-validate.sh                       # checks render gaps before output
+│   ├── agent-memory/
+│   │   └── _universal/<persona>/{universal-constraints,anti-patterns}.md
+│   │       # _tenant/ é gitignored — vive no repo privado (corporate-patterns etc.)
+│   ├── output-styles/                               # (vazio; opcional)
+│   └── hooks/
+│       ├── pre-write-guard.sh                       # ENFORCE: library/ read-only (o hard guard)
+│       ├── on-su-change.sh · phase-gate-check.sh    # log-only no MVP (validadores em v0.2.0)
+│       └── synthesis-validate.sh · render-validate.sh
 │
-├── library/                                         # read-only em runtime
-│   ├── kernel/                                      # universal, agnóstico
-│   │   ├── phases.md                                # 4 fases + entry/exit criteria
-│   │   ├── states.md                                # 5 estados canónicos
-│   │   ├── orchestration.md                         # modo híbrido inline/council
-│   │   ├── render-contract.md                       # how /render works
-│   │   └── glossary.md                              # vocabulário aisa
-│   │
+├── library/                                         # read-only em runtime (hook + deny)
+│   ├── kernel/                                      # universal, vendor-agnóstico
+│   │   ├── phases.md · states.md · orchestration.md
+│   │   ├── render-contract.md · blueprint-contract.md · glossary.md
+│   │   └── synthesis-templates/{business-story,as-is,architecture-story,risks-and-assumptions,financial-story}.template.md
 │   └── packs/
-│       ├── _active.txt                              # pack activo (default: pp)
-│       │
-│       ├── pp/                                      # Power Platform — VALIDADO
-│       │   ├── pack.yaml
-│       │   ├── glossary.md                          # Dataverse, Premium connectors, Dataflow, ...
-│       │   ├── question-bank.md                     # 40-60 perguntas tipicamente úteis em PP
-│       │   ├── lenses-config.yaml                   # ajustes PP-específicos por lens
-│       │   ├── deliverable-templates/
-│       │   │   ├── discovery-report.template.md
-│       │   │   ├── executive-report.template.md
-│       │   │   ├── solution-blueprint.template.md
-│       │   │   ├── implementation-spec.template.md
-│       │   │   ├── claude-design-brief.template.md
-│       │   │   └── estimate.template.md
-│       │   ├── architecture-templates/              # sub-templates por architectura
-│       │   │   ├── canvas-only.md
-│       │   │   ├── model-driven-only.md
-│       │   │   ├── hybrid.md
-│       │   │   └── dataverse-led.md
-│       │   ├── domain-knowledge/                    # citado em deliverables
-│       │   │   ├── powerfx-patterns.md
-│       │   │   ├── screen-patterns.md
-│       │   │   ├── security-patterns.md
-│       │   │   └── delegation-matrix.md
-│       │   └── decision-tree.md                     # SÓ consultada em Options
-│       │
-│       ├── outsystems/                              # scaffold, sem conteúdo validado
-│       │   └── pack.yaml
-│       ├── mendix/                                  # scaffold
-│       │   └── pack.yaml
-│       └── generic/                                 # platform-agnostic
-│           └── pack.yaml
+│       ├── pp/                                      # Power Platform — VALIDADO (v1.1.0)
+│       │   ├── pack.yaml                            # deliverables (c/ applies_to) + lenses_config + refs
+│       │   ├── glossary.md · question-bank.md · decision-tree.md
+│       │   ├── deliverable-templates/{discovery-report,executive-report,solution-blueprint,
+│       │   │                          implementation-spec,claude-design-brief,estimate}.template.md
+│       │   ├── architecture-templates/{sharepoint-first,dataverse-first,hybrid}.md
+│       │   └── domain-knowledge/                    # powerfx-patterns · screen-patterns · security-patterns ·
+│       │       # delegation-matrix · excel-patterns · dataverse/azure-sql/sharepoint refs ·
+│       │       # anonymization · flows-patterns · estimation-model · screen-consolidation-rules ·
+│       │       # delivery-conventions
+│       ├── outsystems/pack.yaml                     # scaffold, sem conteúdo validado
+│       ├── mendix/pack.yaml                         # scaffold
+│       └── generic/pack.yaml                        # scaffold platform-agnostic
 │
-├── projects/                                        # MOUNT POINT — config aponta para
-│   └── (vazio por defeito)                          # repo privado aisa-engagements-<tenant>
-│                                                    # ver §10 — engagements vivem fora
-│                                                    # do aisa por privacy
-│
+├── projects/                                        # MOUNT POINT (gitignored) → repo 2 privado
+│                                                    # aisa-engagements-<tenant>; ver §10
+└── docs/                                            # ARCHITECTURE · PHILOSOPHY · ONBOARDING ·
+                                                     # IMPLEMENTATION_PLAN · PACK/LENS/DELIVERABLE_AUTHORING ·
+                                                     # MIGRATION_FROM_AISA · REFERENCES_ANALYSIS ·
+                                                     # GAP_ANALYSIS · NEXT_LEVEL_PLAN · UX_BLUEPRINT_PROPOSAL · ISSUES
+
 # Estrutura típica de UM engagement (vive em aisa-engagements-<tenant>/<slug>/):
 #   <slug>/
-#   ├── _state.json                              # phase, round, pack activo, atomic writes
-#   ├── context.json                             # estrutura de contexto da proposta
-#   ├── shared-understanding.md                  # ARTEFACTO VIVO
+#   ├── _state.json                              # phase, round, pack, atomic writes (tmp → mv)
+#   ├── context.json                             # captura do /start
+#   ├── shared-understanding.md                  # ARTEFACTO VIVO (5 secções por estado)
+#   ├── answers.md                               # respostas verbatim do /answer
 #   ├── council-log.md                           # narrativa cronológica por ronda
-#   ├── decisions.md                             # log de decisões
-#   ├── inputs/                                  # documentos do cliente
-#   ├── lens-outputs/                            # prose por lens (consumido por synthesis)
-#   │   ├── business.md, operations.md, user.md
-#   │   ├── data.md, technology.md, governance.md, financial.md
-#   │   └── chairman-synthesis-<F|O|D>-<NN>.md   # outputs do chairman em modo council
-#   ├── _synthesis/                              # topic packs intermédios (auto-gerado em /decide)
-#   │   ├── business-story.md
-#   │   ├── as-is.md
-#   │   ├── architecture-story.md
-#   │   ├── risks-and-assumptions.md
-#   │   └── financial-story.md
-#   └── _render/                                 # 6 deliverables (versioning incremental)
-#       ├── <slug>_discovery-report_v01.docx
-#       ├── <slug>_executive-report_v01.docx
-#       ├── <slug>_solution-blueprint_v01.docx
-#       ├── <slug>_implementation-spec_v01.md
-#       ├── <slug>_claude-design-brief_v01.md
-#       ├── <slug>_estimate_v01.docx
-#       └── render-gaps.md                       # warnings se algum slot ficou vazio
-│
-├── docs/                                            # documentação para equipa/empresa
-│   ├── ARCHITECTURE.md                              # este documento
-│   ├── ONBOARDING.md                                # como começar
-│   ├── PACK_AUTHORING.md                            # como escrever um novo pack
-│   ├── LENS_AUTHORING.md                            # como adicionar/modificar lens
-│   ├── DELIVERABLE_AUTHORING.md                     # como adicionar template
-│   ├── PHILOSOPHY.md                                # discovery-first thesis
-│   └── MIGRATION_FROM_AISA.md                       # para quem vem do aisa
-│
-└── archive/                                         # opcional
-    └── aisa-reference/                              # snapshot read-only do aisa
+#   ├── decisions.md                             # D-NNN (frame, decisão, aprovação do blueprint)
+#   ├── frame.md · options.md                    # artefactos de fase (chairman)
+#   ├── inputs/                                  # documentos do cliente (abertos e perfilados)
+#   ├── lens-outputs/                            # prose por lens + chairman-synthesis-<F|O>-<NN>.md
+#   │   └── _council-prep/                       # excertos temáticos por persona (audit)
+#   ├── _simulation/                             # options-comparison_v<NN>.md (/simulate)
+#   ├── _blueprint/                              # ux-blueprint_v<NN>.yaml + blueprint-log.md (/blueprint)
+#   ├── _synthesis/                              # 5 topic packs + _synthesis-log.md (auto no /decide)
+#   └── _render/                                 # deliverables v<NN> + render-gaps.md + render-log.md
 ```
 
 ---
@@ -657,9 +586,9 @@ tools: [Read, Grep, Glob]  # restrictive; council agents don't write directly to
 This agent embodies: lens-<name>
 
 ## Memory consulted
-- .claude/agent-memory/<name>/recurring-constraints.md
-- .claude/agent-memory/<name>/anti-patterns.md
-- .claude/agent-memory/<name>/corporate-patterns.md
+- .claude/agent-memory/_universal/<name>/universal-constraints.md
+- .claude/agent-memory/_universal/<name>/anti-patterns.md
+- .claude/agent-memory/_tenant/<tenant>/<name>/corporate-patterns.md (repo privado, se existir)
 
 ## Output format
 <Schema do que esta persona devolve ao chairman.>
@@ -716,14 +645,17 @@ Synthesis-skill instancia este template para cada topic, e o output vai para `_s
 |---|---|---|
 | `/start <slug> [pack]` | Início de engagement | Captura literal do pedido, requester. Cria `projects/<slug>/{context.json, shared-understanding.md skeleton, _state.json: phase=discovery, round=R-01}`. Activa pack (default: pp). Não pergunta sobre tecnologia. |
 | `/round [lens]` | Em qualquer fase | Corre uma lens (ou orquestra a sequência completa de uma ronda). Lens determinada pelo arg ou auto-escolhida com base na fase. |
-| `/status` | A qualquer momento | Mostra fase, ronda actual, contagem de items por estado, contradições por resolver, gaps abertos, próxima acção sugerida. |
+| `/answer <id> "..."` | Em qualquer fase | Resolve uma row Unknown/Conflicted/Assumed/Risky: resposta verbatim em `answers.md`, nova row `was <id>`, marcador `resolved →` na original. |
+| `/status` | A qualquer momento | Mostra fase, ronda actual, contagem de items por estado (abertos vs resolvidos), contradições por resolver, gaps abertos, próxima acção sugerida. |
 | `/frame` | Discovery → Framing | Transita para fase Framing. Corre lenses em modo council-independent + chairman. Produz `frame.md` (a frase única) + `contradictions.md` resolvidas. |
 | `/options` | Framing → Options | Transita para Options. Corre lens-technology + outras lenses como council. Gera 3-5 opções (incluindo `do nothing` e `non-tech`). Consulta `decision-tree.md` pela 1.ª vez. |
-| `/decide` | Options → Decision | Captura escolha + justificação + alternativas + riscos + condições. Regista em `decisions.md`. **Auto-corre `/synthesize` no fim** (produz topic packs em `_synthesis/`). |
+| `/simulate [O-NNN ...]` | Em Options | Projecta cada opção (ecrãs/intervenção, banda de esforço, riscos, constraints) lado-a-lado em `_simulation/` + lista os Unknowns *decision-flipping* (value of information). Advisory. |
+| `/decide [--consult]` | Options → Decision | Captura escolha + justificação + alternativas + riscos + condições. Regista em `decisions.md` + row D-NNN no SU. `--consult` = review opcional do solution-architect. **Auto-corre `/synthesize` no fim.** |
+| `/blueprint` | Decision (draft em Options via `--option`) | Produz `_blueprint/ux-blueprint_v<NN>.yaml` — arquitectura de ecrãs com `su_refs`, via regras do pack. Iterado com o negócio até aprovação (D-NNN). Contrato: `library/kernel/blueprint-contract.md`. |
 | `/synthesize` | Auto após `/decide` (ou ad-hoc) | Produz `_synthesis/{business-story, as-is, architecture-story, risks-and-assumptions, financial-story}.md` a partir do SU + lens-outputs + decisions. Camada intermédia para garantir coerência entre os 6 deliverables. |
 | `/render [deliverable\|--all]` | Fim de Decision (após `/synthesize`) | Renderiza 1 ou todos os 6 deliverables em `_render/`. Lê dos topic packs em `_synthesis/`. Falha alto se faltam topic packs ou slots required. Versioning incremental (`v01`, `v02`, ...) — nunca sobrescreve. |
-| `/resume` | Session retomada | Lê `_state.json` e mostra onde estamos. |
-| `/export` | Portabilidade | Snapshot completo do engagement (para handoff ou archive). |
+| `/resume` | Session retomada | Lê `_state.json`, mostra onde estamos e nomeia o próximo comando. |
+| `/export` | (backlog — não implementado) | Snapshot completo do engagement (para handoff ou archive). |
 
 **Fluxo típico end-to-end** (visto pelo consultor):
 
@@ -760,20 +692,20 @@ Apenas 2 invariantes são hard-enforced:
 
 ### 9.2 Soft (advisory, overrideable com justificação)
 
-- **`on-su-change.sh`** — quando `shared-understanding.md` é modificado, dispara contradiction-scan em background. Resultado adicionado ao SU como `Conflicted` se aplicável.
+- **`on-su-change.sh`** — quando `shared-understanding.md` é modificado, regista a alteração (log-only no MVP; o contradiction-scan em background é v0.2.0). Hoje a detecção de contradições é feita pela lens-governance (passo de conflict-scan) e pelo chairman na síntese.
 - **`phase-gate-check.sh`** — antes de transição de fase, verifica entry/exit criteria. Emite warning se violados. User pode prosseguir com `/frame --override "razão"`.
 - **`synthesis-validate.sh`** — após `/synthesize`, verifica que todos os 5 topic packs em `_synthesis/` foram produzidos sem secções vazias críticas. Se algum está vazio, lista qual lens devia ter contribuído. Bloqueia `/render --all` com warning (overrideable com `/render --skip-validate`).
 - **`render-validate.sh`** — antes de produzir output `_render/`, verifica que todos os required slots têm fonte. Se algum falta, gera `render-gaps.md` e ASKS confirm.
 
 ### 9.3 Por que enforcement minimalista funciona
 
-No aisa, a tentativa de enforcement por prosa ("orquestrador MUST emit AGENT_DELEGATED before MODEL_TIER_MISMATCH") falha porque o LLM eventualmente esquece. Em aisa:
+No aisa v1, a tentativa de enforcement por prosa ("orquestrador MUST emit AGENT_DELEGATED before MODEL_TIER_MISMATCH") falha porque o LLM eventualmente esquece. Em aisa:
 
 - **A ordem deixa de importar.** Não há events.md ordenado. Council-log é narrativo, não consequente.
 - **Frontmatter mandatório deixa de existir.** Outputs são markdown puro.
 - **Coherence gate deixa de existir.** Não há cells coherence; contradictions são detectadas via scan (skill independente) que corre quando o utilizador quer, ou em background via hook.
 
-Tudo o que era "MUST" em prosa no aisa é (a) hook-enforced, (b) advisory, ou (c) não-existente em aisa.
+Tudo o que era "MUST" em prosa no aisa v1 é (a) hook-enforced, (b) advisory, ou (c) não-existente no aisa v2.
 
 ---
 
@@ -840,7 +772,7 @@ Cada agente, em ronda, lê **ambas as folders** (universal + tenant). O loader �
 
 ### 10.3 MCP integrations com credenciais
 
-`.mcp.json` em `aisa/` declara MCP servers. Credenciais via `${ENV_VAR}` syntax (Claude Code padrão):
+`.mcp.json` em `aisa/` declarará os MCP servers quando o primeiro for configurado (não existe no MVP — ver §10.8). Credenciais via `${ENV_VAR}` syntax (Claude Code padrão):
 
 ```json
 {
@@ -887,7 +819,7 @@ Permite a um consultor correr engagements `pp` e `outsystems` em paralelo na mes
 
 Cada folder de agente (`agent-memory/<universal-or-tenant>/<agent>/`) pode conter:
 
-- **`recurring-constraints.md`** — constraints que aparecem em ≥2 engagements (universal: "RGPD afecta qualquer processo com PII"; tenant: "Galp usa SAP S/4HANA via OData").
+- **`universal-constraints.md`** (na `_universal/`; o equivalente tenant chama-se `recurring-constraints.md`) — constraints que aparecem em ≥2 engagements (universal: "RGPD afecta qualquer processo com PII"; tenant: "Galp usa SAP S/4HANA via OData").
 - **`anti-patterns.md`** — falhas observadas (universal: "engagements Procurement sem CFO presente geram conflict user∧finance em 80% dos casos"; tenant: padrões específicos).
 - **`corporate-patterns.md`** — padrões corporativos (só faz sentido em tenant: "Galp environment strategy DEV/UAT/PROD por BU").
 
@@ -917,11 +849,11 @@ Pack declara `language: pt | en | es`. Templates traduzidos por pack. Kernel é 
 
 ---
 
-## 11. Migração do aisa
+## 11. Migração do aisa v1 (SPEA v2)
 
-### 11.1 O que carrega para aisa
+### 11.1 O que carrega para o aisa v2
 
-- **Domain knowledge** (`powerfx-patterns.md`, `screen-patterns.md`, `security-patterns.md`, `delegation-matrix.md`) — copy-paste para `library/packs/pp/domain-knowledge/`. São o conteúdo de maior valor do aisa.
+- **Domain knowledge** (`powerfx-patterns.md`, `screen-patterns.md`, `security-patterns.md`, `delegation-matrix.md`) — copy-paste para `library/packs/pp/domain-knowledge/`. São o conteúdo de maior valor do aisa v1.
 - **Deliverable templates** (`solution-blueprint.md`, `discovery-report.md`, etc.) — adaptados para `library/packs/pp/deliverable-templates/` com schema novo (slots em vez de claims).
 - **Architecture templates** (`templates/architecture/*`) — copy-paste para `library/packs/pp/architecture-templates/`.
 - **Question bank** — extrair das `cells/` (cada cell tem secções "questions to consider") e consolidar em `question-bank.md`.
@@ -935,7 +867,7 @@ Pack declara `language: pt | en | es`. Templates traduzidos por pack. Kernel é 
 - `forensics/` — pode reaparecer como skill futura (não MVP).
 - O conceito de "waves" — substituído por "rondas dentro de fases".
 
-### 11.3 Conceitos novos sem equivalente no aisa
+### 11.3 Conceitos novos sem equivalente no aisa v1
 
 - **`_synthesis/` (topic packs)** — camada intermédia entre Decision e Render. Não tinha equivalente em aisa (o pp-consulting renderizava directamente das cells, o que causa inconsistências cross-deliverable). Skill nova: `aisa-synthesize`.
 - **`lens-outputs/<lens>.md` (prose narrativa por lens)** — não tinha equivalente directo (aisa tinha "workbench.md" partilhada, sem segmentação por lens; cell outputs misturavam prose com Ledger).
@@ -946,9 +878,9 @@ Pack declara `language: pt | en | es`. Templates traduzidos por pack. Kernel é 
 
 1. **`aisa/` greenfield**, novo repositório. Não tocar no `aisa` actual.
 2. **Build MVP** (ver §12).
-3. **Validate** com 2-3 engagements em paralelo: aisa-RUN-X vs aisa-RUN-X com o mesmo input.
-4. **Switch** quando aisa produzir ≥ qualidade do aisa-melhor-caso em ≥2 engagements consecutivos.
-5. **Archive aisa** para `archive/aisa-reference/`. Read-only.
+3. **Validate** com 2-3 engagements em paralelo: v1-RUN-X vs v2-RUN-X com o mesmo input.
+4. **Switch** quando o aisa v2 produzir ≥ qualidade do melhor-caso do v1 em ≥2 engagements consecutivos.
+5. **Archive do aisa v1** para `archive/aisa-reference/`. Read-only.
 
 ---
 
@@ -1019,12 +951,12 @@ Pack declara `language: pt | en | es`. Templates traduzidos por pack. Kernel é 
 - ✅ Dois runs com input idêntico produzem outputs semanticamente equivalentes (Não exigimos string-equal — exigimos: mesmas decisões, mesmas opções avaliadas, mesmas contradições detectadas, deliverables com mesmas conclusões).
 - ✅ Engagement completo (start → 6 deliverables) em ≤4 dias úteis com 1 consultor.
 - ✅ Os 6 deliverables são handoff-ready (developer / cliente / exec / designer leem-no e usam-no directamente).
-- ✅ Zero "halt-and-confused" do LLM (não conformance issues estilo aisa).
+- ✅ Zero "halt-and-confused" do LLM (não conformance issues estilo aisa v1).
 - ✅ Equipa consegue autoring de novo pack ou lens em ≤1 dia após ler `docs/PACK_AUTHORING.md`.
 
 ### Risco principal
 
-**Risco**: equipa habituada ao aisa pode resistir ao "Shared Understanding como single artefacto" — esperam 5 docx desde o início.
+**Risco**: equipa habituada ao aisa v1 pode resistir ao "Shared Understanding como single artefacto" — esperam 5 docx desde o início.
 **Mitigação**: `/status` mostra preview de cada deliverable a partir do SU em tempo real. Não esperam até `/render`.
 
 ---
@@ -1057,9 +989,9 @@ Em nenhum momento a ferramenta sugere tecnologia antes do passo 11.
 
 ---
 
-## Apêndice B — Glossário aisa (vs aisa)
+## Apêndice B — Glossário aisa v2 (vs aisa v1)
 
-| Conceito aisa | Substitui no aisa | Diferença material |
+| Conceito aisa v2 | Substitui no aisa v1 | Diferença material |
 |---|---|---|
 | **Lens** | Cell | Stateless skill. Sem frontmatter mandatório. Sem ledger output. Sem peers gating. |
 | **Ronda** | Wave | Iteração dentro de uma fase. Não tem consolidation gate. Múltiplas rondas dentro da mesma fase são normais. |
@@ -1104,11 +1036,11 @@ Em nenhum momento a ferramenta sugere tecnologia antes do passo 11.
 
 ---
 
-## Apêndice D — Mapeamento Deliverables aisa → aisa
+## Apêndice D — Mapeamento Deliverables aisa v1 → aisa v2
 
-Confirmação que o trabalho de templates do pp-consulting transita para aisa sem perda de fidelidade:
+Confirmação que o trabalho de templates do pp-consulting (v1) transita para o aisa v2 sem perda de fidelidade:
 
-| aisa output (existe hoje) | aisa deliverable | Mudanças necessárias |
+| aisa v1 output | aisa v2 deliverable | Mudanças necessárias |
 |---|---|---|
 | `outputs/discovery-report.md` | discovery-report (#1) | Slots equivalentes; remover Claim Ledger refs; adicionar SU-id refs |
 | `outputs/executive-report.md` | executive-report (#2) | Adicionar `decision_options` slot (vinha de wave-4 architecture-branching, agora vem de Options phase) |
@@ -1123,4 +1055,4 @@ Confirmação que o trabalho de templates do pp-consulting transita para aisa se
 
 ---
 
-**FIM** — v0.1.0 DRAFT. Próximo passo: revisão pela equipa, depois Fase 0 do roadmap.
+**FIM** — v2.1.0. Estado: MVP estrutural + next-level build feitos; próximo passo: pilot (Fase 12).
