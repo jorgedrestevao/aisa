@@ -56,12 +56,12 @@ Regras de evolução (extraídas da história do próprio repo): enforcement mec
 1. ~~**Validação live end-to-end**~~ ✅ **FEITA (2026-08-31)** — sequência completa corrida no engagement fixture `galp-adv-val`, incluindo `/answer`, `/simulate` e `/blueprint`; council com Task subagents reais (6+7 em paralelo); todos os critérios verificados; 3 defeitos encontrados e corrigidos. Evidência: `docs/LIVE_VALIDATION_REPORT.md`.
 2. **Fase 12 — pilot** com 2 consultores; retro alimenta `TODO(team)` do delivery-conventions, thresholds do decision-tree e agent-memory.
 3. **H2 — scanner de traceability**: no lado do MCP de authoring, escrever o stamping (a convenção já está no pack); depois um `/trace`//`/drift` que lê a solution e faz diff contra implementation-spec/blueprint.
-4. **Passe editorial ao ARCHITECTURE.md** (G-08/G-09: rename aisa/aisa, árvore §6 fantasma) — antes do pilot, porque os consultores vão lê-lo.
+4. ~~**Passe editorial ao ARCHITECTURE.md**~~ ✅ **FEITO (2026-08-31)** — antecessor desambiguado como SPEA v2 (aisa v1); árvore §6 reescrita ao estado real; changelog v2.1.0; tabela de comandos/fases/exemplos atualizados (fecha G-08/G-09).
 5. **Operação assíncrona (reframing 2)**: MCPs de ingestão (§10.8) + answers assíncronos — depois do pilot provar o processo síncrono.
 
 ## 5. Pendências que dependem do Jorge
 
 1. **Calibração do pack** (via A da conversa de enriquecimento — 15 min): limite real para SharePoint como backend; o padrão de pedido que é "process change disfarçado"; rácios de estimativa por complexidade de ecrã; multiplicadores (SAP, multi-idioma, offline, multi-nível). Destino: `decision-tree.md` + `estimation-model.md`.
 2. **`TODO(team)` do `delivery-conventions.md`**: publisher prefix, nomes de environments, aprovador de deploy, SLA de hypercare.
-3. **Validação live** (item 4.1) — 1 sessão com o Jorge a fazer de sponsor.
+3. **Re-validação com sponsor real** — a validação mecânica está feita (item 4.1, com fixture); 1 sessão contigo como sponsor num pedido real continua a valer antes do pilot.
 4. Decisão de negócio (sem pressa): qual dos três reframings do §1 é o alvo comercial — condiciona o que o H2 prioriza (consultoria própria vs produto).
