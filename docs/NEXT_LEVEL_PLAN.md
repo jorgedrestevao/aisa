@@ -22,7 +22,7 @@ Regras de evolução (extraídas da história do próprio repo): enforcement mec
 
 | H | Nome | Conteúdo | Estado |
 |---|---|---|---|
-| H0 | Consolidar | Fechar gaps de design (answer/resume/decision/non-tech), validação live, pilot | **Gaps fechados neste branch**; validação live + pilot pendentes |
+| H0 | Consolidar | Fechar gaps de design (answer/resume/decision/non-tech), validação live, pilot | **Gaps fechados + validação live FEITA** (`LIVE_VALIDATION_REPORT.md`); falta o pilot |
 | H1 | Do documento ao contrato | Blueprint UX com proveniência; deliverables como projeções de artefactos estruturados | **Implementado neste branch** (`/blueprint`) |
 | NL | Wedge do next level | `/simulate` — opções concretizadas + VOI antes do `/decide` | **Implementado neste branch** (v1) |
 | H2 | Atravessar o render | Stamping de ids nos artefactos PP (via MCP de authoring) + scanner + `/trace` `/drift` | Convenção preparada (`delivery-conventions.md §2`); scanner por construir |
@@ -53,7 +53,7 @@ Regras de evolução (extraídas da história do próprio repo): enforcement mec
 
 ## 4. O que falta (por ordem)
 
-1. **Validação live end-to-end** (a sequência do `IMPLEMENTATION_PLAN §16` + os comandos novos): `/start → /round → /answer → /frame → /options → /simulate → /decide → /blueprint → /render --all`, num engagement de teste com o domínio real do xlsx disponível. Critérios: council paralelo verificado; SU sem invenções; simulate cita ids; render filtra por applies_to; grep vendor limpo nos deliverables neutros.
+1. ~~**Validação live end-to-end**~~ ✅ **FEITA (2026-08-31)** — sequência completa corrida no engagement fixture `galp-adv-val`, incluindo `/answer`, `/simulate` e `/blueprint`; council com Task subagents reais (6+7 em paralelo); todos os critérios verificados; 3 defeitos encontrados e corrigidos. Evidência: `docs/LIVE_VALIDATION_REPORT.md`.
 2. **Fase 12 — pilot** com 2 consultores; retro alimenta `TODO(team)` do delivery-conventions, thresholds do decision-tree e agent-memory.
 3. **H2 — scanner de traceability**: no lado do MCP de authoring, escrever o stamping (a convenção já está no pack); depois um `/trace`//`/drift` que lê a solution e faz diff contra implementation-spec/blueprint.
 4. **Passe editorial ao ARCHITECTURE.md** (G-08/G-09: rename aisa/aisa, árvore §6 fantasma) — antes do pilot, porque os consultores vão lê-lo.

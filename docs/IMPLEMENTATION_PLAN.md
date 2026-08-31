@@ -1541,7 +1541,9 @@ Fases 1-6 anteriores: `29f98cf`, `ce011bf`, `3afbad6`, `3a4108e`, `e4eae7d`, `91
 - Vaga 2 (contrato + wedge): `/blueprint` (kernel `blueprint-contract.md`, skill `aisa-blueprint`, re-sourcing de claude-design-brief e implementation-spec) e `/simulate` (comparação de opções + value-of-information em `_simulation/`).
 - Pack pp v1.1.0: R4–R6 do decision-tree reescritas + inputs_used completado; sinais de Discovery neutralizados; novo `delivery-conventions.md` (naming, ALM, stamping `su:` para traceability futura).
 
-**Próxima sessão**: live exec end-to-end (agora incluindo `/answer`, `/simulate` e `/blueprint` na sequência). Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
+**Live exec end-to-end — FEITO (2026-08-31, engagement fixture `galp-adv-val`)** — sequência completa `/start → /round → /answer ×10 → /frame (6 personas paralelas) → /options (7 personas) → /simulate → /decide → /synthesize → /blueprint → /render --all` validada; 6/6 deliverables, 0 gaps required, vendor-grep limpo, R0 do decision-tree e protocolo missing-inputs exercitados em produção. 3 defeitos corrigidos (excertos de council passam a incluir resoluções; aisa-status --check 6 ficheiros kernel; nota sobre Task async). Evidência completa: `docs/LIVE_VALIDATION_REPORT.md`. O engagement fixture fica gitignored (projects/).
+
+**Próxima sessão**: **Fase 12 — pilot** com 2 consultores (1 engagement PP real; retro alimenta os TODO(team) do delivery-conventions + thresholds do decision-tree + agent-memory). Sequência recomendada num `claude .` fresco contra um engagement novo (`/start <slug> pp`) — ou contra um existente:
 
 1. `/round` (Discovery — já validado em Fase 5/6, mas rever em conjunto com os PostToolUse hooks novos).
 2. `/frame` — validar (a) que as 6 personas arrancam em paralelo (uma única assistant message com 6 Task calls), (b) que o `frame.md` produzido é uma frase única coerente, (c) que apenas o chairman escreve no SU (autores das novas linhas vs `lens-outputs/chairman-synthesis-F-01.md`).
@@ -1585,7 +1587,7 @@ Depois disso, **Fase 12 (pilot)** — workshop curto com 2 consultores Galp + 2 
 | 9 — Render + 6 templates | ☑ done (structural) | 2026-05-28 | (bundled with 8,10,11) | 6 deliverable templates (incl. new implementation-spec, renamed claude-design-brief) + 3 architecture sub-templates + aisa-render skill (slot-resolution, versioning, render-gaps, --dry-run) + /render wired. |
 | 10 — Domain knowledge transplant | ☑ done (structural) | 2026-05-28 | (bundled) | 3 patterns files transplanted from SPEA v5 (powerfx 566 / screen 244 / security 359 lines) + new delegation-matrix.md + decision-tree.md (3 branches, 6 rules + exclusions + missing-inputs protocol). |
 | 11 — Enterprise readiness | ☑ done (structural) | 2026-05-28 | (bundled) | 3 authoring docs (PACK/LENS/DELIVERABLE) + 3 skeleton packs (outsystems, mendix, generic) + 4 hook stubs (log-mode) + HOOKS.md + settings.json wired + bootstrap.ps1 + 14 agent-memory _universal/ seed files. Live exec deferred. |
-| 12 — Pilot | ☐ todo | — | — | Real-world distributed work with consultants — outside the build sessions. |
+| 12 — Pilot | ☐ todo | — | — | Real-world distributed work with consultants — outside the build sessions. Pré-requisito (live exec) FEITO 2026-08-31 — ver LIVE_VALIDATION_REPORT.md. |
 
 ### Como actualizar este tracking
 
