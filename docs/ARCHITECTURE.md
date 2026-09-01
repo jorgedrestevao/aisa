@@ -437,9 +437,11 @@ aisa/                                              # repo 1 — partilhável den
 │   ├── kernel/                                      # universal, vendor-agnóstico
 │   │   ├── phases.md · states.md · orchestration.md
 │   │   ├── render-contract.md · blueprint-contract.md · glossary.md
-│   │   └── synthesis-templates/{business-story,as-is,architecture-story,risks-and-assumptions,financial-story}.template.md
+│   │   ├── synthesis-templates/{business-story,as-is,architecture-story,risks-and-assumptions,financial-story}.template.md
+│   │   ├── capture-templates/process-model.template.md
+│   │   └── tools/xlsx_extract.py                 # L1 extracção + L3 replay (lido e EXECUTADO, nunca editado)
 │   └── packs/
-│       ├── pp/                                      # Power Platform — VALIDADO (v1.1.0)
+│       ├── pp/                                      # Power Platform — VALIDADO (v1.2.0)
 │       │   ├── pack.yaml                            # deliverables (c/ applies_to) + lenses_config + refs
 │       │   ├── glossary.md · question-bank.md · decision-tree.md
 │       │   ├── deliverable-templates/{discovery-report,executive-report,solution-blueprint,
@@ -458,7 +460,8 @@ aisa/                                              # repo 1 — partilhável den
 └── docs/                                            # ARCHITECTURE · PHILOSOPHY · ONBOARDING ·
                                                      # IMPLEMENTATION_PLAN · PACK/LENS/DELIVERABLE_AUTHORING ·
                                                      # MIGRATION_FROM_AISA · REFERENCES_ANALYSIS ·
-                                                     # GAP_ANALYSIS · NEXT_LEVEL_PLAN · UX_BLUEPRINT_PROPOSAL · ISSUES
+                                                     # GAP_ANALYSIS · NEXT_LEVEL_PLAN · UX_BLUEPRINT_PROPOSAL · ISSUES ·
+                                                     # V3_IMPLEMENTATION_PLAN · V3_VALIDATION_REPORT · PROCESS_CAPTURE_SPEC
 
 # Estrutura típica de UM engagement (vive em aisa-engagements-<tenant>/<slug>/):
 #   <slug>/
@@ -472,6 +475,7 @@ aisa/                                              # repo 1 — partilhável den
 #   ├── inputs/                                  # documentos do cliente (abertos e perfilados)
 #   ├── lens-outputs/                            # prose por lens + chairman-synthesis-<F|O>-<NN>.md
 #   │   └── _council-prep/                       # excertos temáticos por persona (audit)
+#   ├── _capture/                                # extraction.json + replay.md por input + process-model.md (/capture)
 #   ├── _simulation/                             # options-comparison_v<NN>.md (/simulate)
 #   ├── _blueprint/                              # ux-blueprint_v<NN>.yaml + blueprint-log.md (/blueprint)
 #   ├── _synthesis/                              # 5 topic packs + _synthesis-log.md (auto no /decide)
