@@ -311,7 +311,7 @@ Thresholds do decision-tree (R4-R6), rácios do estimation-model, `TODO(team)` d
 |---|---|---|---|---|---|
 | A — metabolismo + pré-mortem | v2.2 | ☑ done | 2026-09-01 | (ver git log) | A1-A11 conforme plano; validação: micro-fixture exp-test (saúde 33%→100%, revalidate vs transição OK) + /premortem real no galp-adv-val (5 causas, 3 tripwires candidatos). Melhoria além-plano: hard rule 4 do premortem (rows expiradas = combustível) |
 | B — economia da pergunta + narrativa | v2.3 | ☑ done | 2026-09-01 | (ver git log) | B1-B8 conforme plano; validação: agenda de 3 listas no exp-test, drill de correção de swing (cosmético→dimensionante anotado), story.md com 4 episódios no galp-adv-val. Nota: lens-technology numerou price=7/expired=8 (tinha 6 rules base) |
-| C — dialética + multiverso | v2.4 | ☐ todo | — | — | — |
+| C — dialética + multiverso | v2.4 | ☑ done | 2026-09-01 | (ver git log) | C1-C8 conforme plano; validação: drill dialético REAL (2 antíteses paralelas sobre X-003 — Concedo/Contesto/Síntese; sínteses convergiram, sem Conflicted novo; 2/6 calls), 4 counterfactuals congelados, D-002a com 5 tripwires, drill TW-2 (disparo→/revisit→ADAPTAR, decisão e congelado intactos) |
 | D — biografias + interrogável + docs + validação | v3.0 | ☐ todo | — | — | — |
 
 Regras: marcar `☑ done` só com validação verde; desvios e decisões in-flight registados aqui em nota; se uma vaga falhar aceitação, fica `☐` com a razão e a sessão seguinte retoma daí.

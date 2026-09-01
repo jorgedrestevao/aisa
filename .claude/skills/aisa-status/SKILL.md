@@ -27,11 +27,12 @@ description: Show the current phase, round, Shared Understanding summary (counts
    a. **Agenda da próxima reunião**: `custo = reuniao`, ordered `decisivo` → `dimensionante`, each with its swing phrase.
    b. **Por outro canal**: `custo ∈ {email, documento, spike}`, same ordering (spikes flagged with their cost in days).
    c. **Não gastes tempo com**: every `cosmético`, listed explicitly — protecting the sponsor's hour is the point.
-7. Suggest the next action based on phase + gaps, e.g.:
+7. **Check tripwires** (engagements with a final D-NNN): read the `Tripwires` list from the latest decision block; for each TW, scan the OPEN SU rows for evidence that the condition fired (a row satisfying the metric/condition). Fired → highlighted alert with the associated counterfactual + suggest `/revisit TW-n`.
+8. Suggest the next action based on phase + gaps, e.g.:
    - Critical Unknown/Conflicted open → "Resolve N critical items with the sponsor before /frame."
    - Discovery exit criteria met → "Ready for /frame."
    - Expired rows underpin the current phase's artefact → "Revalidate before deciding."
-8. Output a readable summary:
+9. Output a readable summary:
    ```
    Engagement: <slug>   Pack: <pack>
    Phase: <phase>       Round: <round>
@@ -53,6 +54,8 @@ description: Show the current phase, round, Shared Understanding summary (counts
    Open critical items:
      U-00x — <question> (lens)
      X-00x — <conflict> (lens)
+
+   Tripwires: <OK | TW-n DISPAROU → evidência <id>; counterfactual O-NNN → /revisit TW-n>
 
    Next suggested action:
      → <suggestion>

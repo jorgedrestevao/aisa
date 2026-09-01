@@ -89,9 +89,10 @@ If `--consult` was passed (or the user asks for a technical review mid-flow), la
   - <O-NNN> — <one-line "why not">
   - …
 - **Accepted risks**: <list pointing to R-NNN ids; add new R-NNN rows in the SU if any are new>
-- **Revision conditions**:
-  - <measurable trigger>
-  - …
+- **Revision conditions / Tripwires (estruturados)**:
+  - TW-1: <condição mensurável, com fonte no SU> → se disparar, comparar com `_simulation/counterfactuals/<O-NNN>.md`
+  - TW-2: …
+  (Fontes: as respostas do utilizador + os TRIPWIRE candidatos do `premortem.md`, se existir — propõe-os explicitamente.)
 - **Sponsor confirmation**: <yes | pending | no (with --override reason)>
 - **Decided in round**: D-<NN>
 - **Timestamp**: <ISO-8601>
@@ -108,6 +109,10 @@ The SU stays complete (understanding + commitments). Append ONE row to `## Confi
 ```
 
 Update the SU header `Última actualização`. (Per `docs/ARCHITECTURE.md §4.5` — the decision is citable from the SU like any other id.)
+
+### 4c. Freeze the counterfactuals (multiverse)
+
+For every option NOT chosen that has a projection in the latest `_simulation/options-comparison_v<NN>.md`, write `_simulation/counterfactuals/<O-NNN>.md`: the frozen projection (shape, effort band, risks, constraint verdicts) + a final section **"Condições em que este ramo ganharia"** derived from the decision-tree verdicts and the VOI (e.g., "se o volume confirmado cair para <20/mês, o caso de eficiência de O-002 passa à frente"). Frozen = never edited afterwards; `/revisit` compares against them and writes NEW artefacts.
 
 ### 5. Auto-invoke aisa-synthesize
 

@@ -118,6 +118,22 @@ Return your response in the exact section format documented in your agent file.
 
 Wait for all 6 to return. Collect their tool results verbatim.
 
+### 5b. Dialectic round (conditional)
+
+If chairman-synthesis returns material divergences (its Step 2b), run the antithesis round BEFORE it writes anything: for each divergence (max 3 per round), launch 2 Task calls in parallel — each side's persona receives the other's full thesis with this prompt:
+
+```
+Estás na ronda dialéctica de <fase> <ronda> do engagement <slug>. A tua proposta diverge da
+da persona <X> neste ponto: <divergência, citada verbatim com ids>.
+Lê a tese completa dela (em anexo). A tua tarefa NÃO é defender a tua — é atacar a tese
+mais forte dela com a melhor evidência disponível, e depois dizer honestamente:
+(1) onde ela tem razão; (2) onde falha e porquê (com ids/inputs);
+(3) a síntese que proporias se tivesses de assinar as duas.
+Devolve nas secções: Concedo / Contesto / Síntese proposta. Máx. 300 palavras.
+```
+
+Collect the `Concedo / Contesto / Síntese proposta` returns and re-invoke chairman-synthesis with theses + antitheses. Cost cap: ≤6 extra calls per round; if there are more than 3 material divergences, take the 3 with the highest impact on the phase artefact and record the rest as Conflicted directly.
+
 ### 6. Hand off to chairman-synthesis
 
 Invoke the `chairman-synthesis` skill with:

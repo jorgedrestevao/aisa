@@ -45,6 +45,10 @@ Reads the topic packs + decisions + the pack's `deliverable-templates/<deliverab
 - Never overwrites existing files (user edits to v01 are preserved).
 - `_render/<slug>_<deliverable>_v<NN>.<ext>` is the filename pattern.
 
+### Counterfactuals
+
+`_simulation/counterfactuals/<O-NNN>.md` (frozen at `/decide`) are engagement artefacts, not deliverables — they never render. The executive-report may carry the decision's structured tripwires via an optional slot.
+
 ### Applicability by decision type
 
 `pack.yaml` may declare `applies_to` per deliverable (`all` or a list such as `[technology]`). For a non-technology / do-nothing decision, only `applies_to: all` deliverables render; the rest are skipped with a logged reason (a skip is not a gap). `architecture-story.md` is still synthesized but describes the chosen intervention, not a platform architecture. Missing `applies_to` defaults to `all`.

@@ -49,6 +49,11 @@ Maintain a working table per category:
 - **Contradictions** → personas explicitly disagree (claim vs counter-claim) OR a persona's `Conflicts seen` lists another persona/lens.
 - **Open questions** → union of personas' `Open questions / Unknowns flagged` (dedupe by question text).
 - **Risks** → union of personas' `Risks` (dedupe; merge if same risk with different mitigations).
+- **Material divergences** (explicit output of this step): the contradictions above whose resolution would change the phase artefact (the frame sentence, an option's viability/ranking). List each as `persona A: <tese com ids> vs persona B: <tese com ids>`.
+
+### Step 2b — Dialectic hand-back (when ≥1 material divergence)
+
+Do NOT write yet. Return the material-divergence list to the calling skill (`aisa-frame`/`aisa-options`); it runs the antithesis round (max 3 divergences × 2 Task calls) and re-invokes you with theses + antitheses. On the second invocation, incorporate the `Concedo/Contesto/Síntese proposta` sections: divergences resolved by an accepted synthesis become normal rows; divergences that SURVIVE the antithesis become Conflicted rows (never silently pick a winner). If there are no material divergences — or this is already the second invocation — continue to Step 3.
 
 ### Step 3 — Assign Shared Understanding states
 

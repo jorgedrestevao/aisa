@@ -41,7 +41,11 @@ Lenses (and council agents) treat everything under `<engagement>/inputs/` as **p
   - Reads all agent outputs.
   - Identifies overlaps, gaps, contradictions.
   - Writes new rows to the Shared Understanding.
-  - Writes `chairman-synthesis-<round>.md` in `lens-outputs/` (`F-<NN>` in Framing, `O-<NN>` in Options, `D-<NN>` in Decision).
+  - Writes `chairman-synthesis-<round>.md` in `lens-outputs/` (`F-<NN>` in Framing, `O-<NN>` in Options — the Decision phase runs no council synthesis).
+
+## Dialectic round
+
+Full peer review was rejected for cost. Its surgical replacement: when the chairman detects **material divergences** between persona outputs (claim vs counter-claim that would change the phase artefact), the orchestrator runs an antithesis round for those points ONLY — each side attacks the other's strongest thesis and returns `Concedo / Contesto / Síntese proposta`. Cap: **3 divergences × 2 calls = ≤6 extra passes** per council round. Divergences that survive the antithesis become Conflicted rows; the chairman never silently picks a winner. Thesis → antithesis → synthesis, only where there is real disagreement.
 
 ## Why parallel (not sequential isolated)
 
@@ -49,13 +53,13 @@ Concurrent Task subagents complete the council round in ~1 LLM-pass-time, versus
 
 ## Peer review (omitted in MVP)
 
-Karpathy's full pattern includes peer review (each agent comments on the neighbor's output). The aisa MVP omits this. Add in v2 if production observes group-think (unlikely given full isolation).
+Karpathy's full pattern includes peer review (each agent comments on the neighbor's output). aisa omits the full version by cost; the **dialectic round** above is its surgical replacement — antithesis only where personas materially disagree.
 
 ## Cost envelope per engagement
 
 - Discovery: ~6 lenses × ~2-3 rounds = 12-18 LLM passes (inline, cheaper per pass).
-- Framing: 6 agents + 1 chairman = 7 passes (council).
-- Options: 7 agents + 1 chairman = 8 passes (council, technology enters).
+- Framing: 6 agents + 1 chairman = 7 passes (council) + 0-6 dialectic passes (only on material divergence).
+- Options: 7 agents + 1 chairman = 8 passes (council, technology enters) + 0-6 dialectic passes.
 - Decision: interactive (user-driven) + optional 1 solution-architect review (`/decide --consult`) + auto synthesize (5 topic packs) = 5-7 passes.
 - Render: 6 deliverables × 1 composition pass = 6 passes.
 

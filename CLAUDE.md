@@ -44,6 +44,7 @@
 | `/blueprint` | Produce the UX blueprint (screen architecture) from the SU + pack rules; iterate to business approval |
 | `/synthesize` | Produce topic packs (auto after `/decide` or manual) |
 | `/render [deliverable\|--all]` | Render the deliverables (filtered by decision type) |
+| `/revisit <TW-n\|O-NNN>` | Compare the present with a frozen counterfactual when a tripwire fires; recommend keep/adapt/reopen |
 | `/resume` | Resume from `_state.json` and name the next command |
 
 ## Anti-patterns to avoid
