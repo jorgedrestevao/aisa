@@ -67,12 +67,12 @@ description: Show the current phase, round, Shared Understanding summary (counts
 1. Verify `library/kernel/` has the 6 expected files (phases, states, orchestration, render-contract, blueprint-contract, glossary) + `synthesis-templates/` with 5 templates.
 2. Verify at least one pack exists under `library/packs/` with a `pack.yaml`.
 3. Verify the engagements root is resolvable: `$AISA_ENGAGEMENTS_ROOT` is set, or `projects/` exists and is writable.
-4. Verify `.claude/hooks/pre-write-guard.sh` exists (and is executable on Unix).
+4. Verify `.claude/hooks/pre-write-guard.py` exists and that `python`/`python3` is on PATH (all hooks are Python 3).
 5. Output green/red per check, e.g.:
    ```
    ✓ kernel: 5/5 files
    ✓ packs: pp (+ scaffolds)
    ✓ engagements root: projects/ (or $AISA_ENGAGEMENTS_ROOT)
-   ✓ pre-write-guard hook present
+   ✓ pre-write-guard hook present (Python)
    ✓ ready.
    ```

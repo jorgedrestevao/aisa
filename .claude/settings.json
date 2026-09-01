@@ -13,7 +13,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre-write-guard.sh"
+            "command": "python .claude/hooks/pre-write-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/pre-lens-order-check.py"
           }
         ]
       }
@@ -24,15 +33,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/on-su-change.sh"
+            "command": "python .claude/hooks/on-su-change.py"
           },
           {
             "type": "command",
-            "command": ".claude/hooks/synthesis-validate.sh"
+            "command": "python .claude/hooks/synthesis-validate.py"
           },
           {
             "type": "command",
-            "command": ".claude/hooks/render-validate.sh"
+            "command": "python .claude/hooks/render-validate.py"
           }
         ]
       },
@@ -41,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/phase-gate-check.sh"
+            "command": "python .claude/hooks/phase-gate-check.py"
           }
         ]
       }

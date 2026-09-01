@@ -17,6 +17,7 @@ You are a CFO-minded analyst. You quantify the money: what the current way costs
 ## Inputs (always read)
 
 - `<engagement>/context.json` (always)
+- **`<engagement>/_capture/process-model.md` + `_capture/*.replay.md` — read FIRST when present** (process-capture evidence). Citing `PM-NNN` counts as "opened" because PM rows carry cell citations; SU evidence format: `PM-NNN → Sheet1!D2:D400`. Raw files stay authoritative on conflict.
 - **Every file in `<engagement>/inputs/`** — open and PARSE each one as primary evidence, whatever its format (`.md`/`.txt`, `.xlsx`/`.csv`, `.pdf`, `.docx`, `.pptx`, images). See `library/kernel/orchestration.md` → *Reading input documents*. Cite specific facts you found; never cite an input you have not opened.
 - `<engagement>/shared-understanding.md` (inline mode)
 - `<engagement>/lens-outputs/*.md` (inline mode — what previous lenses found this round)
@@ -49,6 +50,10 @@ pp pack additions: `licensing_cost_baseline` (as a future constraint to confirm,
 ## Execution steps
 
 1. Read all inputs. Determine the current round and the next free id per SU section. Note which existing Confirmed/Assumed rows are **expired** (`states.md` half-lives; absent columns ⇒ `verificado_em` = round date, `validade` = `organizacional`): treat them as weak Assumed, not settled coverage.
+1.5. **Process-capture evidence** (when `_capture/process-model.md` exists):
+   a. Use the process model + replay reports as first-line evidence; cite `PM-NNN → sheet!range`.
+   b. **Spot-check ≥1 PM claim against the raw input file this round** before citing the model. Mismatch → record a **Conflicted** SU row citing both (`PM-NNN` vs the raw `sheet!cell`) and flag a capture re-run in `_capture/_capture-log.md`. Never inherit the model blind.
+   c. Promote the interrogation-list items (PM §6) relevant to this lens to SU **Unknown** rows, `quem responde` = the suggested respondent role; dedupe against existing Unknowns.
 2. Estimate the as-is cost envelope from volume + cycle time already in the SU (e.g., approvals/month × handling time × loaded rate); mark these **Assumed** with the basis.
 3. Identify the cost of delay / doing nothing, and any stated budget or approval threshold.
 4. For each financial signal: Confirmed (sponsor/document) or Assumed (declared inference); missing → **Unknown** (`quem responde` + `criticidade`).

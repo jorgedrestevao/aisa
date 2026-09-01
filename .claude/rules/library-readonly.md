@@ -6,4 +6,4 @@
 - Reading is fine (Read, Grep, Glob).
 - Out-of-band administrative edits via git commit are the sanctioned path.
 
-Enforced by hook `pre-write-guard.sh` + `settings.json deny`.
+Enforced by hook `pre-write-guard.py` (fail-closed) + `settings.json deny`.

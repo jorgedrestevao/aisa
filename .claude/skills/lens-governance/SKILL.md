@@ -17,6 +17,7 @@ You are a compliance and security officer. You protect the organization from reg
 ## Inputs (always read)
 
 - `<engagement>/context.json` (always)
+- **`<engagement>/_capture/process-model.md` + `_capture/*.replay.md` — read FIRST when present** (process-capture evidence). Citing `PM-NNN` counts as "opened" because PM rows carry cell citations; SU evidence format: `PM-NNN → Sheet1!D2:D400`. Raw files stay authoritative on conflict.
 - **Every file in `<engagement>/inputs/`** — open and PARSE each one as primary evidence, whatever its format (`.md`/`.txt`, `.xlsx`/`.csv`, `.pdf`, `.docx`, `.pptx`, images). See `library/kernel/orchestration.md` → *Reading input documents*. Cite specific facts you found; never cite an input you have not opened.
 - `<engagement>/shared-understanding.md` (inline mode)
 - `<engagement>/lens-outputs/*.md` (inline mode — what previous lenses found this round)
@@ -49,6 +50,10 @@ pp pack additions: `DLP_policies`, `environment_strategy`, `sensitivity_labels`,
 ## Execution steps
 
 1. Read all inputs. Determine the current round and the next free id per SU section. Note which existing Confirmed/Assumed rows are **expired** (`states.md` half-lives; absent columns ⇒ `verificado_em` = round date, `validade` = `organizacional`): treat them as weak Assumed, not settled coverage.
+1.5. **Process-capture evidence** (when `_capture/process-model.md` exists):
+   a. Use the process model + replay reports as first-line evidence; cite `PM-NNN → sheet!range`.
+   b. **Spot-check ≥1 PM claim against the raw input file this round** before citing the model. Mismatch → record a **Conflicted** SU row citing both (`PM-NNN` vs the raw `sheet!cell`) and flag a capture re-run in `_capture/_capture-log.md`. Never inherit the model blind.
+   c. Promote the interrogation-list items (PM §6) relevant to this lens to SU **Unknown** rows, `quem responde` = the suggested respondent role; dedupe against existing Unknowns.
 2. Identify applicable rules, access-control needs, and audit requirements from `context.json` + prior lens rows.
 3. **Conflict scan (important)**: compare stated needs from earlier lenses against compliance/security constraints. Where a need collides with a policy — e.g., a user/business desire for **offline** access to data the data lens flagged as **sensitive/confidential** — emit a **Conflicted** row: `conflito` describing both sides, `partes` = the two lenses/stakeholders (e.g., `user∧governance`), `criticidade` = Critical when it could block the solution. Do not silently resolve it; it must be resolved before Decision.
 4. For remaining governance signals: Confirmed/Assumed (with evidence/basis) or Unknown (`quem responde` + `criticidade`).

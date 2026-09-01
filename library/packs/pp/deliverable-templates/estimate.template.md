@@ -4,50 +4,60 @@ output_format: md
 audience: client
 required_slots:
   - solution_name
-  - chosen_architecture
-  - components_table
-  - effort_summary
+  - estimate_headline
+  - phases_table
   - timeline
-  - cost_estimate
-optional_slots:
+  - detailed_phases
+  - effort_summary
+  - team_effort
+  - risks_table
   - assumptions
-  - exclusions
-sub_templates:
-  - architecture-templates/{{chosen_architecture}}.md
+optional_slots:
+  - operational_impact
+  - recommendations
 slot_sources:
-  chosen_architecture: decisions.md# D-NNN — Branch (if technology)
-  components_table: _synthesis/architecture-story.md# Platform and components, Data, Integrations
-  effort_summary: _synthesis/financial-story.md# Build effort and indicative cost
-  timeline: _synthesis/financial-story.md# Build effort and indicative cost
-  cost_estimate: _synthesis/financial-story.md# Build effort and indicative cost, Sensitivity and revision triggers
+  estimate_headline: _synthesis/financial-story.md# Estimate headline
+  phases_table: _synthesis/financial-story.md# Phased build plan
+  detailed_phases: _synthesis/financial-story.md# Detailed estimate by phase
+  timeline: _synthesis/financial-story.md# Timeline
+  effort_summary: _synthesis/financial-story.md# Effort summary by phase
+  team_effort: _synthesis/financial-story.md# Team and effort by profile
+  operational_impact: _synthesis/financial-story.md# Operational impact
+  recommendations: _synthesis/financial-story.md# Recommendations
+  risks_table: _synthesis/risks-and-assumptions.md# Accepted risks (with mitigations)
   assumptions: _synthesis/risks-and-assumptions.md# Assumptions to validate during build
-  exclusions: decisions.md# D-NNN — Alternatives considered (the "why not" lines often state exclusions)
 ---
 
-# Estimativa Detalhada — {{solution_name}}
+# Estimativa de Implementação — {{solution_name}}
 
-> Estimativa de componentes, esforço, calendário e custo para a opção arquitectural escolhida. Audience: client (sponsor + financial controller).
+> Estimativa de fases, esforço, calendário, equipa e custo para a opção arquitectural escolhida. Audience: client (sponsor + financial controller).
 
-## 1. Sumário Executivo
-Estimativa de componentes para a opção arquitectural escolhida: **{{chosen_architecture}}**.
+## 1. Resumo
+{{estimate_headline}}
 
-## 2. Componentes a entregar
-{{components_table}}
+## 2. Fases do Projeto
+{{phases_table}}
 
-## 3. Resumo de esforço
-{{effort_summary}}
-
-## 4. Calendário previsto
+## 3. Timeline
 {{timeline}}
 
-## 5. Estimativa de custo
-{{cost_estimate}}
+## 4. Estimativa Detalhada por Fase
+{{detailed_phases}}
 
-## 6. Pressupostos
+## 5. Resumo da Estimativa
+{{effort_summary}}
+
+## 6. Equipa e Esforço por Perfil
+{{team_effort}}
+
+## 7. Análise de Riscos
+{{risks_table}}
+
+## 8. Impacto Operacional Esperado
+{{operational_impact}}
+
+## 9. Premissas
 {{assumptions}}
 
-## 7. Exclusões
-{{exclusions}}
-
-## 8. Arquitectura escolhida
-{{>> architecture-templates/{{chosen_architecture}}.md}}
+## 10. Recomendações
+{{recommendations}}

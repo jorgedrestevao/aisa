@@ -13,6 +13,7 @@ The aisa engagement progresses through 4 phases. Each phase declares its mode of
 **Entry criteria**:
 - `_state.json` exists with `phase: discovery`.
 - `context.json` has at minimum: literal request, requester role.
+- Capture run for supported inputs — `_capture/` artefacts exist for every `.xlsx`/`.xlsm` in `inputs/` (soft — warn if missing; `/capture` fixes it).
 
 **Exit criteria** (soft, advisory):
 - `## Confirmed` has ≥10 rows.
@@ -94,7 +95,7 @@ The aisa engagement progresses through 4 phases. Each phase declares its mode of
 ## Transition rules
 
 - Transitions are user-triggered (`/frame`, `/options`, `/decide`).
-- Soft gates emit warnings via the `phase-gate-check.sh` hook but do not block.
+- Soft gates emit warnings via the `phase-gate-check.py` hook but do not block.
 - Override syntax: `/frame --override "reason"` — logged in `decisions.md`.
 - Phase regression is allowed (`/round` from Framing returns to Discovery scope if needed).
 

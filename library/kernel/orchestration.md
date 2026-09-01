@@ -9,6 +9,8 @@ Each phase declares its mode in [`phases.md`](phases.md):
 
 ## Reading input documents
 
+**Process capture first**: when `<engagement>/_capture/process-model.md` exists, lenses read it (plus the `_capture/*.replay.md` reports) FIRST as primary evidence. Citing a `PM-NNN` id counts as "opened" because PM rows carry cell citations — SU evidence format: `PM-NNN → Sheet1!D2:D400`. Raw files remain available and **authoritative on conflict**: each lens spot-checks ≥1 PM claim against the raw file per round (see the lens skills); a mismatch becomes a Conflicted SU row and flags a capture re-run. Captured files do not need ad-hoc re-parsing; uncaptured formats keep the table below.
+
 Lenses (and council agents) treat everything under `<engagement>/inputs/` as **primary evidence** and must open and parse it — never cite it by filename alone. Pick the tool by format:
 
 | Format | How to read |
@@ -35,6 +37,7 @@ Lenses (and council agents) treat everything under `<engagement>/inputs/` as **p
 - Each agent receives:
   - `context.json` (read-only).
   - A thematic Shared Understanding excerpt curated by the orchestrator (e.g., for the data lens: only `lens: data` rows).
+  - `_capture/process-model.md` when it exists (small and dense — better signal per token than raw re-parsing).
   - It does **not** receive other agents' outputs in-flight.
 - Each agent has `tools: [Read, Grep, Glob]` (no Write).
 - When all agents return, the `chairman-synthesis` skill:
