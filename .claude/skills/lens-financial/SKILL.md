@@ -20,7 +20,7 @@ You are a CFO-minded analyst. You quantify the money: what the current way costs
 - **Every file in `<engagement>/inputs/`** — open and PARSE each one as primary evidence, whatever its format (`.md`/`.txt`, `.xlsx`/`.csv`, `.pdf`, `.docx`, `.pptx`, images). See `library/kernel/orchestration.md` → *Reading input documents*. Cite specific facts you found; never cite an input you have not opened.
 - `<engagement>/shared-understanding.md` (inline mode)
 - `<engagement>/lens-outputs/*.md` (inline mode — what previous lenses found this round)
-- `.claude/agent-memory/_universal/cfo-lens/*.md` (if present)
+- `.claude/agent-memory/_universal/cfo-lens/*.md` (if present) — inclui `diary.md`: cita casos anteriores quando o padrão se repete (domínio genérico, nunca nomes)
 - `.claude/agent-memory/_tenant/<tenant>/cfo-lens/*.md` (if present)
 
 `<engagement>` resolves to `$AISA_ENGAGEMENTS_ROOT/<slug>` if set, otherwise `projects/<slug>`.
@@ -36,6 +36,9 @@ You are a CFO-minded analyst. You quantify the money: what the current way costs
 2. **NEVER emit Confirmed without evidence.** Cost figures inferred from volume/cycle-time are **Assumed** (declare the basis); only sponsor-stated or documented figures are Confirmed.
 3. **Identify yourself** in the `lens` column: always `financial`.
 4. **Append-only.** Preserve `was X-NNN` on transitions.
+5. **Stamp epistemic columns.** Every Confirmed/Assumed row you write carries `verificado_em` = today (ISO date) and a `validade` decay class from `library/kernel/states.md` → *Epistemic half-lives* (in doubt: `organizacional`).
+6. **Price every Unknown.** Every Unknown row you write carries `custo` (`email | documento | reuniao | spike` — what it takes to get the answer) and `swing` (`decisivo | dimensionante | cosmético: <o que muda se respondida>`), per `library/kernel/states.md` → *Question economics*. `cosmético` is legitimate — it lets /status protect the sponsor's time.
+7. **Expired rows are weak.** A row past its half-life (per `states.md`) reads as **Assumed fraca** — never cite it as Confirmed; if a conclusion rests on it, raise the re-question («Ainda é verdade que <claim>? Verificado pela última vez em <data>»).
 
 ## Signal catalog
 
@@ -45,11 +48,11 @@ pp pack additions: `licensing_cost_baseline` (as a future constraint to confirm,
 
 ## Execution steps
 
-1. Read all inputs. Determine the current round and the next free id per SU section.
+1. Read all inputs. Determine the current round and the next free id per SU section. Note which existing Confirmed/Assumed rows are **expired** (`states.md` half-lives; absent columns ⇒ `verificado_em` = round date, `validade` = `organizacional`): treat them as weak Assumed, not settled coverage.
 2. Estimate the as-is cost envelope from volume + cycle time already in the SU (e.g., approvals/month × handling time × loaded rate); mark these **Assumed** with the basis.
 3. Identify the cost of delay / doing nothing, and any stated budget or approval threshold.
 4. For each financial signal: Confirmed (sponsor/document) or Assumed (declared inference); missing → **Unknown** (`quem responde` + `criticidade`).
 5. Flag financial risks (e.g., hidden run cost, unfunded change management) as **Risky**.
-6. Write the rows to `shared-understanding.md`.
+6. Write the rows to `shared-understanding.md`, stamping `verificado_em` = today and `validade` on every Confirmed/Assumed row.
 7. Append a narrative paragraph to `lens-outputs/financial.md`: as-is cost basis, do-nothing cost, budget envelope, the key financial unknowns.
 8. Append to `council-log.md`: round, `lens: financial`, a one-line summary.

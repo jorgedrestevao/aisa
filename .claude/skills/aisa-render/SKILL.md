@@ -12,6 +12,7 @@ description: Render the 6 (or a specific) deliverable(s) for the engagement, by 
 - `<deliverable>`: render only one — `discovery-report`, `executive-report`, `solution-blueprint`, `implementation-spec`, `claude-design-brief`, `estimate`.
 - `--all`: render every deliverable declared in `library/packs/<pack>/pack.yaml` **that applies to the decision type** (see *Applicability by decision type* below). This is the default after `/decide` → `/synthesize`.
 - `--dry-run`: resolve slots and surface gaps without writing to `_render/`. Useful for debugging templates without bumping versions.
+- `--html`: additionally produce `<slug>_discovery-report_v<NN>.html` — the interrogable projection: self-contained HTML (inline CSS, ZERO external requests), every SU id citation rendered as `<span class="prov" title="<estado> · <evidência> · verificado <data> (<validade>)">C-014</span>`, a top banner ("documento gerado do Shared Understanding — cada afirmação é rastreável") and a final **Proveniência** section with the id → lens → evidência → validade table. v3.0 scope: discovery-report only (other deliverables in v3.1).
 
 ## Phase gate (soft)
 
@@ -87,7 +88,8 @@ When the decision is non-technology/do-nothing and a still-applicable template i
    ```
    <ISO timestamp> — rendered <N>/<M> deliverables — versions: { <id>: v<NN>, … } — gaps: <count>
    ```
-7. Output to the user:
+7. Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — as entregas prontas (render)`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
+8. Output to the user:
    - `--all`: "Rendered <N>/<M> deliverables to _render/. Gaps: <count>. Review `_render/render-gaps.md` and adjust the SU/synthesis if needed, then re-run /render --all (will produce v<NN+1>)."
    - Single deliverable: "Rendered <id> v<NN> at `_render/<file>`. Gaps: <count>."
    - `--dry-run`: print the resolved template inline (truncated if >50 lines) and the gap list. Do not write.

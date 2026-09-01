@@ -1,4 +1,4 @@
-# Phases — Kernel v0.1.0
+# Phases — Kernel v0.2.0
 
 The aisa engagement progresses through 4 phases. Each phase declares its mode of orchestration, the lenses active, and soft entry/exit criteria. Phases are defined here; the 5 knowledge states are in [`states.md`](states.md); orchestration modes in [`orchestration.md`](orchestration.md).
 

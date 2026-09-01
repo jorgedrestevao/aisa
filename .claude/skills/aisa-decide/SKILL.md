@@ -24,6 +24,7 @@ description: Interactive Decision phase. User picks an option from options.md, g
 
 - `<engagement>/_state.json`, `<engagement>/context.json`, `<engagement>/shared-understanding.md`, `<engagement>/decisions.md`, `<engagement>/council-log.md`.
 - `<engagement>/frame.md`, `<engagement>/options.md`.
+- `<engagement>/premortem.md` (if present — tripwire candidates and requirements for the D-NNN block).
 - `<engagement>/lens-outputs/*.md` (incl. all chairman-synthesis logs).
 
 ## Outputs (written)
@@ -39,7 +40,8 @@ description: Interactive Decision phase. User picks an option from options.md, g
 
 1. Resolve the engagement root and read `_state.json`. If `phase != options` AND `phase != decision` → stop with: "/decide transitions Options → Decision; current phase is `<phase>`. Use /options first." If `phase == decision`, treat as a re-decision (a new D-NNN, the next number).
 2. Verify `<engagement>/options.md` exists. If not → stop and ask the user to run `/options` first, or supply `--override "..."`.
-3. Parse `options.md` and list the available options.
+3. **Pre-mortem check (soft)**: if `<engagement>/premortem.md` does not exist, or is older than the latest Options-round artefact (`options.md` / newest `_simulation/*`), suggest `/premortem` first — its mitigations feed the accepted risks and revision conditions below. Free override: if the user says "proceed", proceed (no `--override` needed); note the skip in the D-NNN block's justification context.
+4. Parse `options.md` and list the available options.
 
 ### 2. Interactive capture
 
@@ -87,9 +89,10 @@ If `--consult` was passed (or the user asks for a technical review mid-flow), la
   - <O-NNN> — <one-line "why not">
   - …
 - **Accepted risks**: <list pointing to R-NNN ids; add new R-NNN rows in the SU if any are new>
-- **Revision conditions**:
-  - <measurable trigger>
-  - …
+- **Revision conditions / Tripwires (estruturados)**:
+  - TW-1: <condição mensurável, com fonte no SU> → se disparar, comparar com `_simulation/counterfactuals/<O-NNN>.md`
+  - TW-2: …
+  (Fontes: as respostas do utilizador + os TRIPWIRE candidatos do `premortem.md`, se existir — propõe-os explicitamente.)
 - **Sponsor confirmation**: <yes | pending | no (with --override reason)>
 - **Decided in round**: D-<NN>
 - **Timestamp**: <ISO-8601>
@@ -107,9 +110,17 @@ The SU stays complete (understanding + commitments). Append ONE row to `## Confi
 
 Update the SU header `Última actualização`. (Per `docs/ARCHITECTURE.md §4.5` — the decision is citable from the SU like any other id.)
 
+### 4c. Freeze the counterfactuals (multiverse)
+
+For every option NOT chosen that has a projection in the latest `_simulation/options-comparison_v<NN>.md`, write `_simulation/counterfactuals/<O-NNN>.md`: the frozen projection (shape, effort band, risks, constraint verdicts) + a final section **"Condições em que este ramo ganharia"** derived from the decision-tree verdicts and the VOI (e.g., "se o volume confirmado cair para <20/mês, o caso de eficiência de O-002 passa à frente"). Frozen = never edited afterwards; `/revisit` compares against them and writes NEW artefacts.
+
 ### 5. Auto-invoke aisa-synthesize
 
 Immediately invoke the `aisa-synthesize` skill. Wait for it to return; it produces the 5 topic packs in `_synthesis/`. If any topic-pack synthesis fails → record the failure in `council-log.md` but do NOT roll back the decision (the synthesis can be retried manually).
+
+### 5c. Story
+
+Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — a decisão (e porquê)`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
 
 ### 6. Wrap-up output
 

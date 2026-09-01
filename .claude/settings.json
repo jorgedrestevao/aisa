@@ -48,7 +48,7 @@
     ]
   },
   "env": {
-    "AISA_KERNEL_VERSION": "0.1.0",
+    "AISA_KERNEL_VERSION": "0.2.0",
     "AISA_GUARD_MODE": "enforce"
   }
 }

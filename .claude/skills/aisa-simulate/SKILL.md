@@ -31,7 +31,7 @@ Requires `phase ∈ {options, decision}` and `options.md` to exist. The sponsor 
 5. **Comparison artefact**: write `<engagement>/_simulation/options-comparison_v<NN>.md` (versioned, append-only, mirrors `_render/`):
    - Side-by-side table: option · shape (screens/intervention) · effort band · licensing/run cost signal · top-3 risks · reversibility · constraint blockers.
    - One-pager per option: the projected future in 5-8 lines, every claim citing SU/option/tree ids.
-   - **Value of information**: the Unknowns that are *decision-flipping* — resolving them changes the ranking or kills an option — ranked by swing size, each with `quem responde`. These are the answers worth chasing before `/decide`; Unknowns that flip nothing are explicitly listed as "não vale a pena esperar por".
+   - **Value of information**: the Unknowns that are *decision-flipping* — resolving them changes the ranking or kills an option — ranked by swing size, each with `quem responde` and `custo`. Start from the rows' own `swing` classes (kernel *Question economics*); when the simulation's evidence disagrees with a row's class (a `cosmético` that flips an option, a `decisivo` that flips nothing), CORRECT the row's `swing` (sanctioned metadata edit) and note the correction in the output. These are the answers worth chasing before `/decide`; Unknowns that flip nothing are explicitly listed as "não vale a pena esperar por".
 6. Append one line to `council-log.md`. Output the comparison table inline + the VOI list + "Next: `/answer` the decision-flipping Unknowns, or proceed to `/decide`."
 
 ## Hard rules

@@ -32,6 +32,7 @@ You are executing the **chairman** role described in `.claude/agents/chairman.md
 3. **Every Confirmed row must have ≥2 persona anchors OR a direct document/sponsor citation.** A single persona's claim with no document → **Assumed** (declare basis) or **Unknown**.
 4. **Surface contradictions as Conflicted rows.** Never silently pick a winner. The user resolves at `/decide` time.
 5. **Atomic writes**. Update `_state.json` via tmp → rename (`Move-Item -Force` on Windows, `mv` on Unix), matching `aisa-start`.
+6. **Epistemic columns.** Every Confirmed/Assumed row you write carries `verificado_em` = today (ISO date) and a `validade` decay class (`library/kernel/states.md` → *Epistemic half-lives*; in doubt: `organizacional`). An **expired** row (past its half-life) reads as *Assumed fraca*: a persona claim anchored only on expired rows never becomes Confirmed — keep it Assumed and raise the re-question as an Unknown.
 
 ## Synthesis procedure
 
@@ -48,6 +49,11 @@ Maintain a working table per category:
 - **Contradictions** → personas explicitly disagree (claim vs counter-claim) OR a persona's `Conflicts seen` lists another persona/lens.
 - **Open questions** → union of personas' `Open questions / Unknowns flagged` (dedupe by question text).
 - **Risks** → union of personas' `Risks` (dedupe; merge if same risk with different mitigations).
+- **Material divergences** (explicit output of this step): the contradictions above whose resolution would change the phase artefact (the frame sentence, an option's viability/ranking). List each as `persona A: <tese com ids> vs persona B: <tese com ids>`.
+
+### Step 2b — Dialectic hand-back (when ≥1 material divergence)
+
+Do NOT write yet. Return the material-divergence list to the calling skill (`aisa-frame`/`aisa-options`); it runs the antithesis round (max 3 divergences × 2 Task calls) and re-invokes you with theses + antitheses. On the second invocation, incorporate the `Concedo/Contesto/Síntese proposta` sections: divergences resolved by an accepted synthesis become normal rows; divergences that SURVIVE the antithesis become Conflicted rows (never silently pick a winner). If there are no material divergences — or this is already the second invocation — continue to Step 3.
 
 ### Step 3 — Assign Shared Understanding states
 
@@ -64,11 +70,11 @@ Walk the working table and assign state per row:
 
 ### Step 4 — Allocate ids
 
-Scan the current SU per section, find the highest existing id, and allocate the next n contiguously. Use the prefixes from `library/kernel/states.md`: `C-`, `A-`, `U-`, `X-`, `R-`. For cross-lens synthesis rows that do not cleanly belong to one lens, use `chair` as the lens value; otherwise use the dominant lens.
+Scan the current SU per section, find the highest existing id, and allocate the next n contiguously. Rows you write follow the kernel's epistemic columns: Confirmed/Assumed carry `verificado_em` (today) + `validade` (decay class); Unknown carry `custo` + `swing` (*Question economics*). Use the prefixes from `library/kernel/states.md`: `C-`, `A-`, `U-`, `X-`, `R-`. For cross-lens synthesis rows that do not cleanly belong to one lens, use `chair` as the lens value; otherwise use the dominant lens.
 
 ### Step 5 — Write the SU rows
 
-Edit `<engagement>/shared-understanding.md`, appending to each section table. Preserve existing rows and headers exactly. Update the SU header `Última actualização` timestamp.
+Edit `<engagement>/shared-understanding.md`, appending to each section table. Stamp `verificado_em` = today and a `validade` class on every Confirmed/Assumed row. Preserve existing rows and headers exactly. Update the SU header `Última actualização` timestamp.
 
 ### Step 6 — Write the phase artefact
 

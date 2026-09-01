@@ -57,7 +57,7 @@ description: Start a new aisa engagement. Captures the literal request + request
    }
    ```
    (`round` seeds at `R-00` — no round has run yet. The first `/round` increments it to `R-01`.)
-8. **Write the `shared-understanding.md` skeleton** (the 5 state sections with their column headers, per `library/kernel/states.md`):
+8. **Write the `shared-understanding.md` skeleton** (the 5 state sections with their column headers, per `library/kernel/states.md`; `verificado_em`/`validade` per its *Epistemic half-lives* section; the `Saúde epistémica` header line stays `—` here — `/status` fills it):
    ```markdown
    # Shared Understanding — <slug>
 
@@ -66,16 +66,17 @@ description: Start a new aisa engagement. Captures the literal request + request
    > Iniciado: <date>
    > Fase actual: Discovery
    > Última actualização: <timestamp>
+   > Saúde epistémica: —
 
    ## Confirmed
 
-   | id | lens | claim | evidência | ronda |
-   |----|------|-------|-----------|-------|
+   | id | lens | claim | evidência | verificado_em | validade | ronda |
+   |----|------|-------|-----------|---------------|----------|-------|
 
    ## Assumed
 
-   | id | lens | claim | base da assumption | ronda |
-   |----|------|-------|--------------------|-------|
+   | id | lens | claim | base da assumption | verificado_em | validade | ronda |
+   |----|------|-------|--------------------|---------------|----------|-------|
 
    ## Unknown
 
@@ -92,5 +93,5 @@ description: Start a new aisa engagement. Captures the literal request + request
    | id | lens | risco | impacto | mitigação proposta | ronda |
    |----|------|-------|---------|--------------------|-------|
    ```
-9. Write `council-log.md` with a header (`# Council Log — <slug>`), `decisions.md` with a header (`# Decisions — <slug>`), and `answers.md` with a header (`# Answers — <slug>`).
+9. Write `council-log.md` with a header (`# Council Log — <slug>`), `decisions.md` with a header (`# Decisions — <slug>`), `answers.md` with a header (`# Answers — <slug>`), and `story.md` with `# Story — <slug>` + **Episódio 1** (o pedido: quem pediu, o quê, porquê — 4-6 frases na voz do sponsor).
 10. Output: "Engagement `<slug>` created (pack: `<pack>`). Phase: discovery. Next: `/round` to run Discovery, or `/round business` lens-by-lens."

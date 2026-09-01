@@ -38,7 +38,7 @@ The contract (schema, hard rules, versioning) is `library/kernel/blueprint-contr
 5. **Decide the exclusions**: fields present in inputs/SU that must NOT appear (sensitivity, internal calc columns) → `excluded_from_ui` with reason + `su_refs`.
 6. **Carry the open questions**: any design decision blocked by an Unknown goes to `open_questions` (never a silent default). If a NEW unknown emerges (e.g., brand palette), append the `U-NNN` row to the SU first, then reference it.
 7. **Validate the caps** (pack hard caps). Each violation: record in `validation.violations` AND append a Conflicted row to the SU (`partes: ux∧<lens>`), per the contract.
-8. **Write** `_blueprint/ux-blueprint_v<NN>.yaml` (next version, never overwrite; `draft: true` + `option: O-NNN` in draft mode) and append to `_blueprint/blueprint-log.md`: timestamp, trigger, SU ids consumed, violations. Append one line to `council-log.md`.
+8. **Write** `_blueprint/ux-blueprint_v<NN>.yaml` (next version, never overwrite; `draft: true` + `option: O-NNN` in draft mode) and append to `_blueprint/blueprint-log.md`: timestamp, trigger, SU ids consumed, violations. Append one line to `council-log.md`. Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — o desenho da aplicação (blueprint)`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
 9. **Output** to the user:
    ```
    Blueprint v<NN> produzido: <N> screens (<patterns>), <N> personas, <N> entidades.

@@ -1,4 +1,4 @@
-# Render Contract — Kernel v0.1.0
+# Render Contract — Kernel v0.2.0
 
 ## Pipeline: Decision → (Blueprint) → Synthesize → Render
 
@@ -44,6 +44,10 @@ Reads the topic packs + decisions + the pack's `deliverable-templates/<deliverab
 - `v01`, `v02`, ... — `/render` always produces the next available version.
 - Never overwrites existing files (user edits to v01 are preserved).
 - `_render/<slug>_<deliverable>_v<NN>.<ext>` is the filename pattern.
+
+### Counterfactuals
+
+`_simulation/counterfactuals/<O-NNN>.md` (frozen at `/decide`) are engagement artefacts, not deliverables — they never render. The executive-report may carry the decision's structured tripwires via an optional slot.
 
 ### Applicability by decision type
 

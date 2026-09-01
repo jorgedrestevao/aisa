@@ -12,12 +12,13 @@
 
 1. **Discovery before solution, always.** Lenses do not mention vendor/product before the Options phase.
 2. **Shared Understanding as process artefact; deliverables as transition artefacts.** SU is the source of truth during the engagement; the 6 deliverables are rendered at the end.
-3. **5 knowledge states**: Confirmed / Assumed / Unknown / Conflicted / Risky. No state×tag combinatorics.
+3. **5 knowledge states**: Confirmed / Assumed / Unknown / Conflicted / Risky. No state×tag combinatorics. Confirmed/Assumed carregam validade — conhecimento expira e revalida-se (`library/kernel/states.md` → *Epistemic half-lives*).
 4. **Council híbrido** by phase: inline in Discovery; council-independent (parallel subagents) in Framing/Options. Decision is interactive (user-driven; optional `/decide --consult` technology review).
 5. **Soft gates**: warnings, overrideable with justification. The only hard rule is `library/` is read-only at runtime.
 6. **Native Claude Code primitives**: skills, agents, hooks, commands. No reinvention.
 7. **Pack activo per-engagement**: declared in `projects/<slug>/_state.json.pack`. Not global.
 8. **Atomic writes** to `_state.json`: tmp → mv pattern.
+9. **Knowledge expires; questions have prices; decisions keep their counterfactuals.** (kernel v0.2.0: half-lives, question economics, tripwires/multiverso, diários do council.)
 
 ## Key paths
 
@@ -39,10 +40,13 @@
 | `/frame` | Transit to Framing phase |
 | `/options` | Transit to Options phase |
 | `/simulate [O-NNN ...]` | Project each option (screens, effort, risks) + decision-flipping Unknowns, before `/decide` |
+| `/premortem [--horizon <meses>]` | Write the project's obituary before deciding — failure causes anchored to SU ids; mitigations → requirements/tripwires |
 | `/decide [--consult]` | Capture decision; auto-runs `/synthesize` |
 | `/blueprint` | Produce the UX blueprint (screen architecture) from the SU + pack rules; iterate to business approval |
 | `/synthesize` | Produce topic packs (auto after `/decide` or manual) |
 | `/render [deliverable\|--all]` | Render the deliverables (filtered by decision type) |
+| `/revisit <TW-n\|O-NNN>` | Compare the present with a frozen counterfactual when a tripwire fires; recommend keep/adapt/reopen |
+| `/retro` | Close-of-engagement: personas write diaries (human-curated) — the council gets wiser |
 | `/resume` | Resume from `_state.json` and name the next command |
 
 ## Anti-patterns to avoid

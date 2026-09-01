@@ -14,6 +14,7 @@ optional_slots:
   - decision_options
   - alternatives_summary
   - open_assumptions_list
+  - revision_tripwires
 slot_sources:
   business_case: _synthesis/business-story.md# What success looks like to the sponsor, The impact in business terms
   chosen_solution_summary: _synthesis/architecture-story.md# Chosen architecture, Platform and components
@@ -23,6 +24,7 @@ slot_sources:
   decision_context: decisions.md# D-NNN — Justification
   decision_options: options.md
   alternatives_summary: decisions.md# D-NNN — Alternatives considered
+  revision_tripwires: decisions.md# D-NNN — Revision conditions / Tripwires (estruturados)
   open_assumptions_list: _synthesis/risks-and-assumptions.md# Assumptions to validate during build, Unresolved Unknowns (Critical)
 ---
 

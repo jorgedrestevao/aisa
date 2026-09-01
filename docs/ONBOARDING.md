@@ -207,10 +207,14 @@ Phase: discovery
 Round: R-01
 
 Shared Understanding:
+  Saúde epistémica: 92% (1 expirada)
   ## Confirmed (12)
     C-001 — Sponsor é António Silva, Director Procurement (lens: business)
     C-002 — Processo actual: Excel + Outlook, 47 aprovações/mês (lens: operations)
     ...
+  A revalidar:
+    C-005 (pessoas-disponibilidade, verificado 2026-04-02) — "Ainda é verdade que só o Director aprova? Verificado pela última vez em 2026-04-02."
+      → /answer --revalidate C-005   (ou /answer C-005 "..." se o facto mudou)
   ## Assumed (8)
     A-001 — Tenant Galp tem E5 licensing (lens: technology) [⚠️ confirmar]
     ...
@@ -231,7 +235,7 @@ Next suggested action:
 
 ### 3.5 Passo 4 — Resolver Unknowns + Conflicted com sponsor
 
-Em reunião com sponsor (ou async), resolves os 4 críticos. Voltas e fazes append em `answers.md`:
+O `/status` já te deu a **agenda da reunião** — as perguntas que pagam o tempo síncrono do sponsor (por swing), as que vão por email/documento, e as que explicitamente não valem a reunião. Em reunião com sponsor (ou async), resolves os 4 críticos. Voltas e fazes append em `answers.md`:
 
 ```
 /answer U-001 "Para >€10k, aprova Director + Finance Manager. Para <€10k, só Director."
@@ -296,6 +300,16 @@ Cada opção vem com prós, contras, e referências aos constraints do SU (ex: o
 
 **Opcional — `/simulate`**: antes de decidir, projeta as opções lado-a-lado (ecrãs/intervenção, banda de esforço, riscos, constraints) e lista os Unknowns *decision-flipping* — os que vale a pena resolver com o sponsor antes do `/decide`. Output em `_simulation/options-comparison_v01.md`.
 
+### 3.8b Passo 7b — `/premortem` (antes de decidir)
+
+```
+/premortem
+```
+
+Escreve o obituário do projecto datado a +12 meses (`premortem.md`): 3–6 causas de morte **narradas** — como 2+ fraquezas do SU se combinam (ids inline: Risky, Assumed expiradas, Unknowns abertas) — cada uma com probabilidade, primeiro sinal observável e mitigação classificada (REQUISITO / TRIPWIRE candidato / ACEITAÇÃO). O sponsor lê isto antes de assinar; o `/decide` sugere-o automaticamente se estiver em falta ou desactualizado (soft — podes avançar sem ele).
+
+**Opcional mas recomendado — `/premortem`**: antes de decidir, lê o obituário do projeto (datado a +12 meses, cada causa com ids). As mitigações entram como requisitos e tripwires no `/decide`.
+
 ### 3.9 Passo 8 — `/decide`
 
 ```
@@ -346,6 +360,8 @@ render-gaps.md                            (warnings se algum slot ficou vazio)
 
 > O render produz **markdown**; a conversão para .docx (para entrega formal ao cliente) é um passo manual via Pandoc/Word por agora. Numa decisão non-technology/do-nothing, só os deliverables `applies_to: all` são produzidos (discovery-report, executive-report, estimate) — os restantes são saltados com razão registada em `render-log.md`.
 
+**Depois do go-live**: os tripwires da decisão ficam armados — o `/status` avisa quando um dispara e o `/revisit` compara com o caminho que não escolheste (mantém/adapta/reabre). No fecho, `/retro`: as 7 personas escrevem os diários (com a tua curadoria) e o council fica mais sábio para o próximo engagement.
+
 Se `render-gaps.md` está vazio → tudo OK. Se tem entradas → render-validate sinaliza qual slot/topic precisa de mais conteúdo; tu corres /round ou /answer adicional, depois /synthesize + /render outra vez (produz v02).
 
 ---
@@ -367,6 +383,7 @@ Se `render-gaps.md` está vazio → tudo OK. Se tem entradas → render-validate
 | Memória institucional (compartilhada) | `.claude/agent-memory/_universal/<agent>/*.md` |
 | Memória institucional (Galp) | `.claude/agent-memory/_tenant/galp/<agent>/*.md` (via symlink) |
 | Estado actual da engagement | `projects/<slug>/_state.json` |
+| A história para o sponsor | `projects/<slug>/story.md` (episódio por marco) |
 | Artefacto vivo da engagement | `projects/<slug>/shared-understanding.md` |
 | Outputs por lens | `projects/<slug>/lens-outputs/<lens>.md` |
 | Topic packs intermédios | `projects/<slug>/_synthesis/*.md` |

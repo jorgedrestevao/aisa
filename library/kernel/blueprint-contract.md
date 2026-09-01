@@ -1,4 +1,4 @@
-# UX Blueprint Contract — Kernel v0.1.0
+# UX Blueprint Contract — Kernel v0.2.0
 
 The blueprint is the structured artefact that turns the engagement's knowledge into a designed application concept — **deciding the design** so any downstream renderer (Claude Design or other) only has to **render** it. It is produced by the `aisa-blueprint` skill in the Decision phase (see [`phases.md`](phases.md)) and iterated with the business until approved. This contract is platform-agnostic; screen catalogues, naming conventions and hard caps come from the active pack's `domain-knowledge/`.
 
