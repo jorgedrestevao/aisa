@@ -15,7 +15,8 @@
 
 - **Claude Code instalado** (CLI, VS Code extension, ou desktop app). Verificar: `claude --version`.
 - **Git** instalado. Verificar: `git --version`.
-- **Python 3.10+** ou PowerShell 5.1+ (depende do OS).
+- **Python 3.10+** — obrigatório, não alternativa. Os hooks são todos Python (`.claude/hooks/*.py`) e a captura de processo corre um script Python. Verificar: `python --version` (em Linux/macOS pode ser `python3`; o `settings.json` invoca `python`, portanto garante que o nome resolve).
+- **`openpyxl`** — necessário para a captura de processo ler ficheiros Excel: `pip install openpyxl`. Sem ele a captura é **saltada** com aviso (não é erro): as lenses lêem os ficheiros pelo caminho normal, mas perdes o modelo de processo e o relatório de replay.
 - **Pandoc** (para conversão markdown → docx). Opcional para MVP; necessário para `/render` em formato docx.
 - **Acesso ao grupo Galp** que dá acesso ao repositório privado `aisa-engagements-galp`.
 
@@ -172,7 +173,26 @@ O `aisa-start` vai:
    ```
    (`round: R-00` = nenhuma ronda corrida ainda; o primeiro `/round` corre e regista `R-01`.)
 5. Output esperado:
-   > `Engagement galp-adv criado. Phase: discovery. Próximo passo: /round (corre Discovery completo) ou /round business (lens-a-lens).`
+   > `Engagement galp-adv criado. Phase: discovery. Captura de processo: 1 ficheiro (12 regras, 8 perguntas, 3 achados). Próximo passo: /round (corre Discovery completo) ou /round business (lens-a-lens).`
+
+### 3.2b Passo 1b — a captura de processo (automática)
+
+Se puseste um `.xlsx`/`.xlsm` em `inputs/`, o `/start` corre a **captura de processo** no fim, antes de qualquer lens. Não tens de a invocar; aparece no output do `/start`.
+
+O que ela faz, por ficheiro:
+
+1. **Lê a estrutura e a lógica** — folhas (incluindo as escondidas), colunas classificadas como *entrada*, *calculada* ou *manual*, padrões de fórmula, regras de validação e de formatação condicional, cor usada como dado, comentários, anomalias.
+2. **Re-executa as contas** contra os próprios dados do ficheiro: lookups, chaves duplicadas, espaços a mais, antiguidade dos pendentes, células que quebram o padrão da coluna. É assim que falhas silenciosas aparecem por método e não por sorte.
+3. **Reconstrói o processo** em `_capture/process-model.md`: as regras de negócio que o ficheiro **prova** (cada uma com a célula que a prova) e a lista de perguntas que o ficheiro **levanta mas não responde**.
+
+Duas coisas a saber:
+
+- **Uma coluna preenchida à mão é um passo humano do processo.** É o sinal mais forte que um ficheiro dá, e a captura marca-os todos.
+- **O modelo não substitui as pessoas.** O ficheiro é o *artefacto* do processo, não o processo. Por isso cada lens é obrigada a **confirmar pelo menos uma afirmação do modelo contra o ficheiro original** antes de a citar; se não bater certo, entra como conflito e o ficheiro original ganha.
+
+As perguntas que a captura levantou entram no `/status` como qualquer outra, já com preço — e é normal que as primeiras respostas do sponsor venham daí.
+
+Se não houver ficheiros Excel em `inputs/`, este passo é saltado em silêncio. Para o correr à mão depois de acrescentares um ficheiro: `/capture` (ou `/capture <ficheiro>`). O `/round` também verifica sozinho se algum ficheiro mudou desde a última captura e re-corre o que for preciso.
 
 ### 3.3 Passo 2 — `/round` (Discovery completo)
 
@@ -417,7 +437,27 @@ Não devem. Cada engagement tem `_state.json` próprio. Se há conflict (raro), 
 
 Está a tentar escrever em `library/`. aisa impede isto por design. Se precisas mesmo de editar (raro — ex: adicionar template de pack), faz-lo via git em ambiente local + commit; o hook está em runtime, não previne edits administrativos.
 
-### 5.6 "Claude esquece-se de um step"
+### 5.6 A captura de processo não correu
+
+Vê a mensagem no output do `/start` ou do `/capture`:
+
+- **"capture skipped — openpyxl missing"** → falta a biblioteca: `pip install openpyxl`, depois `/capture`. Não é erro; as lenses lêem os ficheiros pelo caminho normal, mas sem modelo de processo.
+- **"no supported inputs"** → só há `.xlsx`/`.xlsm` na captura. Outros formatos (PDF, Word, notas) são lidos directamente pelas lenses, como sempre.
+- **"status: failed"** num ficheiro → protegido por password ou corrompido. Fica registado como pergunta em aberto no modelo, nunca adivinhado. Pede uma cópia sem protecção.
+- **"replay unavailable"** → a extracção ficou desactualizada. Corre `/capture <ficheiro>` para refazer.
+
+Regra a reter: **"não correu" nunca é o mesmo que "não encontrou nada"**. O modelo diz sempre qual dos dois foi.
+
+### 5.7 Uma lens recusa correr ("lens-X: lens-Y has not run yet")
+
+A ordem das lenses é obrigatória dentro de uma ronda: uma lens a ler um retrato meio construído tira conclusões de informação que ainda não foi recolhida. Duas saídas:
+
+- Querias a ronda completa → corre `/round` sem argumento.
+- Querias mesmo só aquela lens (o caso normal depois de um `/answer`) → corre `/round <lens>`. O comando declara a intenção e a ordem é dispensada só para essa lens, nessa ronda.
+
+Se invocaste a skill da lens directamente em vez de usar o `/round`, é isso que está a dar — usa o comando.
+
+### 5.8 "Claude esquece-se de um step"
 
 aisa não tem invariantes que o Claude tenha de lembrar simultaneamente (foi essa a razão do refactor). Se notar comportamento anómalo:
 1. Confirma que estás na fase correcta (`/status`).

@@ -550,7 +550,7 @@ decision_tree:
   source: decision-tree.md
 ```
 
-**Validação**: hook `pre-write-guard.sh` rejeita writes a `library/`. Schema validation acontece em load-time via `aisa-start`.
+**Validação**: hook `pre-write-guard.py` rejeita writes a `library/`. Schema validation acontece em load-time via `aisa-start`.
 
 ### 7.2 Lens contract — `.claude/skills/lens-<name>/SKILL.md`
 
@@ -716,17 +716,18 @@ Synthesis-skill instancia este template para cada topic, e o output vai para `_s
 
 ### 9.1 Hard (não overrideable)
 
-Apenas 2 invariantes são hard-enforced:
+Todos os hooks são **Python 3** (`.claude/hooks/*.py`), cross-platform e sem dependências externas. Três invariantes são hard-enforced:
 
-1. **`library/` é read-only em runtime.** Hook `pre-write-guard.sh` rejeita qualquer Write/Edit a paths sob `library/`. Backup: `.claude/settings.json` `deny: Write(./library/**)`.
+1. **`library/` é read-only em runtime.** Hook `pre-write-guard.py` rejeita qualquer Write/Edit a paths sob `library/`, e **falha fechado**: enforce é o default, só um `AISA_GUARD_MODE=log` explícito o desliga (override administrativo). Backup: `.claude/settings.json` `deny: Write(./library/**)`. Executar `library/kernel/tools/*.py` não é uma escrita — o guard não se aplica a corridas do script de captura.
 2. **`_state.json` writes são atómicos.** Hook (ou skill convention) força padrão `_state.json.tmp` → `mv _state.json`. Crash mid-write nunca corrompe estado.
+3. **Ordem das lenses em Discovery.** Hook `pre-lens-order-check.py` bloqueia a lens N se a lens N-1 ainda não escreveu output para a ronda em curso — uma lens a ler um SU meio construído tira conclusões de evidência que ainda não foi recolhida. Sem modo log. O `/round <lens>` (lens única, tipicamente re-corrida após um `/answer`) é o único escape, e é **declarado**: o `aisa-round` escreve `_state.json.round_mode = {mode, lens, round}` antes de invocar, e o hook só se afasta quando o marcador nomeia aquela lens para aquela ronda — marcador obsoleto, de outra lens, malformado ou ausente impõem a ordem.
 
 ### 9.2 Soft (advisory, overrideable com justificação)
 
-- **`on-su-change.sh`** — quando `shared-understanding.md` é modificado, regista a alteração (log-only no MVP; o contradiction-scan em background é v0.2.0). Hoje a detecção de contradições é feita pela lens-governance (passo de conflict-scan) e pelo chairman na síntese.
-- **`phase-gate-check.sh`** — antes de transição de fase, verifica entry/exit criteria. Emite warning se violados. User pode prosseguir com `/frame --override "razão"`.
-- **`synthesis-validate.sh`** — após `/synthesize`, verifica que todos os 5 topic packs em `_synthesis/` foram produzidos sem secções vazias críticas. Se algum está vazio, lista qual lens devia ter contribuído. Bloqueia `/render --all` com warning (overrideable com `/render --skip-validate`).
-- **`render-validate.sh`** — antes de produzir output `_render/`, verifica que todos os required slots têm fonte. Se algum falta, gera `render-gaps.md` e ASKS confirm.
+- **`on-su-change.py`** — quando `shared-understanding.md` é modificado, regista a alteração (log-only no MVP; o contradiction-scan em background é v0.2.0). Hoje a detecção de contradições é feita pela lens-governance (passo de conflict-scan) e pelo chairman na síntese.
+- **`phase-gate-check.py`** — antes de transição de fase, verifica entry/exit criteria. Emite warning se violados. User pode prosseguir com `/frame --override "razão"`.
+- **`synthesis-validate.py`** — após `/synthesize`, verifica que todos os 5 topic packs em `_synthesis/` foram produzidos sem secções vazias críticas. Se algum está vazio, lista qual lens devia ter contribuído. Bloqueia `/render --all` com warning (overrideable com `/render --skip-validate`).
+- **`render-validate.py`** — antes de produzir output `_render/`, verifica que todos os required slots têm fonte. Se algum falta, gera `render-gaps.md` e ASKS confirm.
 
 ### 9.3 Por que enforcement minimalista funciona
 

@@ -72,7 +72,7 @@ decision_tree:
   consulted_in_phase: options
 ```
 
-The keys are not enforced by a hard schema (yet — Phase 11+ will add `pack-validate.sh`), but skills assume them. Missing keys → skills will fall back to kernel defaults and warn.
+The keys are not enforced by a hard schema (yet — Phase 11+ will add `pack-validate.py`), but skills assume them. Missing keys → skills will fall back to kernel defaults and warn.
 
 ## Authoring discipline
 
@@ -104,7 +104,7 @@ WARM reference content (delegation matrices, security patterns, etc.) that `lens
 
 ## Validating a pack before use
 
-There is no automated validator in the MVP (Phase 11 adds `pack-validate.sh` stub). Manual checklist:
+There is no automated validator in the MVP (Phase 11 adds `pack-validate.py` stub). Manual checklist:
 
 1. `pack.yaml` parses (try `python -c "import yaml; yaml.safe_load(open('pack.yaml'))"` if PyYAML is installed; otherwise inspect for indent/colon errors).
 2. Every deliverable declared in `pack.yaml` has a matching template file.
