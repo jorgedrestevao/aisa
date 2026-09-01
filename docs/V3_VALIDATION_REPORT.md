@@ -87,4 +87,4 @@
 
 1. **Pilot (Fase 12)** com 2 consultores num engagement real: dia 1 = full-run virgem com as 5 peças (fecha o desvio do §3); a retro do pilot alimenta a calibração do §5 e a primeira curadoria real de diários (substituindo as entradas-drill anotadas).
 2. Tag `v3.0` no repo — proposta, à espera do ok.
-3. Roadmap além-v3.0: ver `V3_IMPLEMENTATION_PLAN.md §11` (o que ficou deliberadamente de fora).
+3. Roadmap além-v3.0: o que ficou deliberadamente de fora está em `V3_IMPLEMENTATION_PLAN.md §0.4` (linha 6 — scanner H2, operação assíncrona, pack não-software, deliverable interactivo em v3.1) e em `NEXT_LEVEL_PLAN.md §4`.
