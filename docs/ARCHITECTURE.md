@@ -465,7 +465,7 @@ aisa/                                              # repo 1 — partilhável den
 
 # Estrutura típica de UM engagement (vive em aisa-engagements-<tenant>/<slug>/):
 #   <slug>/
-#   ├── _state.json                              # phase, round, pack, atomic writes (tmp → mv)
+#   ├── _state.json                              # phase, round, pack, round_mode (run em curso), atomic writes (tmp → mv)
 #   ├── context.json                             # captura do /start
 #   ├── shared-understanding.md                  # ARTEFACTO VIVO (5 secções por estado)
 #   ├── answers.md                               # respostas verbatim do /answer

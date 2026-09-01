@@ -5,7 +5,7 @@ All hooks are written in **Python 3** (single source-of-truth, cross-platform: W
 | Hook | Trigger | Behaviour |
 |---|---|---|
 | `pre-write-guard.py` | `PreToolUse` on `Write\|Edit` | **Hard-blocks** writes to `library/*` (exit 2 + `permissionDecision=deny`). **Fails closed**: enforce is the default, an unset `AISA_GUARD_MODE` also means enforce. `AISA_GUARD_MODE=log` is the administrative override (warn only). |
-| `pre-lens-order-check.py` | `PreToolUse` on `Skill` | **Always active.** Blocks invocation of `lens-N` if `lens-(N-1)` has not written `lens-outputs/<prev>.md` containing the in-progress round ID (`_state.json.round + 1`). Only triggers when an engagement is in `phase: discovery`. |
+| `pre-lens-order-check.py` | `PreToolUse` on `Skill` | **Always active.** Blocks invocation of `lens-N` if `lens-(N-1)` has not written `lens-outputs/<prev>.md` containing the in-progress round ID (`_state.json.round + 1`). Only triggers when an engagement is in `phase: discovery`. Honours the single-lens escape declared by `aisa-round` in `_state.json.round_mode` — see below. |
 | `phase-gate-check.py` | `PostToolUse` on `Skill` | **Log only.** Logs when `aisa-frame`/`aisa-options`/`aisa-decide` ran. Will validate `_state.json` + SU counts against phase exit criteria. |
 | `on-su-change.py` | `PostToolUse` on `Write\|Edit` | **Log only.** Logs Writes/Edits to `shared-understanding.md`. Will trigger a background contradiction-scan. |
 | `synthesis-validate.py` | `PostToolUse` on `Write\|Edit` | **Log only.** Logs Writes to `_synthesis/*.md`. Will validate ≥3 paragraphs, ≥1 SU citation, vendor-neutrality on technology-neutral packs. |
@@ -20,6 +20,18 @@ All hooks are written in **Python 3** (single source-of-truth, cross-platform: W
 | Always-on | n/a | `pre-lens-order-check.py` — the lens-order rule is a correctness invariant, not a preference. No log mode. |
 
 For administrative authoring (populating a pack, editing kernel docs), the sanctioned path per `.claude/rules/library-readonly.md` is an out-of-band edit + `git commit`. The `library/kernel/tools/*.py` scripts are read and **executed** at runtime — execution is never a write, so the guard does not apply to running them.
+
+## The single-lens escape
+
+`/round <lens>` — one named lens, typically re-run after an `/answer` — is documented behaviour, but the `Skill` payload the hook receives (`{"skill": "lens-data"}`) carries no way to tell it apart from a step inside a full round. So `aisa-round` declares the intent in `_state.json` before invoking anything:
+
+```json
+"round_mode": {"mode": "single", "lens": "data", "round": "R-03"}
+```
+
+The hook steps aside only when the marker names **that** lens for **that** in-progress round. Everything else fails closed: a marker from an earlier round, one naming another lens, `{"mode": "full"}`, or no marker at all all enforce the order. An interrupted run therefore cannot leave a hole behind, and the invariant still holds where it matters — inside a full round, where a lens reading a half-built Shared Understanding would draw conclusions from evidence that has not been gathered yet.
+
+`aisa-round` clears the marker in the same atomic write that persists the completed round.
 
 ## Why Python (and not bash / PowerShell)
 
