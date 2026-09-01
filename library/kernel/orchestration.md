@@ -1,4 +1,4 @@
-# Orchestration — Kernel v0.1.0
+# Orchestration — Kernel v0.2.0
 
 ## Mode declaration
 

@@ -1,5 +1,6 @@
 ---
 template_id: discovery-report
+# render --html: this deliverable gets the interrogable HTML projection first (provenance tooltips per id + final Proveniência table); others follow in v3.1
 output_format: md
 audience: client
 required_slots:

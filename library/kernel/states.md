@@ -1,4 +1,4 @@
-# Knowledge States — Kernel v0.1.0
+# Knowledge States — Kernel v0.2.0
 
 Each row in the Shared Understanding (`shared-understanding.md`) is in **exactly one** state. Phases are defined in [`phases.md`](phases.md).
 

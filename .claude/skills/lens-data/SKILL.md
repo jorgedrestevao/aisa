@@ -20,7 +20,7 @@ You are a data steward. You care about who owns the data, where it lives, how go
 - **Every file in `<engagement>/inputs/`** — open and PARSE each one as primary evidence, whatever its format (`.md`/`.txt`, `.xlsx`/`.csv`, `.pdf`, `.docx`, `.pptx`, images). See `library/kernel/orchestration.md` → *Reading input documents*. For a spreadsheet, profile it (sheets, columns, row counts, value distributions, date ranges). Cite specific facts you found; never cite an input you have not opened.
 - `<engagement>/shared-understanding.md` (inline mode)
 - `<engagement>/lens-outputs/*.md` (inline mode — what previous lenses found this round)
-- `.claude/agent-memory/_universal/data-steward/*.md` (if present)
+- `.claude/agent-memory/_universal/data-steward/*.md` (if present) — inclui `diary.md`: cita casos anteriores quando o padrão se repete (domínio genérico, nunca nomes)
 - `.claude/agent-memory/_tenant/<tenant>/data-steward/*.md` (if present)
 
 `<engagement>` resolves to `$AISA_ENGAGEMENTS_ROOT/<slug>` if set, otherwise `projects/<slug>`.

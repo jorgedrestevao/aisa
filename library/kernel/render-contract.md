@@ -1,4 +1,4 @@
-# Render Contract — Kernel v0.1.0
+# Render Contract — Kernel v0.2.0
 
 ## Pipeline: Decision → (Blueprint) → Synthesize → Render
 

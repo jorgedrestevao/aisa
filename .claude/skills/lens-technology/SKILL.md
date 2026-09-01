@@ -35,7 +35,7 @@ If invoked in Discovery or Framing in error → refuse and return: "lens-technol
   - `library/packs/<pack>/decision-tree.md` (the architectural branches)
   - `library/packs/<pack>/domain-knowledge/*.md` (e.g., for `pp`: `powerfx-patterns.md`, `screen-patterns.md`, `security-patterns.md`, `delegation-matrix.md`)
   - `library/packs/<pack>/pack.yaml` (`lenses_config.technology.constraints_to_check`)
-- `.claude/agent-memory/_universal/solution-architect/*.md` (if present)
+- `.claude/agent-memory/_universal/solution-architect/*.md` (if present) — inclui `diary.md`: cita casos anteriores quando o padrão se repete (domínio genérico, nunca nomes)
 - `.claude/agent-memory/_tenant/<tenant>/solution-architect/*.md` (if present)
 
 `<engagement>` resolves to `$AISA_ENGAGEMENTS_ROOT/<slug>` if set, otherwise `projects/<slug>`. `<pack>` is read from `_state.json.pack`.

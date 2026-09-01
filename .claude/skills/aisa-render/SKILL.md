@@ -12,6 +12,7 @@ description: Render the 6 (or a specific) deliverable(s) for the engagement, by 
 - `<deliverable>`: render only one — `discovery-report`, `executive-report`, `solution-blueprint`, `implementation-spec`, `claude-design-brief`, `estimate`.
 - `--all`: render every deliverable declared in `library/packs/<pack>/pack.yaml` **that applies to the decision type** (see *Applicability by decision type* below). This is the default after `/decide` → `/synthesize`.
 - `--dry-run`: resolve slots and surface gaps without writing to `_render/`. Useful for debugging templates without bumping versions.
+- `--html`: additionally produce `<slug>_discovery-report_v<NN>.html` — the interrogable projection: self-contained HTML (inline CSS, ZERO external requests), every SU id citation rendered as `<span class="prov" title="<estado> · <evidência> · verificado <data> (<validade>)">C-014</span>`, a top banner ("documento gerado do Shared Understanding — cada afirmação é rastreável") and a final **Proveniência** section with the id → lens → evidência → validade table. v3.0 scope: discovery-report only (other deliverables in v3.1).
 
 ## Phase gate (soft)
 

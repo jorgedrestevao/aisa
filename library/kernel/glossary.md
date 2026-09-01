@@ -1,4 +1,4 @@
-# Glossary — Kernel v0.1.0
+# Glossary — Kernel v0.2.0
 
 Universal aisa vocabulary (not pack-specific). Pack-specific terms live in `library/packs/<id>/glossary.md`.
 

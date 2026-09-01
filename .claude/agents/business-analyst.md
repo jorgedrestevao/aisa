@@ -26,6 +26,7 @@ Invoked in parallel with the other personas as a Task subagent. Read-only by too
 ## Memory consulted
 
 - `.claude/agent-memory/_universal/business-analyst/*.md` (if present)
+- **Diary**: `diary.md` na mesma pasta — quando um padrão do teu diário se repete, cita o caso («num engagement anterior de <domínio>, vi…»); nunca nomes de cliente fora do tenant.
 - `.claude/agent-memory/_tenant/<tenant>/business-analyst/*.md` (if present)
 
 ## Mandate per phase
