@@ -35,6 +35,7 @@
 |---|---|
 | `/start <slug> [pack]` | New engagement |
 | `/round [lens]` | Run a Discovery round (auto or specific lens) |
+| `/capture [file]` | Process-capture an input file (`.xlsx`/`.xlsm`): deterministic extraction + replay + process model into `_capture/`. Auto-runs in `/start` and on stale hashes in `/round` |
 | `/answer <id> "..."` | Resolve an Unknown/Conflicted/Assumed/Risky row (state transition + answers.md) |
 | `/status` | Show phase, round, SU summary, gaps |
 | `/frame` | Transit to Framing phase |

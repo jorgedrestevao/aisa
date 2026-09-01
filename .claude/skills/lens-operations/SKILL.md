@@ -53,7 +53,8 @@ pp pack additions: `excel_anchors`, `sharepoint_lists_anchors`, `manual_handoffs
 1.5. **Process-capture evidence** (when `_capture/process-model.md` exists):
    a. Use the process model + replay reports as first-line evidence; cite `PM-NNN → sheet!range`.
    b. **Spot-check ≥1 PM claim against the raw input file this round** before citing the model. Mismatch → record a **Conflicted** SU row citing both (`PM-NNN` vs the raw `sheet!cell`) and flag a capture re-run in `_capture/_capture-log.md`. Never inherit the model blind.
-   c. Promote the interrogation-list items (PM §6) relevant to this lens to SU **Unknown** rows, `quem responde` = the suggested respondent role; dedupe against existing Unknowns.
+   c. Promote the interrogation-list items (PM §6) relevant to this lens to SU **Unknown** rows, carrying the model's `quem responde`, `criticidade`, `custo` and `swing` across (rule 6 applies — if the model left a price blank, set it here rather than inheriting the default); dedupe against existing Unknowns.
+   d. PM rows you promote to Confirmed/Assumed keep the model's `verificado_em` and `validade` (rule 5 — do NOT restamp them with today's date: the evidence is as old as the file). A row already past its half-life enters as weak Assumed, per rule 7.
 2. Reconstruct the as-is process end to end from `context.json` and any inputs.
 3. For each operational signal not yet covered:
    - Evidence exists → **Confirmed** or **Assumed** (declare basis).

@@ -12,6 +12,18 @@
 
 ## Changelog
 
+### v3.1.0 — 2026-09-01 (process capture — a lógica as-is extraída do artefacto)
+
+Merge da linha `local/capture-line` (módulo desenvolvido em paralelo, spec `docs/PROCESS_CAPTURE_SPEC.md`) na linha v3, mais o alinhamento ao kernel v0.2.0:
+
+- **Process capture em 3 camadas**: L1 extracção determinística de `.xlsx`/`.xlsm` (estrutura, padrões de fórmula normalizados a R1C1, colunas `input`/`derived`/`manual`, células de excepção = overrides humanos, validações, formatação condicional, cor-como-dado, comentários, anomalias, flags de VBA/links externos); L3 **replay** — bateria fixa que re-executa lookups, unicidade de chaves, whitespace/casing, staleness, excepções de padrão e referências órfãs, com a regra dura *no check = no claim*; L2 **modelo de processo** (LLM) que reconstrói as regras de negócio evidenciadas (PM-NNN, sempre com citação de célula) e a lista de interrogação (PM-U-NNN) para os humanos.
+- **As lenses consomem o modelo primeiro** (`orchestration.md`), com **spot-check obrigatório de ≥1 afirmação PM contra o ficheiro cru por ronda** — o raw é sempre autoritativo; divergência gera row **Conflicted**. É a mitigação da falha correlacionada (um modelo errado a envenenar 6 lenses).
+- **Alinhamento epistémico**: as regras PM carregam `verificado_em` = data de modificação **do ficheiro** (não da corrida de captura — um Excel de janeiro é evidência de janeiro, e nasce expirado se passou a meia-vida) + `validade`; as PM-U carregam `criticidade`, `custo` e `swing`. As lenses herdam esses carimbos na promoção, sem re-datar.
+- **Hooks migrados para Python** (cross-platform, sem dependência de `jq`), mais o novo `pre-lens-order-check.py` que impõe a ordem sequencial das lenses em Discovery. O `pre-write-guard.py` mantém-se **fail-closed**: enforce por default, `AISA_GUARD_MODE=log` é o override administrativo.
+- Deliverable `estimate` reestruturado em 10 secções por fase.
+
+Validação: fixture xlsx com os 3 defeitos do critério de aceitação do spec §10 — duplicado de chave, falha de lookup por espaço à direita, aging >120 dias — **todos reencontrados mecanicamente pelo replay, com citação de célula** e sem envolvimento de lenses.
+
 ### v3.0.0 — 2026-09-01 (as 5 peças epistémicas — kernel v0.2.0, pack pp v1.2.0)
 
 Build das vagas A–D de `docs/V3_IMPLEMENTATION_PLAN.md` (validação por vaga em `docs/V3_VALIDATION_REPORT.md`):
@@ -656,6 +668,7 @@ Synthesis-skill instancia este template para cada topic, e o output vai para `_s
 |---|---|---|
 | `/start <slug> [pack]` | Início de engagement | Captura literal do pedido, requester. Cria `projects/<slug>/{context.json, shared-understanding.md skeleton, _state.json: phase=discovery, round=R-01}`. Activa pack (default: pp). Não pergunta sobre tecnologia. |
 | `/round [lens]` | Em qualquer fase | Corre uma lens (ou orquestra a sequência completa de uma ronda). Lens determinada pelo arg ou auto-escolhida com base na fase. |
+| `/capture [file]` | Discovery (auto no `/start`, freshness check no `/round`) | Process-capture de inputs `.xlsx`/`.xlsm`: L1 extracção determinística (`library/kernel/tools/xlsx_extract.py`) → L3 replay (bateria fixa de verificações) → L2 modelo de processo (LLM). Escreve `_capture/{<f>.extraction.json, <f>.replay.md, process-model.md, _capture-log.md}`. `inputs/` fica evidência pura. Spec: `docs/PROCESS_CAPTURE_SPEC.md`. |
 | `/answer <id> "..."` | Em qualquer fase | Resolve uma row Unknown/Conflicted/Assumed/Risky: resposta verbatim em `answers.md`, nova row `was <id>`, marcador `resolved →` na original. |
 | `/status` | A qualquer momento | Mostra fase, ronda actual, contagem de items por estado (abertos vs resolvidos), contradições por resolver, gaps abertos, próxima acção sugerida. |
 | `/frame` | Discovery → Framing | Transita para fase Framing. Corre lenses em modo council-independent + chairman. Produz `frame.md` (a frase única) + `contradictions.md` resolvidas. |

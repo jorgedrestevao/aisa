@@ -1,6 +1,12 @@
 # Process Capture Module — Spec v1.0
 
-> Status: BUILT — commit `99fd032` (2026-08-07). Acceptance gate §10.6 passed against the `dpt-galp-jp` pilot.
+> Status: BUILT — commit `99fd032` (2026-08-07), script v1.1.0 after the `pricing-marinha` stress test.
+> Acceptance gate (§10, item 6) passed against the `dpt-galp-jp` pilot, and re-verified on merge
+> into the v3 line (2026-09-01) against a synthetic fixture: the three defects — duplicate key,
+> trailing-space lookup failure, >120-day aging — all resurface mechanically with cell citations.
+> **Aligned to kernel v0.2.0**: PM rules carry `verificado_em` (the input file's modified date, not
+> the capture-run date) + `validade`; PM-U rows carry `criticidade`/`custo`/`swing`. See
+> `docs/ARCHITECTURE.md` changelog v3.1.0.
 > Motivation: pilot (`dpt-galp-jp`) showed the as-is process logic lives largely *inside* the input Excel
 > (formulas, manual columns, color-coding), but the current pipeline captures it accidentally — each lens
 > re-parses inputs ad-hoc, 6× per round, with no guarantee of depth or consistency. This module makes
