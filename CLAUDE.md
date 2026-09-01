@@ -18,6 +18,7 @@
 6. **Native Claude Code primitives**: skills, agents, hooks, commands. No reinvention.
 7. **Pack activo per-engagement**: declared in `projects/<slug>/_state.json.pack`. Not global.
 8. **Atomic writes** to `_state.json`: tmp → mv pattern.
+9. **Knowledge expires; questions have prices; decisions keep their counterfactuals.** (kernel v0.2.0: half-lives, question economics, tripwires/multiverso, diários do council.)
 
 ## Key paths
 
@@ -45,6 +46,7 @@
 | `/synthesize` | Produce topic packs (auto after `/decide` or manual) |
 | `/render [deliverable\|--all]` | Render the deliverables (filtered by decision type) |
 | `/revisit <TW-n\|O-NNN>` | Compare the present with a frozen counterfactual when a tripwire fires; recommend keep/adapt/reopen |
+| `/retro` | Close-of-engagement: personas write diaries (human-curated) — the council gets wiser |
 | `/resume` | Resume from `_state.json` and name the next command |
 
 ## Anti-patterns to avoid

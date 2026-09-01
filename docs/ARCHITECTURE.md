@@ -12,6 +12,17 @@
 
 ## Changelog
 
+### v3.0.0 — 2026-09-01 (as 5 peças epistémicas — kernel v0.2.0, pack pp v1.2.0)
+
+Build das vagas A–D de `docs/V3_IMPLEMENTATION_PLAN.md` (validação por vaga em `docs/V3_VALIDATION_REPORT.md`):
+
+- **Metabolismo epistémico**: Confirmed/Assumed carregam `verificado_em` + `validade` (6 classes de decaimento com meias-vidas default); rows expiram e revalidam-se (`/answer --revalidate`); `/status` mostra saúde epistémica + "a revalidar". Compat: SUs antigos lidos com defaults, nunca migrados.
+- **Economia da pergunta**: Unknowns carregam `custo` (email/documento/reuniao/spike) e `swing` (decisivo/dimensionante/cosmético); `/status` produz a agenda da reunião (o que paga o tempo síncrono do sponsor — e o que explicitamente não); o VOI do `/simulate` consome e corrige as classes.
+- **Pré-mortem + council dialético**: `/premortem` escreve o obituário do projecto (causas narradas com ids; mitigações → requisitos/tripwires); divergências materiais entre personas disparam a ronda de antítese (≤6 calls; Concedo/Contesto/Síntese) — o substituto cirúrgico do peer review.
+- **Multiverso da decisão**: `/decide` congela counterfactuals das opções rejeitadas + tripwires estruturados (TW-n); `/status` vigia-os; `/revisit` compara o presente com o ramo rejeitado e recomenda manter/adaptar/reabrir (advisory absoluto).
+- **Biografias do council**: `/retro` — as 7 personas escrevem diários (staged, curadoria humana) em `agent-memory/_universal/<persona>/diary.md`; personas citam casos anteriores. O council envelhece com o uso.
+- **Experiência**: `story.md` (narrativa por marco, voz de sponsor) e `render --html` (discovery-report interrogável: tooltips de proveniência por id + tabela final).
+
 ### v2.1.0 — 2026-08-31 (build next-level + passe editorial)
 
 Actualizações após o build registado em `docs/NEXT_LEVEL_PLAN.md` e a auditoria `docs/GAP_ANALYSIS.md`:
@@ -183,7 +194,7 @@ Cada linha do Shared Understanding está em **exactamente um** destes estados:
 | **Conflicted** | Stakeholders ou fontes discordam | "Business diz X, Compliance diz não-X" — TEM de resolver antes de avançar para Decision |
 | **Risky** | Alta incerteza com impacto material | "SAP API latency unknown — se >2s mata o caso de uso mobile" |
 
-Transições típicas: `Unknown → (USER_ANSWER) → Confirmed` ou `Assumed`. `Conflicted → (sponsor decision) → Confirmed` ou `Risky`.
+Transições típicas: `Unknown → (USER_ANSWER) → Confirmed` ou `Assumed`. `Conflicted → (sponsor decision) → Confirmed` ou `Risky`. Desde o kernel v0.2.0, Confirmed/Assumed carregam `verificado_em` + `validade` (classe de decaimento): conhecimento expira e revalida-se — ver `library/kernel/states.md` → *Epistemic half-lives* e *Question economics* (custo/swing nos Unknowns).
 
 ### 3.3 As 7 Lenses
 
@@ -228,7 +239,7 @@ Custo: Discovery = ~6 LLM passes por ronda (uma por lens, sequencial). Framing/O
 
 ### 4.1 Schema
 
-Markdown puro, sem YAML frontmatter. 5 secções por estado, cada uma uma tabela:
+Markdown puro, sem YAML frontmatter. 5 secções por estado, cada uma uma tabela. (Kernel v0.2.0: Confirmed/Assumed têm ainda `verificado_em`+`validade`; Unknown tem `custo`+`swing` — exemplos abaixo mantêm o schema base por legibilidade; o normativo é `states.md`.)
 
 ```markdown
 # Shared Understanding — <project-slug>
@@ -650,11 +661,14 @@ Synthesis-skill instancia este template para cada topic, e o output vai para `_s
 | `/frame` | Discovery → Framing | Transita para fase Framing. Corre lenses em modo council-independent + chairman. Produz `frame.md` (a frase única) + `contradictions.md` resolvidas. |
 | `/options` | Framing → Options | Transita para Options. Corre lens-technology + outras lenses como council. Gera 3-5 opções (incluindo `do nothing` e `non-tech`). Consulta `decision-tree.md` pela 1.ª vez. |
 | `/simulate [O-NNN ...]` | Em Options | Projecta cada opção (ecrãs/intervenção, banda de esforço, riscos, constraints) lado-a-lado em `_simulation/` + lista os Unknowns *decision-flipping* (value of information). Advisory. |
+| `/premortem [--horizon <meses>]` | Em Options/Decision, antes do `/decide` | O obituário do projecto datado a +N meses: causas de morte narradas (ids), sinais observáveis, mitigações → requisitos/tripwires. Soft-sugerido pelo `/decide`. |
 | `/decide [--consult]` | Options → Decision | Captura escolha + justificação + alternativas + riscos + condições. Regista em `decisions.md` + row D-NNN no SU. `--consult` = review opcional do solution-architect. **Auto-corre `/synthesize` no fim.** |
 | `/blueprint` | Decision (draft em Options via `--option`) | Produz `_blueprint/ux-blueprint_v<NN>.yaml` — arquitectura de ecrãs com `su_refs`, via regras do pack. Iterado com o negócio até aprovação (D-NNN). Contrato: `library/kernel/blueprint-contract.md`. |
 | `/synthesize` | Auto após `/decide` (ou ad-hoc) | Produz `_synthesis/{business-story, as-is, architecture-story, risks-and-assumptions, financial-story}.md` a partir do SU + lens-outputs + decisions. Camada intermédia para garantir coerência entre os 6 deliverables. |
 | `/render [deliverable\|--all]` | Fim de Decision (após `/synthesize`) | Renderiza 1 ou todos os 6 deliverables em `_render/`. Lê dos topic packs em `_synthesis/`. Falha alto se faltam topic packs ou slots required. Versioning incremental (`v01`, `v02`, ...) — nunca sobrescreve. |
-| `/resume` | Session retomada | Lê `_state.json`, mostra onde estamos e nomeia o próximo comando. |
+| `/revisit <TW-n\|O-NNN>` | Pós-decisão, quando um tripwire dispara | Compara o presente com o counterfactual congelado; recomenda manter/adaptar/reabrir. Nunca altera a decisão. |
+| `/retro` | Fecho do engagement | As 7 personas escrevem diários (staged → curadoria humana → agent-memory). O council fica mais sábio a cada engagement. |
+| `/resume` | Session retomada | Lê `_state.json`, mostra onde estamos, verifica tripwires e nomeia o próximo comando. |
 | `/export` | (backlog — não implementado) | Snapshot completo do engagement (para handoff ou archive). |
 
 **Fluxo típico end-to-end** (visto pelo consultor):

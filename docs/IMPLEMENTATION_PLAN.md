@@ -1591,6 +1591,8 @@ Depois disso, **Fase 12 (pilot)** — workshop curto com 2 consultores Galp + 2 
 | 11 — Enterprise readiness | ☑ done (structural) | 2026-05-28 | (bundled) | 3 authoring docs (PACK/LENS/DELIVERABLE) + 3 skeleton packs (outsystems, mendix, generic) + 4 hook stubs (log-mode) + HOOKS.md + settings.json wired + bootstrap.ps1 + 14 agent-memory _universal/ seed files. Live exec deferred. |
 | 12 — Pilot | ☐ todo | — | — | Real-world distributed work with consultants — outside the build sessions. Pré-requisito (live exec) FEITO 2026-08-31 — ver LIVE_VALIDATION_REPORT.md. |
 
+> **Evoluções pós-MVP** (fora do âmbito das fases acima): v2.0/v2.1 — loop fechado + blueprint + simulate + pack pp 1.1.0 (`NEXT_LEVEL_PLAN.md §3`, 2026-08-31); v2.2–v3.0 — as 5 peças epistémicas: metabolismo, economia da pergunta, pré-mortem, dialética+multiverso, biografias + deliverable interrogável (`V3_IMPLEMENTATION_PLAN.md §10`, 2026-09-01; evidência em `V3_VALIDATION_REPORT.md`). Kernel 0.2.0 · pack pp 1.2.0 · ARCHITECTURE v3.0.0.
+
 ### Como actualizar este tracking
 
 No fim de cada sessão de build, actualizar este section:
