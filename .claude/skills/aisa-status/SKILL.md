@@ -1,6 +1,6 @@
 ---
 name: aisa-status
-description: Show the current phase, round, Shared Understanding summary (counts per state), open critical gaps, and the suggested next action. With --check, validates the aisa install.
+description: Show the current phase, round, Shared Understanding summary (counts per state), epistemic health (expired Confirmed/Assumed rows to revalidate, with the re-question formulated), open critical gaps, and the suggested next action. With --check, validates the aisa install.
 ---
 
 # aisa-status
@@ -18,16 +18,28 @@ description: Show the current phase, round, Shared Understanding summary (counts
 2. Read `_state.json` → engagement, pack, phase, round (the most recent completed round; `R-00` = no round has run yet).
 3. Read `shared-understanding.md` and count rows in each section: Confirmed, Assumed, Unknown, Conflicted, Risky. Rows carrying a `resolved → <id>` marker count as **resolved**, not open — report them separately (e.g., "Unknown: 4 open (+6 resolved)").
 4. Identify **Critical** Unknown and Conflicted rows (criticidade column).
-5. Suggest the next action based on phase + gaps, e.g.:
+5. **Compute epistemic health** (per `library/kernel/states.md` → *Epistemic half-lives*):
+   a. For every OPEN Confirmed/Assumed row (rows with a `resolved →` marker are out), read `verificado_em` + `validade`. Absent columns (pre-v2.2 SUs) ⇒ `verificado_em` = the row's round date, `validade` = `organizacional` — never migrate the SU.
+   b. Half-lives: kernel decay table, overridden by the pack's `epistemics.half_lives_override` (`pack.yaml`) when present.
+   c. A row is **expirada** when `verificado_em + meia-vida(validade) < hoje`. Health = `vivas / (vivas + expiradas)` as a percentage.
+   d. Update the SU header line `> Saúde epistémica: NN% (X expiradas) — <date>` (create the line if the SU predates it).
+6. Suggest the next action based on phase + gaps, e.g.:
    - Critical Unknown/Conflicted open → "Resolve N critical items with the sponsor before /frame."
    - Discovery exit criteria met → "Ready for /frame."
-6. Output a readable summary:
+   - Expired rows underpin the current phase's artefact → "Revalidate before deciding."
+7. Output a readable summary:
    ```
    Engagement: <slug>   Pack: <pack>
    Phase: <phase>       Round: <round>
 
    Shared Understanding:
      Confirmed: N   Assumed: N   Unknown: N (C critical)   Conflicted: N (C critical)   Risky: N
+     Saúde epistémica: NN% (X expiradas)
+
+   A revalidar (top-5, mais vencidas primeiro):
+     C-00x (<validade>, verificado <data>) — "Ainda é verdade que <claim>? Verificado pela última vez em <data>."
+       → /answer --revalidate C-00x   (ou /answer C-00x "..." se o facto mudou)
+     …
 
    Open critical items:
      U-00x — <question> (lens)
@@ -36,6 +48,7 @@ description: Show the current phase, round, Shared Understanding summary (counts
    Next suggested action:
      → <suggestion>
    ```
+   Omit the "A revalidar" block when nothing is expired (health 100%). Sort by how far past expiry; list at most 5 and say how many more there are.
 
 ## Execution steps (--check)
 

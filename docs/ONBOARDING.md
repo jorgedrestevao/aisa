@@ -207,10 +207,14 @@ Phase: discovery
 Round: R-01
 
 Shared Understanding:
+  Saúde epistémica: 92% (1 expirada)
   ## Confirmed (12)
     C-001 — Sponsor é António Silva, Director Procurement (lens: business)
     C-002 — Processo actual: Excel + Outlook, 47 aprovações/mês (lens: operations)
     ...
+  A revalidar:
+    C-005 (pessoas-disponibilidade, verificado 2026-04-02) — "Ainda é verdade que só o Director aprova? Verificado pela última vez em 2026-04-02."
+      → /answer --revalidate C-005   (ou /answer C-005 "..." se o facto mudou)
   ## Assumed (8)
     A-001 — Tenant Galp tem E5 licensing (lens: technology) [⚠️ confirmar]
     ...
@@ -295,6 +299,14 @@ Os 7 agentes (agora incluindo solution-architect / lens-technology) correm em pa
 Cada opção vem com prós, contras, e referências aos constraints do SU (ex: opção 3 referencia A-001 "tenant tem E5" como pre-requisito a confirmar).
 
 **Opcional — `/simulate`**: antes de decidir, projeta as opções lado-a-lado (ecrãs/intervenção, banda de esforço, riscos, constraints) e lista os Unknowns *decision-flipping* — os que vale a pena resolver com o sponsor antes do `/decide`. Output em `_simulation/options-comparison_v01.md`.
+
+### 3.8b Passo 7b — `/premortem` (antes de decidir)
+
+```
+/premortem
+```
+
+Escreve o obituário do projecto datado a +12 meses (`premortem.md`): 3–6 causas de morte **narradas** — como 2+ fraquezas do SU se combinam (ids inline: Risky, Assumed expiradas, Unknowns abertas) — cada uma com probabilidade, primeiro sinal observável e mitigação classificada (REQUISITO / TRIPWIRE candidato / ACEITAÇÃO). O sponsor lê isto antes de assinar; o `/decide` sugere-o automaticamente se estiver em falta ou desactualizado (soft — podes avançar sem ele).
 
 ### 3.9 Passo 8 — `/decide`
 

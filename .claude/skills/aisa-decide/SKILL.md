@@ -24,6 +24,7 @@ description: Interactive Decision phase. User picks an option from options.md, g
 
 - `<engagement>/_state.json`, `<engagement>/context.json`, `<engagement>/shared-understanding.md`, `<engagement>/decisions.md`, `<engagement>/council-log.md`.
 - `<engagement>/frame.md`, `<engagement>/options.md`.
+- `<engagement>/premortem.md` (if present — tripwire candidates and requirements for the D-NNN block).
 - `<engagement>/lens-outputs/*.md` (incl. all chairman-synthesis logs).
 
 ## Outputs (written)
@@ -39,7 +40,8 @@ description: Interactive Decision phase. User picks an option from options.md, g
 
 1. Resolve the engagement root and read `_state.json`. If `phase != options` AND `phase != decision` → stop with: "/decide transitions Options → Decision; current phase is `<phase>`. Use /options first." If `phase == decision`, treat as a re-decision (a new D-NNN, the next number).
 2. Verify `<engagement>/options.md` exists. If not → stop and ask the user to run `/options` first, or supply `--override "..."`.
-3. Parse `options.md` and list the available options.
+3. **Pre-mortem check (soft)**: if `<engagement>/premortem.md` does not exist, or is older than the latest Options-round artefact (`options.md` / newest `_simulation/*`), suggest `/premortem` first — its mitigations feed the accepted risks and revision conditions below. Free override: if the user says "proceed", proceed (no `--override` needed); note the skip in the D-NNN block's justification context.
+4. Parse `options.md` and list the available options.
 
 ### 2. Interactive capture
 

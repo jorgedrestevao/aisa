@@ -83,3 +83,10 @@ glossary: glossary.md
 decision_tree:
   source: decision-tree.md
   consulted_in_phase: options  # never in discovery
+
+epistemics:
+  # Half-life overrides for this pack's domain. Empty = the kernel defaults apply
+  # (library/kernel/states.md -> "Epistemic half-lives").
+  # TODO(team): calibrate at the pilot retro (e.g. plataforma-tecnica: 9 meses
+  # if platform limits churn faster than the kernel default).
+  half_lives_override: {}

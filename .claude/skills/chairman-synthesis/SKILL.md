@@ -32,6 +32,7 @@ You are executing the **chairman** role described in `.claude/agents/chairman.md
 3. **Every Confirmed row must have ≥2 persona anchors OR a direct document/sponsor citation.** A single persona's claim with no document → **Assumed** (declare basis) or **Unknown**.
 4. **Surface contradictions as Conflicted rows.** Never silently pick a winner. The user resolves at `/decide` time.
 5. **Atomic writes**. Update `_state.json` via tmp → rename (`Move-Item -Force` on Windows, `mv` on Unix), matching `aisa-start`.
+6. **Epistemic columns.** Every Confirmed/Assumed row you write carries `verificado_em` = today (ISO date) and a `validade` decay class (`library/kernel/states.md` → *Epistemic half-lives*; in doubt: `organizacional`). An **expired** row (past its half-life) reads as *Assumed fraca*: a persona claim anchored only on expired rows never becomes Confirmed — keep it Assumed and raise the re-question as an Unknown.
 
 ## Synthesis procedure
 
@@ -68,7 +69,7 @@ Scan the current SU per section, find the highest existing id, and allocate the 
 
 ### Step 5 — Write the SU rows
 
-Edit `<engagement>/shared-understanding.md`, appending to each section table. Preserve existing rows and headers exactly. Update the SU header `Última actualização` timestamp.
+Edit `<engagement>/shared-understanding.md`, appending to each section table. Stamp `verificado_em` = today and a `validade` class on every Confirmed/Assumed row. Preserve existing rows and headers exactly. Update the SU header `Última actualização` timestamp.
 
 ### Step 6 — Write the phase artefact
 

@@ -53,6 +53,8 @@ If invoked in Discovery or Framing in error → refuse and return: "lens-technol
 3. **NEVER emit Confirmed without evidence.** Option pros/cons are usually **Assumed** unless documented; declare the basis.
 4. **Identify yourself** in the `lens` column: always `technology`.
 5. **Append-only.** Preserve `was X-NNN` on transitions.
+6. **Stamp epistemic columns.** Every Confirmed/Assumed row you write carries `verificado_em` = today (ISO date) and a `validade` decay class from `library/kernel/states.md` → *Epistemic half-lives* (in doubt: `organizacional`).
+7. **Expired rows are weak.** A row past its half-life (per `states.md`) reads as **Assumed fraca** — never cite it as Confirmed; if a conclusion rests on it, raise the re-question («Ainda é verdade que <claim>? Verificado pela última vez em <data>»).
 
 ## Signal catalog (pack-driven)
 
@@ -69,7 +71,7 @@ Other packs declare their own; lens-technology reads them from `lenses_config.te
 ## Execution steps
 
 1. Read `_state.json`. Verify `phase ∈ {options, decision}`. If not → refuse (see phase gate).
-2. Read all inputs (engagement + pack architectural knowledge).
+2. Read all inputs (engagement + pack architectural knowledge). Note which existing Confirmed/Assumed rows are **expired** (`states.md` half-lives; absent columns ⇒ `verificado_em` = round date, `validade` = `organizacional`): treat them as weak Assumed, not settled coverage.
 3. Cross the framed problem against the pack's `decision-tree.md` to identify the candidate architectural branches.
 4. For each candidate (target 3–5, must include do-nothing + non-tech):
    a. Name the option (e.g., "Canvas-only", "Hybrid Canvas + Model-driven", "Process change without digitalization", "Do nothing").
@@ -77,7 +79,7 @@ Other packs declare their own; lens-technology reads them from `lenses_config.te
    c. Identify integrations needed against the systems already in the SU.
    d. Estimate reversibility and effort band.
    e. Anchor each conclusion: cite the decision-tree branch, the domain-knowledge file, or the SU row id.
-5. Write SU rows: each option as **Assumed** (with declared basis) unless backed by direct evidence; constraint blockers as **Risky** with mitigation; missing constraint inputs as **Unknown**.
+5. Write SU rows: each option as **Assumed** (with declared basis) unless backed by direct evidence; constraint blockers as **Risky** with mitigation; missing constraint inputs as **Unknown**. Stamp `verificado_em` = today and `validade` on every Confirmed/Assumed row.
 6. Write the narrative paragraph to `lens-outputs/technology.md`: the candidate set, why each is in or out, the constraint watch-list.
 7. In council mode, return the structured proposal per the solution-architect agent schema.
 8. Append to `council-log.md`: round, `lens: technology`, a one-line summary.

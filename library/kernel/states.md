@@ -29,17 +29,44 @@ Each row in the Shared Understanding (`shared-understanding.md`) is in **exactly
 | Conflicted | Risky | No resolution; tracked as risk |
 | Assumed | Confirmed | Validation done |
 | Risky | Confirmed | Mitigation implemented or risk realized & resolved |
+| Confirmed (expirado) | Confirmed | **Revalidação**: the fact still holds → renew `verificado_em` on the row itself (sanctioned edit; no new row) |
+| Confirmed (expirado) | Unknown | The fact may have changed → re-question; the answer then follows the normal transition (`was <id>`) |
 
-Append rule: when a row transitions, the new row references the old id (`was U-007`). The old row stays for audit, and gains a ` — resolved → <new-id>` marker in its last column (the one sanctioned edit). Status counting treats marked rows as resolved, not open. The `/answer` skill applies these transitions; the verbatim answer is kept in `answers.md`.
+Append rule: when a row transitions, the new row references the old id (`was U-007`). The old row stays for audit, and gains a ` — resolved → <new-id>` marker in its last column. Sanctioned edits to existing rows are exactly two: the `resolved →` marker on transition, and renewing `verificado_em` on revalidation (see *Epistemic half-lives*). Status counting treats marked rows as resolved, not open. The `/answer` skill applies these transitions; the verbatim answer is kept in `answers.md`.
 
 ## Schema of Shared Understanding rows
 
 | Section | Columns |
 |---|---|
-| `## Confirmed` | `id \| lens \| claim \| evidência \| ronda` |
-| `## Assumed` | `id \| lens \| claim \| base da assumption \| ronda` |
+| `## Confirmed` | `id \| lens \| claim \| evidência \| verificado_em \| validade \| ronda` |
+| `## Assumed` | `id \| lens \| claim \| base da assumption \| verificado_em \| validade \| ronda` |
 | `## Unknown` | `id \| lens \| pergunta \| quem responde \| criticidade (Low/Med/Critical) \| ronda` |
 | `## Conflicted` | `id \| lens \| conflito \| partes \| criticidade \| ronda` |
 | `## Risky` | `id \| lens \| risco \| impacto \| mitigação proposta \| ronda` |
 
 Id prefixes: `C-` (Confirmed), `A-` (Assumed), `U-` (Unknown), `X-` (Conflicted), `R-` (Risky), `D-` (Decision; cross-ref to `decisions.md`).
+
+## Epistemic half-lives
+
+Confirmed and Assumed rows carry two columns beyond the claim: `verificado_em` (ISO date, e.g. `2026-08-31` — when the fact was last verified) and `validade` (one of the 6 decay classes below, short name). Knowledge expires: the schema governs a claim's *filiation* (when it was verified, how fast it decays), never what the claim may say.
+
+### Decay classes and default half-lives
+
+| Classe (`validade`) | Meia-vida default | Exemplos |
+|---|---|---|
+| `legal-regulatorio` | 24 meses | retenção legal, obrigações de auditoria |
+| `plataforma-tecnica` | 12 meses | limites de produto, capacidades de plataforma |
+| `organizacional` | 6 meses (**DEFAULT** — na dúvida, usa esta) | processos, políticas internas, org |
+| `financeiro` | 6 meses | envelopes, taxas, chargeback |
+| `pessoas-disponibilidade` | 3 meses | quem aprova, aceites individuais, disponibilidades |
+| `volatil` | 1 mês | estados operacionais correntes (backlogs, pendências) |
+
+TODO(team): defaults em uso desde a v2.2 — validar as meias-vidas na retro do pilot. Packs podem sobrepor classes via `epistemics.half_lives_override` no seu `pack.yaml`; na ausência de override, valem os defaults acima.
+
+### Expiration rule (normative)
+
+Uma row está expirada quando `verificado_em + meia-vida(validade) < hoje`. Expirada ≠ falsa: significa que a confiança caducou. Efeitos: (1) /status conta-a em "a revalidar" e a saúde epistémica desce; (2) lenses e personas tratam-na como Assumed fraca; (3) a re-pergunta sugerida é gerada a partir do claim ("Ainda é verdade que <claim>? Verificado pela última vez em <data>"). A revalidação renova `verificado_em` sem nova row; a mudança de facto segue a transição normal com `was <id>`.
+
+### Compatibility (SUs created before v2.2)
+
+Coluna ausente ⇒ tratar como `verificado_em = data da ronda` e `validade = organizacional`. A regra aplica-se **na leitura** — nunca migrar SUs antigos à força.

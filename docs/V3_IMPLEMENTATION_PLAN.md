@@ -309,7 +309,7 @@ Thresholds do decision-tree (R4-R6), rácios do estimation-model, `TODO(team)` d
 
 | Vaga | Versão | Status | Data | Commit(s) | Notas |
 |---|---|---|---|---|---|
-| A — metabolismo + pré-mortem | v2.2 | ☐ todo | — | — | — |
+| A — metabolismo + pré-mortem | v2.2 | ☑ done | 2026-09-01 | (ver git log) | A1-A11 conforme plano; validação: micro-fixture exp-test (saúde 33%→100%, revalidate vs transição OK) + /premortem real no galp-adv-val (5 causas, 3 tripwires candidatos). Melhoria além-plano: hard rule 4 do premortem (rows expiradas = combustível) |
 | B — economia da pergunta + narrativa | v2.3 | ☐ todo | — | — | — |
 | C — dialética + multiverso | v2.4 | ☐ todo | — | — | — |
 | D — biografias + interrogável + docs + validação | v3.0 | ☐ todo | — | — | — |
