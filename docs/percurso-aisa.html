@@ -1,0 +1,714 @@
+<title>O Percurso aisa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,400;0,500;0,600;1,6..72,400&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --paper:      #F2F4F1;
+  --paper-sunk: #E9ECE7;
+  --card:       #FBFCFA;
+  --ink:        #16201C;
+  --ink-soft:   #55625B;
+  --ink-faint:  #7C8880;
+  --rule:       #D5DCD6;
+  --rule-soft:  #E4E9E3;
+  --accent:     #1F5E4A;
+  --accent-lit: #2E7D5B;
+  --warn:       #A8571E;
+
+  --s-confirmed: #2E7D5B;
+  --s-assumed:   #96690F;
+  --s-unknown:   #4A6076;
+  --s-conflict:  #A33A33;
+  --s-risky:     #7B4A82;
+
+  --shadow: 0 1px 2px rgba(22,32,28,.04), 0 8px 24px -12px rgba(22,32,28,.10);
+
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans:  "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:      #111614;
+    --paper-sunk: #0C100E;
+    --card:       #18201C;
+    --ink:        #E4E9E3;
+    --ink-soft:   #A3AFA7;
+    --ink-faint:  #7C8880;
+    --rule:       #2A342E;
+    --rule-soft:  #212A25;
+    --accent:     #6FBF9B;
+    --accent-lit: #8AD3B2;
+    --warn:       #D89253;
+
+    --s-confirmed: #66C79A;
+    --s-assumed:   #D9A93E;
+    --s-unknown:   #8FAAC2;
+    --s-conflict:  #E2837A;
+    --s-risky:     #C193C8;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.30), 0 8px 24px -12px rgba(0,0,0,.55);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper:      #111614;
+  --paper-sunk: #0C100E;
+  --card:       #18201C;
+  --ink:        #E4E9E3;
+  --ink-soft:   #A3AFA7;
+  --ink-faint:  #7C8880;
+  --rule:       #2A342E;
+  --rule-soft:  #212A25;
+  --accent:     #6FBF9B;
+  --accent-lit: #8AD3B2;
+  --warn:       #D89253;
+
+  --s-confirmed: #66C79A;
+  --s-assumed:   #D9A93E;
+  --s-unknown:   #8FAAC2;
+  --s-conflict:  #E2837A;
+  --s-risky:     #C193C8;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.30), 0 8px 24px -12px rgba(0,0,0,.55);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 5vw, 3.5rem);
+}
+.eyebrow {
+  font-family: var(--sans);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 1.5rem;
+}
+.masthead h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.75rem, 8vw, 5.25rem);
+  line-height: 1.02;
+  letter-spacing: -.02em;
+  margin: 0 0 1.25rem;
+  text-wrap: balance;
+}
+.masthead h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.standfirst {
+  font-size: clamp(1.125rem, 2.4vw, 1.4rem);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 34ch;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ---------- layout ---------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  align-items: start;
+}
+@media (min-width: 1000px) {
+  .shell { grid-template-columns: 210px minmax(0, 1fr); gap: clamp(3rem, 6vw, 5.5rem); }
+}
+
+.rail { display: none; }
+@media (min-width: 1000px) {
+  .rail {
+    display: block;
+    position: sticky;
+    top: 2.5rem;
+    padding-top: 4.5rem;
+    font-family: var(--sans);
+  }
+  .rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .1rem; }
+  .rail a {
+    display: block;
+    padding: .42rem 0 .42rem .9rem;
+    border-left: 2px solid var(--rule-soft);
+    color: var(--ink-faint);
+    text-decoration: none;
+    font-size: .82rem;
+    line-height: 1.35;
+    transition: color .18s ease, border-color .18s ease;
+  }
+  .rail a:hover { color: var(--ink); border-left-color: var(--rule); }
+  .rail a.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+}
+
+main { padding-bottom: 6rem; min-width: 0; }
+
+section { padding-top: clamp(3.5rem, 7vw, 5.5rem); scroll-margin-top: 2rem; }
+
+h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(1.65rem, 3.6vw, 2.35rem);
+  line-height: 1.15;
+  letter-spacing: -.015em;
+  margin: 0 0 1.5rem;
+  text-wrap: balance;
+}
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: .95rem;
+  letter-spacing: .01em;
+  margin: 2.25rem 0 .6rem;
+}
+p { margin: 0 0 1.15rem; max-width: 66ch; }
+p.lede { font-size: 1.2rem; line-height: 1.55; color: var(--ink-soft); font-weight: 300; }
+strong { font-weight: 600; }
+em { font-style: italic; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: .875em;
+  background: var(--paper-sunk);
+  border: 1px solid var(--rule-soft);
+  border-radius: 3px;
+  padding: .08em .38em;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+/* ---------- the five marks ---------- */
+
+.marks {
+  display: grid;
+  gap: 1px;
+  background: var(--rule-soft);
+  border: 1px solid var(--rule-soft);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 2rem 0;
+}
+@media (min-width: 640px) { .marks { grid-template-columns: repeat(2, 1fr); } }
+.mark { background: var(--card); padding: 1.15rem 1.25rem; }
+.mark-name {
+  font-family: var(--sans);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-bottom: .5rem;
+}
+.dot { width: .58rem; height: .58rem; border-radius: 50%; flex: none; }
+.mark p { margin: 0; font-size: .95rem; line-height: 1.55; color: var(--ink-soft); max-width: none; }
+.m-confirmed .dot { background: var(--s-confirmed); } .m-confirmed .mark-name { color: var(--s-confirmed); }
+.m-assumed   .dot { background: var(--s-assumed); }   .m-assumed   .mark-name { color: var(--s-assumed); }
+.m-unknown   .dot { background: var(--s-unknown); }   .m-unknown   .mark-name { color: var(--s-unknown); }
+.m-conflict  .dot { background: var(--s-conflict); }  .m-conflict  .mark-name { color: var(--s-conflict); }
+.m-risky     .dot { background: var(--s-risky); }     .m-risky     .mark-name { color: var(--s-risky); }
+
+/* ---------- phases ---------- */
+
+.phase {
+  border-top: 1px solid var(--rule);
+  padding-top: 2rem;
+  margin-top: 3rem;
+  display: grid;
+  gap: 1.75rem;
+}
+@media (min-width: 760px) {
+  .phase { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 2.5rem; }
+}
+.phase:first-of-type { margin-top: 2rem; }
+.phase-mark { font-family: var(--sans); }
+.phase-num {
+  font-family: var(--serif);
+  font-size: 2.75rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  display: block;
+}
+.phase-label {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: .5rem;
+  display: block;
+}
+.phase-body > h3:first-child { margin-top: 0; }
+.phase-goal {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  border-left: 2px solid var(--rule);
+  padding-left: 1rem;
+  margin: 0 0 1.75rem;
+  font-style: italic;
+}
+
+/* ---------- steps ---------- */
+
+.step { margin: 0 0 1.75rem; }
+.step:last-child { margin-bottom: 0; }
+.step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .7rem;
+  margin-bottom: .5rem;
+}
+.cmd {
+  font-family: var(--mono);
+  font-size: .875rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 3px;
+  padding: .18em .5em;
+  white-space: nowrap;
+}
+.cmd.auto {
+  color: var(--ink-soft);
+  background: var(--paper-sunk);
+  border-color: var(--rule);
+  font-family: var(--sans);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.step-what {
+  font-family: var(--sans);
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.step p { margin: 0 0 .7rem; }
+.step p:last-child { margin-bottom: 0; }
+
+/* ---------- pull ---------- */
+
+.pull {
+  background: var(--card);
+  border: 1px solid var(--rule-soft);
+  border-radius: 4px;
+  padding: 1.25rem 1.35rem;
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow);
+}
+.pull-label {
+  font-family: var(--sans);
+  font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--warn);
+  display: block;
+  margin-bottom: .5rem;
+}
+.pull p { margin: 0; font-size: .97rem; line-height: 1.6; max-width: none; }
+
+/* ---------- distinctives ---------- */
+
+.distinct { display: grid; gap: 2.5rem; margin-top: 2rem; }
+@media (min-width: 860px) { .distinct { grid-template-columns: repeat(3, 1fr); gap: 2.25rem; } }
+.distinct h3 {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+  margin: 0 0 .75rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--accent);
+}
+.distinct p { font-size: .97rem; margin-bottom: .8rem; }
+
+/* ---------- table ---------- */
+
+.table-scroll { overflow-x: auto; margin: 2rem 0; border: 1px solid var(--rule-soft); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; min-width: 520px; background: var(--card); }
+th, td { text-align: left; padding: .72rem 1rem; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+th {
+  font-family: var(--sans);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: var(--paper-sunk);
+}
+tbody tr:last-child td { border-bottom: none; }
+td:first-child { white-space: nowrap; }
+td code { background: none; border: none; padding: 0; color: var(--accent); font-weight: 500; }
+
+/* ---------- trouble ---------- */
+
+.trouble { display: grid; gap: 1px; background: var(--rule-soft); border: 1px solid var(--rule-soft); border-radius: 4px; overflow: hidden; margin-top: 2rem; }
+.trouble > div { background: var(--card); padding: 1.15rem 1.3rem; }
+.trouble h3 { margin: 0 0 .45rem; font-size: .92rem; }
+.trouble p { margin: 0; font-size: .94rem; color: var(--ink-soft); max-width: none; }
+
+/* ---------- footer ---------- */
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 5rem;
+  padding: 2rem 0 3.5rem;
+  font-family: var(--sans);
+  font-size: .82rem;
+  color: var(--ink-faint);
+}
+footer p { max-width: 60ch; margin: 0 0 .5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+html { scroll-behavior: smooth; }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Guia de utilização</p>
+    <h1>O percurso <em>aisa</em></h1>
+    <p class="standfirst">Do momento em que alguém diz «precisamos de uma aplicação para isto» até aos documentos que a equipa de construção recebe.</p>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="shell">
+
+  <nav class="rail" aria-label="Secções">
+    <ol>
+      <li><a href="#ideia">A ideia</a></li>
+      <li><a href="#marcas">As cinco marcas</a></li>
+      <li><a href="#percurso">O percurso</a></li>
+      <li><a href="#depois">Depois de decidir</a></li>
+      <li><a href="#diferente">O que é diferente</a></li>
+      <li><a href="#referencia">Referência rápida</a></li>
+      <li><a href="#problemas">Quando algo corre mal</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="ideia">
+      <h2>A ideia, em três parágrafos</h2>
+      <p class="lede">O aisa é um percurso feito de comandos que escreves. Cada comando faz avançar o trabalho e regista o que descobriu — num sítio só, sempre o mesmo.</p>
+      <p>O princípio que governa tudo o resto: <strong>primeiro entende-se o problema, só depois se escolhe como resolvê-lo.</strong> Na prática, isto significa que ninguém nomeia produtos ou fornecedores antes da fase das Opções — nem tu, nem os conselheiros. «Isto precisa de ser usado no telemóvel, em armazém» é uma necessidade e é bem-vinda desde o primeiro minuto. «Fazemos isto em <span aria-hidden="true">…</span> tal ferramenta» é uma solução, e é cedo demais.</p>
+      <p>O que o percurso mantém vivo é <strong>um retrato do que se sabe</strong>: um documento que cresce a cada ronda, onde cada afirmação leva uma marca a dizer quão sólida é e uma referência a dizer de onde veio. Enquanto o trabalho decorre, esse retrato é a verdade — é onde o sponsor pode espreitar a qualquer momento para ver onde as coisas estão. Os documentos finais são gerados a partir dele, no fim.</p>
+      <p>Nada entra inventado. Quando não se sabe, escreve-se que não se sabe — nunca um palpite com cara de facto.</p>
+    </section>
+
+    <section id="marcas">
+      <h2>As cinco marcas</h2>
+      <p>Tudo o que entra no retrato leva uma destas cinco marcas. É o vocabulário que faz o resto do percurso funcionar, e vale os trinta segundos que demora a lê-lo.</p>
+
+      <div class="marks">
+        <div class="mark m-confirmed">
+          <div class="mark-name"><span class="dot"></span>Confirmado</div>
+          <p>Alguém provou. Há uma fonte concreta: um documento, uma resposta do sponsor, uma célula de uma folha de cálculo.</p>
+        </div>
+        <div class="mark m-assumed">
+          <div class="mark-name"><span class="dot"></span>Assumido</div>
+          <p>Estamos a contar com isto, mas ninguém confirmou. Fica escrito em que nos baseámos — para se saber o que cai se a assunção falhar.</p>
+        </div>
+        <div class="mark m-unknown">
+          <div class="mark-name"><span class="dot"></span>Por saber</div>
+          <p>Uma pergunta em aberto, com dono («quem responde a isto?») e com preço — quanto custa perguntar e quanto muda a resposta.</p>
+        </div>
+        <div class="mark m-conflict">
+          <div class="mark-name"><span class="dot"></span>Em conflito</div>
+          <p>Duas fontes dizem coisas diferentes. Não se resolve por maioria nem se escolhe a mais simpática: regista-se e leva-se a quem decide.</p>
+        </div>
+        <div class="mark m-risky">
+          <div class="mark-name"><span class="dot"></span>Arriscado</div>
+          <p>Sabe-se, e é um problema. Fica à vista, com nome, em vez de enterrado numa nota de rodapé.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="percurso">
+      <h2>O percurso, fase a fase</h2>
+      <p>São quatro fases. Não se salta nenhuma, mas volta-se atrás sempre que for preciso — é normal e não é sinal de fracasso.</p>
+
+      <!-- FASE 1 -->
+      <div class="phase">
+        <div class="phase-mark">
+          <span class="phase-num">1</span>
+          <span class="phase-label">Descoberta</span>
+        </div>
+        <div class="phase-body">
+          <p class="phase-goal">Perceber o problema real — não o pedido tal como chegou.</p>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/start &lt;nome&gt;</span><span class="step-what">Abrir o trabalho</span></div>
+            <p>Pede-te três coisas: o pedido <em>literal</em> (cola-o tal como foi dito, sem melhorar a redação), quem pediu e que autoridade tem, e os documentos que existirem. Põe os ficheiros do cliente na pasta <code>inputs/</code> antes de começar.</p>
+            <p>Guardar o pedido em bruto parece pouco importante e não é: metade das descobertas úteis vem da diferença entre o que foi pedido e o que se percebeu depois.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd auto">Automático</span><span class="step-what">A leitura das folhas de cálculo</span></div>
+            <p>Se puseste ficheiros Excel em <code>inputs/</code>, o aisa lê-os antes de qualquer pessoa opinar. Procura o que costuma estar escondido lá dentro: que colunas são calculadas e quais são <strong>preenchidas à mão</strong> — essas são passos humanos do processo, e são o sinal mais forte que uma folha dá; que regras de negócio vivem dentro de fórmulas e validações; e que contas deixaram de bater.</p>
+            <p>Devolve duas listas: as regras que o ficheiro <em>prova</em>, cada uma com a célula que a prova, e as perguntas que o ficheiro <em>levanta e não responde</em>. Encontra também as falhas silenciosas — um espaço a mais que faz uma procura falhar sem dar erro, um registo duplicado, pedidos parados há quatro meses que ninguém escalou.</p>
+            <div class="pull">
+              <span class="pull-label">A regra que protege isto</span>
+              <p>O ficheiro é o <em>retrato</em> do processo, não o processo. Por isso cada uma das seis perspetivas é obrigada a confirmar pelo menos uma dessas regras contra o ficheiro original antes de a usar — e, se não bater certo, o ficheiro original ganha e fica registado um conflito. Sem esta regra, um único engano na leitura contaminaria as seis perspetivas ao mesmo tempo.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/round</span><span class="step-what">As seis perspetivas</span></div>
+            <p>Seis olhares sobre o mesmo material, por esta ordem: <strong>negócio</strong> (o que está em jogo e para quem), <strong>operações</strong> (como o trabalho é mesmo feito, incluindo os atalhos), <strong>utilizador</strong> (quem sofre a fricção), <strong>dados</strong> (de quem são, que qualidade têm, quão sensíveis são), <strong>governança</strong> (o que a auditoria e as regras exigem) e <strong>dinheiro</strong> (quanto custa hoje, quanto custa não fazer nada).</p>
+            <p>A ordem é obrigatória, porque cada perspetiva lê o que as anteriores escreveram. Para correr só uma — o caso normal depois de teres obtido uma resposta — usa <code>/round dados</code>.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/status</span><span class="step-what">Onde estamos</span></div>
+            <p>Quantas coisas sabemos, quantas assumimos, o que falta, o que está em conflito. E a parte que mais tempo poupa: <strong>a agenda da reunião</strong>, em três listas — o que resolves por email, o que precisa mesmo do tempo do sponsor, e o que não vale a pena perguntar a ninguém.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/answer &lt;id&gt; "…"</span><span class="step-what">Registar o que soubeste</span></div>
+            <p>A pergunta fecha-se, a informação nova entra com a marca certa, e a resposta fica guardada tal como foi dita. Nada se apaga: vê-se sempre de onde cada facto veio e o que ele era antes.</p>
+          </div>
+
+          <p>Repete <code>/round</code> → <code>/status</code> → <code>/answer</code> até as perguntas críticas estarem respondidas. Duas ou três voltas é o normal.</p>
+        </div>
+      </div>
+
+      <!-- FASE 2 -->
+      <div class="phase">
+        <div class="phase-mark">
+          <span class="phase-num">2</span>
+          <span class="phase-label">Enquadramento</span>
+        </div>
+        <div class="phase-body">
+          <p class="phase-goal">Chegar a uma frase — qual é o problema.</p>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/frame</span><span class="step-what">A frase única</span></div>
+            <p>Aqui os conselheiros mudam de modo: trabalham <strong>em separado, sem se ouvirem uns aos outros</strong>, e só depois alguém junta o que cada um trouxe. É deliberado — perspetivas que se ouvem convergem cedo demais e cedo demais é convergir para o óbvio.</p>
+            <p>Se dois discordarem de forma séria, há uma segunda volta em que cada um tem de atacar o argumento <em>mais forte</em> do outro e propor uma síntese. Se a discordância sobreviver a isso, fica registada como conflito em vez de desaparecer numa média.</p>
+            <p>O sponsor lê a frase e valida. Sem essa validação, não se avança — e essa validação fica registada.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 3 -->
+      <div class="phase">
+        <div class="phase-mark">
+          <span class="phase-num">3</span>
+          <span class="phase-label">Opções</span>
+        </div>
+        <div class="phase-body">
+          <p class="phase-goal">Pôr os caminhos possíveis lado a lado, antes de gostar de algum.</p>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/options</span><span class="step-what">Três a cinco caminhos</span></div>
+            <p>Sempre com dois obrigatórios: <strong>não fazer nada</strong> e <strong>mudar apenas o processo, sem software</strong>. Não são caminhos de cortesia — em muitos casos um deles é a resposta certa, e tê-los na mesa é o que dá honestidade à comparação.</p>
+            <p>É aqui, e só aqui, que se nomeiam produtos e fornecedores.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/simulate</span><span class="step-what">Como seria cada caminho</span></div>
+            <p>Que ecrãs, que esforço, que riscos, que restrições. E, mais útil do que tudo isso: a lista das perguntas ainda em aberto que <strong>mudariam a escolha</strong> — para as fazeres antes de decidir, e não depois.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/premortem</span><span class="step-what">O obituário, antes do funeral</span></div>
+            <p>Escreve-se o obituário do projeto: estamos a doze meses no futuro, isto correu mal, porquê. Não vale repetir os riscos já conhecidos — cada causa de morte tem de <strong>combinar pelo menos duas fraquezas</strong> que já estão no retrato, porque é assim que os projetos morrem de verdade: não de um problema, mas de dois que se encontram.</p>
+            <p>Cada causa sai dali como uma de três coisas: um requisito, um alarme a armar, ou um risco que se aceita conscientemente.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 4 -->
+      <div class="phase">
+        <div class="phase-mark">
+          <span class="phase-num">4</span>
+          <span class="phase-label">Decisão</span>
+        </div>
+        <div class="phase-body">
+          <p class="phase-goal">Escolher, e deixar escrito porquê — incluindo o que não se escolheu.</p>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/decide</span><span class="step-what">A escolha</span></div>
+            <p>Escolhes tu — esta parte não é automática. Registas o porquê, o que ficou de fora, que riscos aceitas e em que condições isto se revê.</p>
+            <p>E acontece aqui uma coisa invulgar: os caminhos que <em>não</em> escolheste ficam <strong>congelados</strong>, com a projeção de como seriam e com as condições em que teriam ganho. As condições de revisão viram alarmes concretos e mensuráveis, do género «se ao fim do primeiro mês menos de metade dos pedidos entrar pela aplicação».</p>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/blueprint</span><span class="step-what">Os ecrãs</span></div>
+            <p>Para trabalhos com interface: a arquitetura de ecrãs, cada um ligado às linhas do retrato que o justificam — incluindo os campos que se decidiu <em>não</em> mostrar, e porquê. Itera-se com o negócio até haver aprovação.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="cmd">/render --all</span><span class="step-what">Os documentos finais</span></div>
+            <p>Os documentos de entrega, gerados a partir do retrato. Se faltar informação para preencher alguma coisa, o aisa <strong>diz o que falta e quem devia ter respondido</strong> — não preenche com texto plausível.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="depois">
+      <h2>Depois de decidir</h2>
+      <p>O percurso não acaba na entrega, porque as decisões continuam vivas depois de tomadas.</p>
+
+      <div class="step">
+        <div class="step-head"><span class="cmd">/revisit</span><span class="step-what">Quando um alarme dispara</span></div>
+        <p>Compara-se o presente com o caminho congelado que ficou de fora e produz-se uma recomendação: <strong>manter</strong>, <strong>adaptar</strong> ou <strong>reabrir</strong>. Repara na palavra: recomenda. Nunca decide sozinho, nunca altera a decisão original — mexer na decisão é sempre um ato humano.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="cmd">/retro</span><span class="step-what">O fecho</span></div>
+        <p>No fim, cada conselheiro escreve o que aprendeu neste trabalho — incluindo, obrigatoriamente, <strong>onde falhou</strong>. Tu lês, cortas o que não deve sair, e aprovas. No trabalho seguinte, eles citam a própria experiência: «num caso parecido, o motivo declarado escondia um prazo de auditoria».</p>
+        <p>Um diário só com vitórias é suspeito e deve ser devolvido.</p>
+      </div>
+    </section>
+
+    <section id="diferente">
+      <h2>Três coisas que tornam isto diferente</h2>
+
+      <div class="distinct">
+        <div>
+          <h3>O conhecimento tem prazo</h3>
+          <p>Cada facto guardado leva a data em que foi verificado e a velocidade a que envelhece. Uma obrigação legal muda devagar; quem está disponível na equipa muda depressa.</p>
+          <p>Passado o prazo, o <code>/status</code> avisa e propõe a pergunta de revalidação. Um facto expirado não é falso — é um facto em que já não se deve apostar sem confirmar.</p>
+          <p>Quando a informação vem de um ficheiro, a data é a da <strong>última edição do ficheiro</strong>, não a do dia em que o leste. Uma folha parada há oito meses entra já expirada, e é assim que deve ser.</p>
+        </div>
+        <div>
+          <h3>As perguntas têm preço</h3>
+          <p>Cada pergunta em aberto leva duas etiquetas: quanto custa responder — um email, um documento, uma reunião, ou trabalho técnico — e quanto muda a resposta: muda a escolha, muda o dimensionamento, ou não muda nada.</p>
+          <p>É daí que sai a agenda da reunião. E é o que te permite dizer ao sponsor, com fundamento, que uma pergunta <em>não</em> vale o tempo dele.</p>
+        </div>
+        <div>
+          <h3>A decisão guarda o que não escolheu</h3>
+          <p>Meses depois, quando alguém perguntar «e se tivéssemos ido pelo outro caminho?», a resposta não depende da memória de ninguém.</p>
+          <p>Está escrita: como seria esse caminho, e em que condições teria ganho. Se essas condições se verificarem, o alarme dispara sozinho.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="referencia">
+      <h2>Referência rápida</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Comando</th><th>Quando</th><th>O que faz</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/start</code></td><td>Ao abrir</td><td>Abre o trabalho e guarda o pedido tal como foi dito.</td></tr>
+            <tr><td><code>/capture</code></td><td>Automático</td><td>Lê as folhas de cálculo e extrai as regras que elas provam. Corre sozinho; usa-o à mão se acrescentares ficheiros.</td></tr>
+            <tr><td><code>/round</code></td><td>Descoberta</td><td>As seis perspetivas. Com um nome à frente, corre só essa.</td></tr>
+            <tr><td><code>/status</code></td><td>Sempre</td><td>Onde estamos, o que expirou, a agenda da reunião.</td></tr>
+            <tr><td><code>/answer</code></td><td>Após falar com alguém</td><td>Regista a resposta e fecha a pergunta.</td></tr>
+            <tr><td><code>/resume</code></td><td>Ao voltar</td><td>Diz-te onde ficaste e qual é o próximo comando.</td></tr>
+            <tr><td><code>/frame</code></td><td>Enquadramento</td><td>A frase única do problema, validada pelo sponsor.</td></tr>
+            <tr><td><code>/options</code></td><td>Opções</td><td>Três a cinco caminhos, incluindo não fazer nada.</td></tr>
+            <tr><td><code>/simulate</code></td><td>Antes de decidir</td><td>Como seria cada caminho e o que ainda mudaria a escolha.</td></tr>
+            <tr><td><code>/premortem</code></td><td>Antes de decidir</td><td>O obituário do projeto e o que fazer quanto a isso.</td></tr>
+            <tr><td><code>/decide</code></td><td>Decisão</td><td>A escolha, o porquê, e os alarmes para o futuro.</td></tr>
+            <tr><td><code>/blueprint</code></td><td>Com interface</td><td>A arquitetura de ecrãs, ligada ao retrato.</td></tr>
+            <tr><td><code>/render --all</code></td><td>Entrega</td><td>Os documentos finais.</td></tr>
+            <tr><td><code>/revisit</code></td><td>Alarme disparado</td><td>Compara com o caminho congelado e recomenda.</td></tr>
+            <tr><td><code>/retro</code></td><td>Ao fechar</td><td>Os conselheiros escrevem o que aprenderam.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="problemas">
+      <h2>Quando algo corre mal</h2>
+      <div class="trouble">
+        <div>
+          <h3>«A leitura das folhas não correu»</h3>
+          <p>Lê a mensagem: se diz que falta o <code>openpyxl</code>, instala-o e corre <code>/capture</code>. Não é uma avaria — as perspetivas continuam a ler os ficheiros na mesma, só ficas sem o modelo do processo. A distinção que interessa: <em>não conseguiu correr</em> nunca é o mesmo que <em>não encontrou nada</em>, e o aisa diz sempre qual dos dois foi.</p>
+        </div>
+        <div>
+          <h3>«Uma perspetiva recusa-se a correr»</h3>
+          <p>A ordem é obrigatória dentro de uma ronda — quem vem a seguir precisa de ler o que os anteriores escreveram. Se querias a ronda toda, corre <code>/round</code> sem mais nada. Se querias mesmo só aquela (o caso normal depois de um <code>/answer</code>), corre <code>/round &lt;nome&gt;</code>.</p>
+        </div>
+        <div>
+          <h3>«Os documentos finais vêm com buracos»</h3>
+          <p>É informação a faltar no retrato, e é bom sinal que apareça assim em vez de vir preenchido com texto plausível. O aviso diz que perspetiva devia ter respondido: corre essa, responde às perguntas que bloqueiam, e gera outra vez. A versão anterior não se perde.</p>
+        </div>
+        <div>
+          <h3>«Isto está a demorar»</h3>
+          <p>Duas ou três voltas na Descoberta é o normal, e é aí que o valor se cria. Se sentes que estás a andar em círculos, corre <code>/status</code> e olha para a terceira lista da agenda: perguntas que não mudam nada são as primeiras a cortar.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Guia de utilização do aisa. A referência técnica completa vive no repositório, em <code>docs/ARCHITECTURE.md</code>; o passo-a-passo de instalação e o primeiro trabalho, em <code>docs/ONBOARDING.md</code>.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function (a) {
+    var el = document.querySelector(a.getAttribute('href'));
+    if (el) map[el.id] = a;
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting; });
+    var current = null;
+    Object.keys(map).forEach(function (id) { if (seen[id] && !current) current = id; });
+    links.forEach(function (a) { a.classList.remove('on'); });
+    if (current && map[current]) map[current].classList.add('on');
+  }, { rootMargin: '-10% 0px -70% 0px' });
+  Object.keys(map).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) io.observe(el);
+  });
+})();
+</script>
