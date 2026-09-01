@@ -113,6 +113,10 @@ Update the SU header `Última actualização`. (Per `docs/ARCHITECTURE.md §4.5`
 
 Immediately invoke the `aisa-synthesize` skill. Wait for it to return; it produces the 5 topic packs in `_synthesis/`. If any topic-pack synthesis fails → record the failure in `council-log.md` but do NOT roll back the decision (the synthesis can be retried manually).
 
+### 5c. Story
+
+Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — a decisão (e porquê)`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
+
 ### 6. Wrap-up output
 
 "Decision D-<NN> registered. Synthesis produced <N>/5 topic packs in `_synthesis/`. Next: `/render --all` to produce the 6 deliverables, or `/render <id>` for one."

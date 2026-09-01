@@ -19,3 +19,8 @@ Universal aisa vocabulary (not pack-specific). Pack-specific terms live in `libr
 | **Hard guard** | A hook-enforced rule (only one: `library/` is read-only at runtime). |
 | **Chairman** | The synthesizer in council-independent mode. The only writer to the SU in that mode. |
 | **Council** | The agents (one per lens) running in parallel via Task subagents. |
+| **Half-life (validade)** | Decay class of a Confirmed/Assumed row; past it, the row is expired and must be revalidated. See [`states.md`](states.md). |
+| **Custo / Swing** | The price of answering an Unknown and what changes if answered (`decisivo`/`dimensionante`/`cosmético`). Drives the meeting agenda and VOI. |
+| **Meeting agenda** | `/status` output: the questions worth the sponsor's synchronous time, ranked by swing — and the ones explicitly not worth it. |
+| **Pre-mortem** | The project's obituary written before `/decide`; causes anchored to SU ids, mitigations become requirements/tripwires. |
+| **Story** | `story.md` — the engagement narrated episode by episode in sponsor language; a projection of the SU, not a source. |

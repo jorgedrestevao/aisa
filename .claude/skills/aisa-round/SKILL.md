@@ -25,6 +25,7 @@ description: Run a round of lenses in the current phase. In Discovery, runs the 
    a. Persist `_state.json.round` = the round just run (atomically, tmp → rename). It therefore always holds the most recent completed round = the engagement's current round.
    b. Update the SU header `Última actualização` timestamp.
    c. Append a round summary to `council-log.md`.
+   d. Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — ronda de Discovery (o que se descobriu, o que ficou por saber)`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
 6. Output: "Round `R-NN` complete (lenses run: …). Run `/status` for the summary."
 
 ## Notes

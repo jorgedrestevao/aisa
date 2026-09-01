@@ -54,7 +54,8 @@ If invoked in Discovery or Framing in error → refuse and return: "lens-technol
 4. **Identify yourself** in the `lens` column: always `technology`.
 5. **Append-only.** Preserve `was X-NNN` on transitions.
 6. **Stamp epistemic columns.** Every Confirmed/Assumed row you write carries `verificado_em` = today (ISO date) and a `validade` decay class from `library/kernel/states.md` → *Epistemic half-lives* (in doubt: `organizacional`).
-7. **Expired rows are weak.** A row past its half-life (per `states.md`) reads as **Assumed fraca** — never cite it as Confirmed; if a conclusion rests on it, raise the re-question («Ainda é verdade que <claim>? Verificado pela última vez em <data>»).
+7. **Price every Unknown.** Every Unknown row you write carries `custo` (`email | documento | reuniao | spike` — what it takes to get the answer) and `swing` (`decisivo | dimensionante | cosmético: <o que muda se respondida>`), per `library/kernel/states.md` → *Question economics*. `cosmético` is legitimate — it lets /status protect the sponsor's time.
+8. **Expired rows are weak.** A row past its half-life (per `states.md`) reads as **Assumed fraca** — never cite it as Confirmed; if a conclusion rests on it, raise the re-question («Ainda é verdade que <claim>? Verificado pela última vez em <data>»).
 
 ## Signal catalog (pack-driven)
 

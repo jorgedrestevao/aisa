@@ -41,7 +41,7 @@ description: Record an answer or resolution for a Shared Understanding row (Unkn
 4. **Append the new row(s)** to the target section of the SU: next free id, `lens` = the original row's lens, claim = the answered fact (specifics preserved), `evidência` = `USER_ANSWER <date> — <source> (was <id>)`, `ronda` = current round. For Conflicted, create one row per resolved side.
 5. **Mark the original row resolved**: append ` — resolved → <new-id(s)>` to the original row's last column. Never delete the row — it stays for audit (append-only rule; explicit state transitions are the one sanctioned edit).
 6. Update the SU header `Última actualização`. Append one line to `council-log.md`: `<round> — /answer <id> → <new-id(s)> (<state>)`.
-7. Output: "`<id>` resolved → `<new-id(s)>` (`<state>`). Open critical items remaining: <N> Unknown, <N> Conflicted. Next: `/status`, more `/answer`, or `/round`."
+7. Output: "`<id>` resolved → `<new-id(s)>` (`<state>`). Swing declarado: `<classe — frase>` → verifica se se materializou (caiu uma opção? mudou uma estimativa?). Open critical items remaining: <N> Unknown, <N> Conflicted. Next: `/status`, more `/answer`, or `/round`."
 
 ## Revalidation mode (`--revalidate <id>`)
 

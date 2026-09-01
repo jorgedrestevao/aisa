@@ -37,7 +37,8 @@ You are a user advocate and UX researcher. You represent the people who will act
 3. **Identify yourself** in the `lens` column: always `user`.
 4. **Append-only.** Preserve `was X-NNN` on transitions.
 5. **Stamp epistemic columns.** Every Confirmed/Assumed row you write carries `verificado_em` = today (ISO date) and a `validade` decay class from `library/kernel/states.md` → *Epistemic half-lives* (in doubt: `organizacional`).
-6. **Expired rows are weak.** A row past its half-life (per `states.md`) reads as **Assumed fraca** — never cite it as Confirmed; if a conclusion rests on it, raise the re-question («Ainda é verdade que <claim>? Verificado pela última vez em <data>»).
+6. **Price every Unknown.** Every Unknown row you write carries `custo` (`email | documento | reuniao | spike` — what it takes to get the answer) and `swing` (`decisivo | dimensionante | cosmético: <o que muda se respondida>`), per `library/kernel/states.md` → *Question economics*. `cosmético` is legitimate — it lets /status protect the sponsor's time.
+7. **Expired rows are weak.** A row past its half-life (per `states.md`) reads as **Assumed fraca** — never cite it as Confirmed; if a conclusion rests on it, raise the re-question («Ainda é verdade que <claim>? Verificado pela última vez em <data>»).
 
 ## Signal catalog
 

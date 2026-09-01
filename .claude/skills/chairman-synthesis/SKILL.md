@@ -65,7 +65,7 @@ Walk the working table and assign state per row:
 
 ### Step 4 — Allocate ids
 
-Scan the current SU per section, find the highest existing id, and allocate the next n contiguously. Use the prefixes from `library/kernel/states.md`: `C-`, `A-`, `U-`, `X-`, `R-`. For cross-lens synthesis rows that do not cleanly belong to one lens, use `chair` as the lens value; otherwise use the dominant lens.
+Scan the current SU per section, find the highest existing id, and allocate the next n contiguously. Rows you write follow the kernel's epistemic columns: Confirmed/Assumed carry `verificado_em` (today) + `validade` (decay class); Unknown carry `custo` + `swing` (*Question economics*). Use the prefixes from `library/kernel/states.md`: `C-`, `A-`, `U-`, `X-`, `R-`. For cross-lens synthesis rows that do not cleanly belong to one lens, use `chair` as the lens value; otherwise use the dominant lens.
 
 ### Step 5 — Write the SU rows
 

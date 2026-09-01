@@ -40,7 +40,7 @@ Append rule: when a row transitions, the new row references the old id (`was U-0
 |---|---|
 | `## Confirmed` | `id \| lens \| claim \| evidência \| verificado_em \| validade \| ronda` |
 | `## Assumed` | `id \| lens \| claim \| base da assumption \| verificado_em \| validade \| ronda` |
-| `## Unknown` | `id \| lens \| pergunta \| quem responde \| criticidade (Low/Med/Critical) \| ronda` |
+| `## Unknown` | `id \| lens \| pergunta \| quem responde \| criticidade (Low/Med/Critical) \| custo \| swing \| ronda` |
 | `## Conflicted` | `id \| lens \| conflito \| partes \| criticidade \| ronda` |
 | `## Risky` | `id \| lens \| risco \| impacto \| mitigação proposta \| ronda` |
 
@@ -66,6 +66,17 @@ TODO(team): defaults em uso desde a v2.2 — validar as meias-vidas na retro do 
 ### Expiration rule (normative)
 
 Uma row está expirada quando `verificado_em + meia-vida(validade) < hoje`. Expirada ≠ falsa: significa que a confiança caducou. Efeitos: (1) /status conta-a em "a revalidar" e a saúde epistémica desce; (2) lenses e personas tratam-na como Assumed fraca; (3) a re-pergunta sugerida é gerada a partir do claim ("Ainda é verdade que <claim>? Verificado pela última vez em <data>"). A revalidação renova `verificado_em` sem nova row; a mudança de facto segue a transição normal com `was <id>`.
+
+## Question economics
+
+Every Unknown carries a price and a return, so discovery INVESTS in questions instead of listing them:
+
+- **`custo`** — what it takes to get the answer: `email` (async, minutes of a stakeholder), `documento` (obtain/read an existing document), `reuniao` (30-60 synchronous minutes of sponsor/stakeholder), `spike` (days of technical work).
+- **`swing`** — `classe: frase`, where classe ∈ `decisivo` (the answer changes WHICH option/branch/frame survives), `dimensionante` (changes sizing, effort, cost or design — not the choice itself), `cosmético` (changes nothing material). The frase states WHAT changes (e.g. `decisivo: elimina O-004 ou muda o branch`).
+
+`cosmético` is legitimate and useful — it is what lets `/status` say "do not spend meeting time on this". `/status` renders the **meeting agenda** from these columns; `/simulate`'s value-of-information section consumes the classes and corrects them when the evidence disagrees (a sanctioned metadata edit, noted in its output).
+
+Compatibility: absent columns (pre-v2.3 SUs) ⇒ `custo = email`, `swing = dimensionante` — applied on read, never migrated.
 
 ### Compatibility (SUs created before v2.2)
 

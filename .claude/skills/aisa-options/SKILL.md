@@ -122,6 +122,10 @@ Review `options.md`. When ready, run `/decide` to pick one and capture the ratio
 If options feel incomplete or the architect missed a branch, re-run `/options` (produces O-02).
 ```
 
+### 7b. Story
+
+Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — as opções na mesa`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
+
 ### 8. Wrap-up output
 
 "Options O-<NN> complete. Next: `/decide` (or re-run `/options` to add another round). Run `/status` for the SU summary."

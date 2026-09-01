@@ -23,11 +23,15 @@ description: Show the current phase, round, Shared Understanding summary (counts
    b. Half-lives: kernel decay table, overridden by the pack's `epistemics.half_lives_override` (`pack.yaml`) when present.
    c. A row is **expirada** when `verificado_em + meia-vida(validade) < hoje`. Health = `vivas / (vivas + expiradas)` as a percentage.
    d. Update the SU header line `> Saúde epistémica: NN% (X expiradas) — <date>` (create the line if the SU predates it).
-6. Suggest the next action based on phase + gaps, e.g.:
+6. **Build the meeting agenda** from OPEN Unknowns (`custo`/`swing` columns; absent ⇒ `email`/`dimensionante`):
+   a. **Agenda da próxima reunião**: `custo = reuniao`, ordered `decisivo` → `dimensionante`, each with its swing phrase.
+   b. **Por outro canal**: `custo ∈ {email, documento, spike}`, same ordering (spikes flagged with their cost in days).
+   c. **Não gastes tempo com**: every `cosmético`, listed explicitly — protecting the sponsor's hour is the point.
+7. Suggest the next action based on phase + gaps, e.g.:
    - Critical Unknown/Conflicted open → "Resolve N critical items with the sponsor before /frame."
    - Discovery exit criteria met → "Ready for /frame."
    - Expired rows underpin the current phase's artefact → "Revalidate before deciding."
-7. Output a readable summary:
+8. Output a readable summary:
    ```
    Engagement: <slug>   Pack: <pack>
    Phase: <phase>       Round: <round>
@@ -40,6 +44,11 @@ description: Show the current phase, round, Shared Understanding summary (counts
      C-00x (<validade>, verificado <data>) — "Ainda é verdade que <claim>? Verificado pela última vez em <data>."
        → /answer --revalidate C-00x   (ou /answer C-00x "..." se o facto mudou)
      …
+
+   Agenda da próxima reunião (custo=reuniao, por swing):
+     U-00x [decisivo: <o que muda>] — <pergunta> → quem: <role>
+   Por outro canal: U-00y (email), U-00z (spike: <dias>)
+   Não gastes tempo com: U-00w (cosmético)
 
    Open critical items:
      U-00x — <question> (lens)

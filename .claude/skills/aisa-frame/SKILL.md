@@ -176,6 +176,10 @@ Roll back `_state.json.phase` to `discovery` and leave `round` at the last compl
 
 Overwrite the single-sentence line of `frame.md` with the user's edit (preserve all other sections), then proceed with step 8 using the edited sentence.
 
+### 8c. Story
+
+Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — o problema ganhou uma frase (frame)`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
+
 ### 9. Wrap-up output
 
 "Framing F-<NN> complete. D-001 registered. Next: `/options` to enter the Options phase (the technology lens activates there). Run `/status` for the SU summary."

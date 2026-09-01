@@ -87,7 +87,8 @@ When the decision is non-technology/do-nothing and a still-applicable template i
    ```
    <ISO timestamp> — rendered <N>/<M> deliverables — versions: { <id>: v<NN>, … } — gaps: <count>
    ```
-7. Output to the user:
+7. Append one narrative episode to `<engagement>/story.md` (`## Episódio <N> — <data> — as entregas prontas (render)`): 4-8 frases na voz do sponsor, sem jargão de kernel, máx. 2 ids citados. Create the file with `# Story — <slug>` if missing (pre-v2.3 engagements).
+8. Output to the user:
    - `--all`: "Rendered <N>/<M> deliverables to _render/. Gaps: <count>. Review `_render/render-gaps.md` and adjust the SU/synthesis if needed, then re-run /render --all (will produce v<NN+1>)."
    - Single deliverable: "Rendered <id> v<NN> at `_render/<file>`. Gaps: <count>."
    - `--dry-run`: print the resolved template inline (truncated if >50 lines) and the gap list. Do not write.

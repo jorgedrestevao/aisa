@@ -235,7 +235,7 @@ Next suggested action:
 
 ### 3.5 Passo 4 — Resolver Unknowns + Conflicted com sponsor
 
-Em reunião com sponsor (ou async), resolves os 4 críticos. Voltas e fazes append em `answers.md`:
+O `/status` já te deu a **agenda da reunião** — as perguntas que pagam o tempo síncrono do sponsor (por swing), as que vão por email/documento, e as que explicitamente não valem a reunião. Em reunião com sponsor (ou async), resolves os 4 críticos. Voltas e fazes append em `answers.md`:
 
 ```
 /answer U-001 "Para >€10k, aprova Director + Finance Manager. Para <€10k, só Director."
@@ -379,6 +379,7 @@ Se `render-gaps.md` está vazio → tudo OK. Se tem entradas → render-validate
 | Memória institucional (compartilhada) | `.claude/agent-memory/_universal/<agent>/*.md` |
 | Memória institucional (Galp) | `.claude/agent-memory/_tenant/galp/<agent>/*.md` (via symlink) |
 | Estado actual da engagement | `projects/<slug>/_state.json` |
+| A história para o sponsor | `projects/<slug>/story.md` (episódio por marco) |
 | Artefacto vivo da engagement | `projects/<slug>/shared-understanding.md` |
 | Outputs por lens | `projects/<slug>/lens-outputs/<lens>.md` |
 | Topic packs intermédios | `projects/<slug>/_synthesis/*.md` |
