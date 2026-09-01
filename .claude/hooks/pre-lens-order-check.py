@@ -7,6 +7,18 @@ _state.json.round + 1 (the next round to run).
 When more than one engagement is in `phase: discovery`, the active one is the
 most recently touched (see find_discovery_engagement) — stale fixtures parked
 in discovery no longer shadow the live engagement.
+
+Single-lens escape (`/round <lens>`): the order rule targets a full round, but
+`/round <lens>` — re-running one lens after an /answer, say — is a documented
+flow. The Skill payload carries no such intent, so `aisa-round` declares it in
+_state.json before invoking the lens:
+
+    "round_mode": {"mode": "single", "lens": "data", "round": "R-03"}
+
+The escape is honoured only when the marker names THIS lens for THIS in-progress
+round. It therefore self-invalidates: a marker left behind by an earlier round,
+or naming another lens, does not authorise anything. Absent or "full" -> the
+order is enforced, so the default and every stale state fail closed.
 """
 
 from __future__ import annotations
@@ -125,6 +137,12 @@ def main() -> int:
     if not m:
         return 0
     in_progress_round = f"R-{int(m.group(1)) + 1:02d}"
+
+    # Single-lens escape: honoured only for this exact lens in this exact round.
+    marker = state.get("round_mode")
+    if isinstance(marker, dict) and marker.get("mode") == "single":
+        if marker.get("lens") == lens_name and marker.get("round") == in_progress_round:
+            return 0
 
     for prev in LENS_ORDER[:idx]:
         output_file = eng / "lens-outputs" / f"{prev}.md"
