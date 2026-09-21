@@ -423,18 +423,12 @@ def engagement_files(eng: Path) -> tuple[list[tuple[str, Path]], list[dict]]:
     ok: list[tuple[str, Path]] = []
     bad: list[dict] = []
     for p in sorted(eng_real.rglob("*")):
-        try:
-            if not p.is_file():
-                continue
-        except OSError as exc:
-            # Um caminho que não se consegue sequer `stat` não desaparece: é reportado como
-            # impeditivo, tal como o irresolúvel logo abaixo (achado A2 — nada some calado).
-            bad.append({"level": "error", "blocking": True,
-                        "where": p.relative_to(eng_real).as_posix(),
-                        "message": "caminho que não se consegue inspeccionar ({}) — não "
-                                   "lido".format(type(exc).__name__)})
-            continue
         rel = p.relative_to(eng_real).as_posix()
+        # A fronteira decide-se ANTES de se perguntar o que a entrada é. Uma PASTA que é
+        # ligação para fora falha o `is_file()` e sairia calada: `rglob` não desce nela, por
+        # isso o conteúdo de fora nunca entra no denominador, mas a fuga ficava por reportar
+        # e `complete` continuava verdadeiro. Em Windows a junção resolve-se da mesma forma;
+        # em POSIX era silenciosa.
         try:
             real = p.resolve()
         except OSError:
@@ -445,6 +439,16 @@ def engagement_files(eng: Path) -> tuple[list[tuple[str, Path]], list[dict]]:
             bad.append({"level": "error", "blocking": True, "where": rel,
                         "message": "aponta para fora do engagement ({}) — recusado sem "
                                    "ler (contrato §5.3)".format(real)})
+            continue
+        try:
+            if not p.is_file():
+                continue
+        except OSError as exc:
+            # Um caminho que não se consegue sequer `stat` não desaparece: é reportado como
+            # impeditivo, tal como o irresolúvel acima (achado A2 — nada some calado).
+            bad.append({"level": "error", "blocking": True, "where": rel,
+                        "message": "caminho que não se consegue inspeccionar ({}) — não "
+                                   "lido".format(type(exc).__name__)})
             continue
         ok.append((rel, real))
     return ok, bad
