@@ -384,7 +384,10 @@ def criterion_f():
         if p.is_file():
             verdict("\nblueprint:" in p.read_text(encoding="utf-8"),
                     "pack {} declara o bloco blueprint".format(pack))
-    verdict(D["TOOL_VERSION"] == "1.13.0", "motor em 1.13.0", D["TOOL_VERSION"])
+    # Pino actualizado 1.13.0 -> 1.14.0. A fase 4 subiu o motor de propósito
+    # (coverage-phase-4-report.md, secao 43) e actualizou o pino irmao em
+    # test_blueprint_yaml.py; este, sendo da fase 1, ficou para tras.
+    verdict(D["TOOL_VERSION"] == "1.14.0", "motor em 1.14.0", D["TOOL_VERSION"])
     for skill_name, needle in (("aisa-synthesize", "INVALID"),
                                ("aisa-render", "approved_valid"),
                                ("aisa-status", "blueprint.versions[].valid")):
