@@ -35,7 +35,7 @@ evidência de P8. Nada foi apagado.
 | `writer-reader-map.md` | **feito** — camada Python verificada por AST; camada das skills lida |
 | `authority-map.md` | **feito** — 24 skills lidas; autoridades por artefacto e por modo |
 | `integration-adr.md` | **parcial** — ADR-001 (linguagem de runtime) aceite; falta o mapeamento módulo a módulo do doador |
-| `test-map.json` | por fazer |
+| `test-map.json` | **feito** — 61 casos ligados a fase, família e gate de saída; 0 implementados, e porquê |
 | Oráculos dos 2 pilotos | por fazer |
 
 ## Progresso — o que está verificado
@@ -145,19 +145,30 @@ resolve com mais um hook de `Write|Edit`:
 
 ## Próxima acção concreta
 
-1. Ler as 24 skills; fechar `writer-reader-map.md` e produzir `authority-map.md`.
-2. `integration-adr.md` — **ADR-001 fechado**: Python stdlib-only, Node fora, com medição
-   (arranque 19,0 ms vs 41,9 ms; ~114 ms de hooks por escrita) e o núcleo portável do
-   doador inventariado em 2917 linhas. Falta o mapeamento módulo a módulo contra o alvo,
-   com os casos não equivalentes nomeados.
-3. `test-map.json` — ligar os 61 IDs de `cases.json` a fases e testes.
-4. Oráculos dos dois pilotos, por inspecção independente da fonte.
+Quatro dos cinco entregáveis estão fechados. Falta um: **os oráculos dos dois pilotos**.
 
-### Limitação a declarar já, sobre os oráculos
+### Sobre o `test-map.json`: 61 casos, 0 cobertos, e isso está certo
 
-`ACCEPTANCE.md` exige que o oráculo **não** seja gerado a partir das conclusões do candidato.
-Ler os ficheiros de origem directamente satisfaz a letra da regra. Mas quem constrói o
-oráculo e quem opera o candidato seriam, aqui, o mesmo agente — o que enfraquece a
-independência mesmo respeitando o procedimento. Os itens críticos devem ser validados pelo
-responsável do processo antes de contarem como referência. Isto fica dito antes de haver
-resultado, não depois.
+Os 2009 testes do baseline protegem o sistema **actual**. Os 61 casos são sobre um grafo,
+uma recuperação e uma migração que ainda não existem. Não há sobreposição a reclamar, e
+reclamá-la seria o falso verde que a `ACCEPTANCE.md` proíbe.
+
+Uma primeira versão do ficheiro propunha, por caso, os testes existentes mais próximos por
+palavra-chave. Saía ruído — `K01 «Store vazio»` ligado a `test_a5_dictionary_contract.py` —
+e ruído que se lê como cobertura é pior do que campo nenhum. Removido. É o mesmo erro de
+método que o varrimento por verbos cometeu: proximidade não é relação.
+
+Distribuição: P2 leva 16 casos (o maior bloco: storage, escrita e recuperação), P6 leva 13,
+P3 sete, P5 seis, P4/P7/P8 cinco cada, P9 quatro. Os 61 são obrigatórios.
+
+### Os oráculos, e o que preciso de ti
+
+Dois pilotos: `dpt-galp-jp-pilot-4` (tickets) e `pricing-bunkers-pilot-4` (Excel com regras).
+
+Posso abrir as fontes e extrair as regras — é leitura directa, satisfaz a letra da
+`ACCEPTANCE.md`, que só proíbe gerar o oráculo a partir das conclusões do candidato.
+
+O que não posso resolver sozinho continua a ser o mesmo: construtor do oráculo e operador do
+candidato seriam o mesmo agente. Os **itens críticos** precisam de validação do responsável
+do processo antes de contarem como referência de P8. Sem isso, P8 mede o candidato contra
+uma referência que o mesmo modelo escreveu.
