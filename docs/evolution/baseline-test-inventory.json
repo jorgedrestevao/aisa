@@ -805,5 +805,30 @@
       }
     ],
     "note": "The 'suite verde' and 'fase N continua verde' criteria failed on the 3 POSIX tests, now fixed. Re-measured separately."
+  },
+  "pilot_scope_decision": {
+    "decided_by": "operator",
+    "date": "2026-09-21",
+    "scope": "two pilots, not four",
+    "selected": [
+      {
+        "engagement": "dpt-galp-jp-pilot-4",
+        "input": "Dayly_pending_tickets_Anonimo.xlsx",
+        "p8_type": "operational / tickets"
+      },
+      {
+        "engagement": "pricing-bunkers-pilot-4",
+        "inputs": [
+          "PRE\u00c7O BANCAS_03_08_26.xlsm",
+          "Processos Pricing - Marinha \u2026 .vtt"
+        ],
+        "p8_type": "Excel with rules, calculations and dependencies"
+      }
+    ],
+    "not_selected": [
+      "cae-automation-pilot-4",
+      "kam-onboarding-pilot-4"
+    ],
+    "note": "The two selected are exactly the two types P8 names. The other two stay on disk as engagement data (test_state_scaffold scans projects/) but get no oracle and are not P8 evidence. Nothing is deleted."
   }
 }
