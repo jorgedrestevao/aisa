@@ -760,5 +760,50 @@
       "duration_s": 3.02,
       "failing_tests": []
     }
-  ]
+  ],
+  "post_fix_regression": {
+    "commit": "f04792e",
+    "what": "fix(coverage): boundary check moved ahead of the type check",
+    "runner": "per-file unittest, all 48 files",
+    "totals": {
+      "files": 48,
+      "ok": 48,
+      "fail_files": 0,
+      "tests": 2009,
+      "failures": 0,
+      "errors": 0,
+      "skips": 13,
+      "expected_failures": 3
+    },
+    "note": "This is NOT the P0 baseline. P0's baseline is the `totals` field above, measured before any behaviour changed. This records the state after the follow-up fix, so later phases compare against a green suite.",
+    "targeted": {
+      "test_coverage_contract.py": 101,
+      "test_coverage_fixtures.py": 64,
+      "test_coverage_freshness.py": 50,
+      "test_coverage_inventory.py": 86,
+      "test_coverage_phase4.py": 45,
+      "test_coverage_phase5.py": 61,
+      "test_locator_resolution.py": 29,
+      "test_capability_boundary.py": 7,
+      "all_ok": true
+    }
+  },
+  "acceptance_findings": {
+    "measured_before_the_fix": true,
+    "criteria_failing_beyond_suite_verde": [
+      {
+        "criterion": "motor em 1.13.0",
+        "detail": "accept_phase1.py:387 asserts TOOL_VERSION == '1.13.0'; dashboard.py:44 ships '1.14.0'. The script is behind the engine. Which side to correct is undetermined \u2014 P1."
+      },
+      {
+        "criterion": "docs/FRAMEWORK-NEGOCIO.md: tem SCOPE-STATEMENT v1",
+        "detail": "File does not exist in the repository (accept_phase2.py:59). A further missing input, revealed only by this runner mode."
+      },
+      {
+        "criterion": "CONSOLIDATED_PLAN tem errata",
+        "detail": "docs/CONSOLIDATED_PLAN.md does not exist (accept_phase2.py:172). Same class."
+      }
+    ],
+    "note": "The 'suite verde' and 'fase N continua verde' criteria failed on the 3 POSIX tests, now fixed. Re-measured separately."
+  }
 }

@@ -105,6 +105,29 @@ Sai 1, com dois critérios em falha:
    script por atualizar, ou um bump de motor sem atualizar a aceitação — **NÃO ESTÁ
    DETERMINADO**. Fica para P1.
 
+### Resultado de `accept_phase1..3.py`
+
+Os três correram contra os quatro engagements reais. Todos saíram 1. Medidos **antes** da
+correção de fronteira, por isso `suite verde` reflecte as 3 falhas POSIX, e os critérios
+«fase N continua verde (regressão)» são consequência dessa mesma falha, não achados novos.
+
+| Script | Critérios em falha |
+|---|---|
+| `accept_phase1.py` | `motor em 1.13.0`; `suite verde` |
+| `accept_phase2.py` | `docs/FRAMEWORK-NEGOCIO.md: tem SCOPE-STATEMENT v1`; `CONSOLIDATED_PLAN tem errata`; `suite verde`; fase 1 e fase 3 continuam verdes |
+| `accept_phase3.py` | `suite verde`; fase 1 continua verde |
+
+Descontando `suite verde` e as regressões que dela derivam, sobram **três** critérios reais,
+e dois deles são entradas em falta que só este modo de runner revelou:
+
+1. **`docs/FRAMEWORK-NEGOCIO.md` não existe** (`accept_phase2.py:59`).
+2. **`docs/CONSOLIDATED_PLAN.md` não existe** (`accept_phase2.py:172`, que procura `Errata`).
+3. **Divergência de versão do motor**, acima.
+
+Nenhum dos três foi inventado nem contornado. Os dois documentos juntam-se à lista de
+entradas por fornecer; ao contrário das anteriores, **não bloqueiam nenhum teste do conjunto
+principal** — só o critério de aceitação da fase 2.
+
 ### Falhas baseline: 17 → 3
 
 Treze fecharam quando as entradas chegaram. Nenhuma por alteração de código:
