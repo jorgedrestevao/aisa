@@ -1,0 +1,12 @@
+{
+ "engagement": "onboarding-colaboradores",
+ "literal_request": "Temos um problema com a entrada de gente nova. Quando entra alguém, o responsável manda um email ao IT a pedir acessos, outro ao facilities para a secretária e o cartão, e depois anda atrás de toda a gente durante duas semanas. Já aconteceu alguém chegar no primeiro dia e não ter computador. Queríamos organizar isto.",
+ "requester": {
+  "name": "Responsável de equipa (dono do processo de entrada)",
+  "role": "dono do processo",
+  "authority": "decide"
+ },
+ "funding_gate": false,
+ "inputs": [],
+ "captured": "2026-09-11T12:00:00Z"
+}

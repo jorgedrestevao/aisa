@@ -1,0 +1,12 @@
+{
+ "engagement": "manutencao-preventiva",
+ "literal_request": "As paragens de máquina estão a matar-nos. O plano de manutenção está numa folha que o chefe de turno atualiza à mão, e quando uma máquina avaria ninguém sabe se a preventiva estava em dia. Precisamos de ver isto melhor.",
+ "requester": {
+  "name": "Responsável de manutenção (dono do processo)",
+  "role": "dono do processo",
+  "authority": "decide"
+ },
+ "funding_gate": false,
+ "inputs": [],
+ "captured": "2026-09-11T12:00:00Z"
+}

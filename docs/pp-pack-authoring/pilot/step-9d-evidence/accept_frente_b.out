@@ -1,0 +1,82 @@
+
+P-8 — implementation spec §6
+  PASS  §6 de v02 era `(none)`
+  PASS  §6 de v03 já não é só `(none)` — carrega 6.1 streams + 6.2 transições
+  PASS  §6 carrega a coluna 'Quem transiciona'
+  PASS  §6 carrega a coluna 'O que valida'
+  PASS  §6 carrega a coluna 'O que notifica quem'
+  PASS  §6 carrega a coluna 'O que dispara o ciclo'
+  PASS  §6 cobre a entidade AprovacaoCarregamento
+  PASS  §6 cobre a entidade DadosMestrePricing
+  PASS  §6 tem uma linha por transição — 4 linhas
+  PASS  actores/destinatários ausentes renderizam `not named` — 13 ocorrências
+  PASS  §6 não inventa mecanismo: 'Power Automate' ausente
+  PASS  §6 não inventa mecanismo: 'e-mail automático' ausente
+  PASS  §6 não inventa mecanismo: 'Teams' ausente
+  PASS  §6 não inventa mecanismo: 'webhook' ausente
+
+P-8 — estimate §14 preconditions
+  PASS  §14 existe
+  PASS  §14 carrega a coluna 'Dono'
+  PASS  §14 carrega a coluna 'Até quando'
+  PASS  §14 carrega a coluna 'Que fase trava'
+  PASS  §14 carrega a coluna 'Estado'
+  PASS  §14 lista o SME a 20% (aceitação do plano)
+  PASS  §14 lista o acesso à BD partilhada (aceitação do plano)
+  PASS  §14 tem pré-condições suficientes — 10 linhas
+  PASS  §14 preserva `not named` em vez de inventar dono
+  PASS  v02 não tinha secção de pré-condições
+
+P-9 — phases: profile column, sub-tables, containment
+  PASS  §5 tem a coluna do perfil responsável
+  PASS  §5 mantém as 6 fases — 6
+  PASS  2 fases atingem o limiar de 5d — [('3', 8.0), ('7', 8.0)]
+  PASS  fase 3 tem sub-tabela
+  PASS  fase 7 tem sub-tabela
+  PASS  fase 0 (< 5d) NÃO é decomposta
+  PASS  fase 1 (< 5d) NÃO é decomposta
+  PASS  fase 2 (< 5d) NÃO é decomposta
+  PASS  fase 4 (< 5d) NÃO é decomposta
+  PASS  fase 3 declara a união dos intervalos
+  PASS  fase 3: soma(min) ≤ figura ≤ soma(max) — 8.0 ≤ 8.0 ≤ 8.0
+  PASS  fase 3: a soma das tarefas é a união declarada — 2 tarefas
+  PASS  fase 7 declara a união dos intervalos
+  PASS  fase 7: soma(min) ≤ figura ≤ soma(max) — 8.0 ≤ 8.0 ≤ 8.0
+  PASS  fase 7: a soma das tarefas é a união declarada — 2 tarefas
+
+P-9 — every named uncertainty lands in a phase
+  PASS  §9 tem a coluna da fase ameaçada
+  PASS  §9 mantém as 6 incertezas — 6
+  PASS  cada incerteza nomeia a fase que ameaça (ou diz que não está no total)
+  PASS  §5 declara as que ameaçam uma fase fora do total
+
+P-9 — profile load <= declared dedication, and no calendar
+  PASS  §16 tem a ocupação por perfil
+  PASS  a aritmética está mostrada
+  PASS  semanas mínimas derivadas
+  PASS  ocupação ≤ dedicação — 44 pessoa-dias ≤ 45 dias disponíveis em 9 semanas a 100%
+  PASS  perfis sem pessoa-dias não recebem figura de semanas
+  PASS  §16 recusa grelha/Gantt explicitamente
+  PASS  §16 não emite data de calendário
+
+P-9 — repetition dimension
+  PASS  §19 faz a verificação da dimensão de repetição
+  PASS  sem dimensão de repetição, nenhum piloto é fabricado
+
+F09 — planning intervals, no quantiles
+  PASS  estimate v03 não afirma quantis
+  PASS  spec v03 não afirma quantis
+  PASS  a estimativa usa o vocabulário de intervalo de planeamento
+  PASS  taxas pontuais são declaradas como tal, sem ± inventado
+  PASS  o factor SAP ×1.4 sem fonte saiu de aisa-simulate
+
+INVARIANTE — o total não se move
+  PASS  total bruto 30,5d idêntico em v02 e v03
+  PASS  total base 44 pessoa-dias idêntico em v02 e v03
+  PASS  secções não tocadas idênticas carácter a carácter — iguais: [1, 2, 3, 4, 6, 7, 8, 10, 11, 12]
+  PASS  §14 de v02 == §15 de v03 (só renumerada)
+  PASS  §16 de v02 == §17 de v03 (só renumerada)
+  PASS  §17 de v02 == §18 de v03 (só renumerada)
+  PASS  spec: as 13 secções não tocadas são idênticas — tocadas: §2 (um estado de portão), §6, §16
+
+TODOS OS CRITÉRIOS PASSAM

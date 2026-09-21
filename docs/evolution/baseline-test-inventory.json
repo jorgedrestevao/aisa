@@ -1,52 +1,123 @@
 {
-  "schema": "aisa-p0-baseline-test-inventory/1",
-  "generated_utc": "2026-09-21T20:46:31Z",
-  "commit": "e81d50da3cb0b7fdb5736033cb90d9b6ec8fd270",
-  "authoritative_runner": {
-    "how": "python3 <test_file>  (unittest, per file)",
-    "reproduce": "for f in .claude/tests/test_*.py library/kernel/tools/tests/test_*.py; do python3 \"$f\" || echo \"FAIL $f\"; done",
-    "why": "requirements-dev.txt declares unittest per-file; every test file carries an `if __name__ == \"__main__\": unittest.main(...)` block.",
-    "per_file_timeout_s": 180,
-    "no_timeouts_observed": true
-  },
-  "auxiliary_runner_pytest": {
-    "installed_in_measured_env": true,
-    "version": "9.1.1",
-    "command": "python3 -m pytest .claude/tests library/kernel/tools/tests -q -p no:cacheprovider",
-    "collected_tests": 2017,
-    "collected_files": 48,
-    "all_test_files": 48,
-    "result": {
-      "failed": 17,
-      "passed": 1975,
-      "skipped": 22,
-      "xfailed": 3,
-      "subtests_passed": 181,
-      "duration_s": 195.6
+  "schema": "aisa-p0-baseline-test-inventory/2",
+  "commit": "b5491abeda65f6ecf710e707e888661753933e52",
+  "measured_after": "the three operator-supplied input subtrees landed (docs/pp-pack-authoring, docs/runtime-hardening, projects/*)",
+  "runner_modes": {
+    "1_per_file_unittest": {
+      "authoritative": true,
+      "command": "for f in .claude/tests/test_*.py library/kernel/tools/tests/test_*.py; do python3 \"$f\" || echo \"FAIL $f\"; done",
+      "why": "requirements-dev.txt declares it; every test file carries an if __name__ == '__main__' block",
+      "result": {
+        "files": 48,
+        "ok": 47,
+        "fail_files": 1,
+        "tests": 2009,
+        "failures": 3,
+        "errors": 0,
+        "skips": 13,
+        "expected_failures": 3
+      },
+      "per_file_timeout_s": 300,
+      "timeouts": 0,
+      "collection_errors": 0
     },
-    "agreement_with_authoritative_runner": "Same 17 failing test IDs as the per-file unittest run.",
-    "correction": "An operator-supplied .pytest_cache listed only 1444 node ids across 32 files, which P0 first read as pytest under-collecting 16 files. A fresh run disproves that: pytest 9.1.1 collects all 48 files. The cache was stale, not evidence of a pytest blind spot."
-  },
-  "environment_as_measured": {
-    "python": "3.11.15",
-    "os": "Linux 6.18.44-fc-v37 x86_64",
-    "installed_beyond_requirements_dev": [
-      "pypdf 6.19.0",
-      "python-docx 1.2.0",
-      "cffi 2.1.1"
-    ],
-    "declaration": "These three were installed by P0 before measuring. They are NOT in requirements-dev.txt. Without them library/kernel/tools/tests/test_text_extract.py fails (5 errors + 3 failures) and the failing-file count is 5, not 4. This is an environment gap, not a code fix; no product code was changed."
+    "2_pytest": {
+      "authoritative": false,
+      "version": "9.1.1",
+      "command": "python3 -m pytest .claude/tests library/kernel/tools/tests -q -p no:cacheprovider",
+      "note": "Not declared in requirements-dev.txt. Collects all 48 files. Agrees with mode 1 on the failing set.",
+      "result_via_accept_phase1": "3 failed, 1950 passed, 9 skipped, 3 xfailed, 181 subtests passed, 191.35s"
+    },
+    "3_acceptance_scripts": {
+      "authoritative": false,
+      "discovered_in": "docs/runtime-hardening/ and docs/pp-pack-authoring/pilot/, both supplied as inputs after the first baseline",
+      "executed": [
+        "docs/runtime-hardening/accept_phase1.py"
+      ],
+      "accept_phase1_result": {
+        "exit": 1,
+        "failed_criteria": [
+          "motor em 1.13.0",
+          "suite verde"
+        ],
+        "reading": "accept_phase1.py:387 asserts TOOL_VERSION == '1.13.0'; the shipped library/kernel/tools/dashboard.py sets TOOL_VERSION = '1.14.0'. The acceptance script is stale relative to the engine, not the engine behind the script. Which side is correct is NOT determined here."
+      },
+      "not_executed": {
+        "scripts": [
+          "docs/runtime-hardening/repro-coverage-phase4-2026-09-15.py",
+          "docs/runtime-hardening/repro-coverage-phase5-2026-09-15.py",
+          "docs/runtime-hardening/repro-coverage-phase6-evidence15-2026-09-16.py",
+          "docs/runtime-hardening/repro-coverage-phase6-flow-2026-09-16.py",
+          "docs/runtime-hardening/repro-coverage-phase6-integrity-2026-09-16.py",
+          "docs/runtime-hardening/repro-coverage-phase6-matrix-2026-09-16.py",
+          "docs/runtime-hardening/repro-coverage-phase6-review-2026-09-16.py",
+          "docs/runtime-hardening/repro-coverage-real-engagement-2026-09-16.py"
+        ],
+        "reason": "These are rehearsals that WRITE evidence under docs/review-evidence/. P0 changes nothing, so they were not run."
+      },
+      "not_executed_other": {
+        "scripts": [
+          "docs/pp-pack-authoring/pilot/step-9d-evidence/accept_frente_b.py",
+          "docs/pp-pack-authoring/pilot/step-9e-evidence/accept_frente_c.py",
+          "docs/pp-pack-authoring/pilot/step-9e-evidence/accept_p14_runs.py",
+          "docs/pp-pack-authoring/pilot/tools/compare-validation-round.py",
+          "docs/pp-pack-authoring/pilot/tools/extract-direct.py"
+        ],
+        "reason": "Authoring-side acceptance for the pack campaign; out of P0 scope, recorded so P1 can map them."
+      }
+    }
   },
   "totals": {
     "files": 48,
-    "ok": 44,
-    "fail_files": 4,
+    "ok": 47,
+    "fail_files": 1,
     "tests": 2009,
-    "failures": 6,
-    "errors": 11,
-    "skips": 16,
-    "expected_failures": 3,
-    "unexpected_successes": 0
+    "failures": 3,
+    "errors": 0,
+    "skips": 13,
+    "expected_failures": 3
+  },
+  "remaining_failures": {
+    "count": 3,
+    "file": ".claude/tests/test_coverage_inventory.py",
+    "tests": [
+      "test_it_is_reported_instead_of_ignored",
+      "test_a_linked_capture_directory_is_refused_and_reported",
+      "test_a_linked_lens_outputs_directory_is_refused"
+    ],
+    "cause": "POSIX-only. A symlink out of the engagement is correctly excluded from the inventory (no outside content leaks in), but build_inventory raises no blocking diagnostic and inv['complete'] stays True. The tests were written for Windows junctions.",
+    "classification": "real code defect in the coverage.py boundary guarantee"
+  },
+  "resolved_since_first_baseline": {
+    "from": 17,
+    "to": 3,
+    "by_input": [
+      {
+        "group": "A",
+        "tests": 12,
+        "files": [
+          "test_pp_domain_knowledge.py",
+          "test_step8c_semantic_continuity.py"
+        ],
+        "input": "docs/pp-pack-authoring/"
+      },
+      {
+        "group": "B",
+        "tests": 1,
+        "files": [
+          "test_coverage_inventory.py"
+        ],
+        "input": "docs/runtime-hardening/patches/f16-decision-ref-alias.patch"
+      },
+      {
+        "group": "D",
+        "tests": 1,
+        "files": [
+          "test_state_scaffold.py"
+        ],
+        "input": "projects/* (4 engagements)"
+      }
+    ]
   },
   "files": [
     {
@@ -54,219 +125,186 @@
       "status": "ok",
       "rc": 0,
       "tests": 27,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.36,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.37,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_admission_rule.py",
       "status": "ok",
       "rc": 0,
       "tests": 30,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.16,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.14,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_arbiter_declarations.py",
       "status": "ok",
       "rc": 0,
       "tests": 42,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.13,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.19,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_blueprint_yaml.py",
       "status": "ok",
       "rc": 0,
       "tests": 73,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 1,
-      "duration_s": 0.71,
-      "failing_tests": [],
-      "skip_reasons": [
-        "engagements n\u00e3o montados"
-      ],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.7,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_calc_archetypes.py",
       "status": "ok",
       "rc": 0,
       "tests": 10,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 1,
-      "duration_s": 1.76,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 3,
-      "unexpected_successes": 0
+      "duration_s": 1.84,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_calc_budget.py",
       "status": "ok",
       "rc": 0,
       "tests": 8,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 4.43,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 4.41,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_calc_chain.py",
       "status": "ok",
       "rc": 0,
       "tests": 11,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 1.59,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 1.63,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_capability_boundary.py",
       "status": "ok",
       "rc": 0,
       "tests": 7,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 1,
-      "duration_s": 0.25,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.24,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_council_wiring.py",
       "status": "ok",
       "rc": 0,
       "tests": 31,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.06,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.07,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_coverage_contract.py",
       "status": "ok",
       "rc": 0,
       "tests": 101,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 44.76,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 46.85,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_coverage_fixtures.py",
       "status": "ok",
       "rc": 0,
       "tests": 64,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 1.07,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 1.12,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_coverage_freshness.py",
       "status": "ok",
       "rc": 0,
       "tests": 50,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 11.15,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 11.0,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_coverage_integration.py",
       "status": "ok",
       "rc": 0,
       "tests": 53,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
-      "skips": 2,
-      "duration_s": 36.93,
-      "failing_tests": [],
-      "skip_reasons": [
-        "engagements n\u00e3o montados neste checkout"
-      ],
-      "verdict": "OK",
+      "skips": 0,
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 38.75,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_coverage_inventory.py",
       "status": "fail",
       "rc": 1,
       "tests": 86,
-      "failures": 4,
+      "verdict": "FAILED",
+      "failures": 3,
       "errors": 0,
       "skips": 0,
-      "duration_s": 6.61,
+      "expected_failures": 0,
+      "duration_s": 7.79,
       "failing_tests": [
         {
           "kind": "FAIL",
           "test": "test_it_is_reported_instead_of_ignored",
           "class": "__main__.EveryReadCrossesTheBoundary.test_it_is_reported_instead_of_ignored"
-        },
-        {
-          "kind": "FAIL",
-          "test": "test_the_patch_file_is_kept_as_the_record_of_the_change",
-          "class": "__main__.F16IsInstalled.test_the_patch_file_is_kept_as_the_record_of_the_change"
         },
         {
           "kind": "FAIL",
@@ -278,613 +316,449 @@
           "test": "test_a_linked_lens_outputs_directory_is_refused",
           "class": "__main__.LinkedMainSourcesAreRefused.test_a_linked_lens_outputs_directory_is_refused"
         }
-      ],
-      "skip_reasons": [],
-      "verdict": "FAILED",
-      "expected_failures": 0,
-      "unexpected_successes": 0
+      ]
     },
     {
       "file": ".claude/tests/test_coverage_phase4.py",
       "status": "ok",
       "rc": 0,
       "tests": 45,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 16.55,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 17.78,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_coverage_phase5.py",
       "status": "ok",
       "rc": 0,
       "tests": 61,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 33.27,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 35.7,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_frame_identity.py",
       "status": "ok",
       "rc": 0,
       "tests": 13,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 1,
-      "duration_s": 0.19,
-      "failing_tests": [],
-      "skip_reasons": [
-        "no engagements mounted"
-      ],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.21,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_hook_invocation.py",
       "status": "ok",
       "rc": 0,
       "tests": 18,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 3.24,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 3.28,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_hooks_gates.py",
       "status": "ok",
       "rc": 0,
       "tests": 36,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 3.42,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 3.4,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_locator_resolution.py",
       "status": "ok",
       "rc": 0,
       "tests": 29,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.15,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.17,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_motor_identity.py",
       "status": "ok",
       "rc": 0,
       "tests": 19,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 1,
-      "duration_s": 1.27,
-      "failing_tests": [],
-      "skip_reasons": [
-        "case-insensitive filesystem required"
-      ],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 1.26,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_options_artefact.py",
       "status": "ok",
       "rc": 0,
       "tests": 53,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
-      "skips": 1,
-      "duration_s": 0.11,
-      "failing_tests": [],
-      "skip_reasons": [
-        "no engagement mounted"
-      ],
-      "verdict": "OK",
+      "skips": 0,
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.09,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_orchestrator_wiring.py",
       "status": "ok",
       "rc": 0,
       "tests": 23,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.23,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.22,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_pp_architecture_templates.py",
       "status": "ok",
       "rc": 0,
       "tests": 116,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.2,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.2,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_pp_deliverable_templates.py",
       "status": "ok",
       "rc": 0,
       "tests": 247,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 1.14,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 1.09,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_pp_discovery_runtime.py",
       "status": "ok",
       "rc": 0,
       "tests": 22,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.11,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.1,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_pp_domain_knowledge.py",
-      "status": "fail",
-      "rc": 1,
+      "status": "ok",
+      "rc": 0,
       "tests": 64,
-      "failures": 1,
-      "errors": 10,
+      "verdict": "OK",
+      "failures": 0,
+      "errors": 0,
       "skips": 0,
-      "duration_s": 0.82,
-      "failing_tests": [
-        {
-          "kind": "ERROR",
-          "test": "test_all_research_gaps_are_persisted_and_contiguous",
-          "class": "__main__.TestAuthoringAnnexes.test_all_research_gaps_are_persisted_and_contiguous"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_annexes_are_authoring_side_only",
-          "class": "__main__.TestAuthoringAnnexes.test_annexes_are_authoring_side_only"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_gap_annex_records_the_count_correction",
-          "class": "__main__.TestAuthoringAnnexes.test_gap_annex_records_the_count_correction"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_number_adjudication_covers_every_source_file_and_class",
-          "class": "__main__.TestAuthoringAnnexes.test_number_adjudication_covers_every_source_file_and_class"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_number_adjudication_reflects_the_repair",
-          "class": "__main__.TestAuthoringAnnexes.test_number_adjudication_reflects_the_repair"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_provenance_annex_covers_every_research_unit",
-          "class": "__main__.TestAuthoringAnnexes.test_provenance_annex_covers_every_research_unit"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_provenance_annex_row_count_matches_its_own_claim",
-          "class": "__main__.TestAuthoringAnnexes.test_provenance_annex_row_count_matches_its_own_claim"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_half_life_is_deferred_not_open",
-          "class": "__main__.TestRepairIsRecorded.test_half_life_is_deferred_not_open"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_repair_note_appended",
-          "class": "__main__.TestRepairIsRecorded.test_repair_note_appended"
-        },
-        {
-          "kind": "ERROR",
-          "test": "test_the_report_count_is_corrected",
-          "class": "__main__.TestRepairIsRecorded.test_the_report_count_is_corrected"
-        },
-        {
-          "kind": "FAIL",
-          "test": "test_the_three_annexes_exist",
-          "class": "__main__.TestAuthoringAnnexes.test_the_three_annexes_exist"
-        }
-      ],
-      "skip_reasons": [],
-      "verdict": "FAILED",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.87,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_pp_options_decision_model.py",
       "status": "ok",
       "rc": 0,
       "tests": 99,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.13,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.13,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_pp_pack_integrity.py",
       "status": "ok",
       "rc": 0,
       "tests": 97,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.67,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.67,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_render_validate.py",
       "status": "ok",
       "rc": 0,
       "tests": 19,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 2,
-      "duration_s": 1.4,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 1.27,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_reopen_transition.py",
       "status": "ok",
       "rc": 0,
       "tests": 10,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 1,
-      "duration_s": 0.21,
-      "failing_tests": [],
-      "skip_reasons": [
-        "engagement not mounted"
-      ],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.23,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_replay_clones.py",
       "status": "ok",
       "rc": 0,
       "tests": 4,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.62,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.58,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_replay_scope.py",
       "status": "ok",
       "rc": 0,
       "tests": 10,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.24,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.23,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_replay_severity.py",
       "status": "ok",
       "rc": 0,
       "tests": 5,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.69,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.62,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_retirement.py",
       "status": "ok",
       "rc": 0,
       "tests": 19,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.21,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.21,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_round_in_progress.py",
       "status": "ok",
       "rc": 0,
       "tests": 32,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.8,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.8,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_scan_limits.py",
       "status": "ok",
       "rc": 0,
       "tests": 14,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 3.03,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 3.02,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_state_scaffold.py",
-      "status": "fail",
-      "rc": 1,
+      "status": "ok",
+      "rc": 0,
       "tests": 15,
-      "failures": 1,
+      "verdict": "OK",
+      "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.12,
-      "failing_tests": [
-        {
-          "kind": "FAIL",
-          "test": "test_a_pre_v23_su_still_exists_untouched",
-          "class": "__main__.TestNoMigration.test_a_pre_v23_su_still_exists_untouched"
-        }
-      ],
-      "skip_reasons": [],
-      "verdict": "FAILED",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.16,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_status_model.py",
       "status": "ok",
       "rc": 0,
       "tests": 68,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.92,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.94,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_step8c_semantic_continuity.py",
-      "status": "fail",
-      "rc": 1,
+      "status": "ok",
+      "rc": 0,
       "tests": 64,
+      "verdict": "OK",
       "failures": 0,
-      "errors": 1,
+      "errors": 0,
       "skips": 0,
-      "duration_s": 0.19,
-      "failing_tests": [
-        {
-          "kind": "ERROR",
-          "test": "test_step_8b_final_corrections_recorded",
-          "class": "__main__.Guards.test_step_8b_final_corrections_recorded"
-        }
-      ],
-      "skip_reasons": [],
-      "verdict": "FAILED",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.19,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_su_table_reader.py",
       "status": "ok",
       "rc": 0,
       "tests": 30,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.3,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.29,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_swing_parse.py",
       "status": "ok",
       "rc": 0,
       "tests": 22,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.18,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.19,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_synthesis_checks.py",
       "status": "ok",
       "rc": 0,
       "tests": 50,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 1,
-      "duration_s": 2.16,
-      "failing_tests": [],
-      "skip_reasons": [
-        "engagement nao montado"
-      ],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 2.38,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_synthesis_freshness.py",
       "status": "ok",
       "rc": 0,
       "tests": 27,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.88,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 1.0,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_technical_decision_refocus.py",
       "status": "ok",
       "rc": 0,
       "tests": 16,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.14,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.17,
+      "failing_tests": []
     },
     {
       "file": ".claude/tests/test_user_language.py",
       "status": "ok",
       "rc": 0,
       "tests": 25,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "duration_s": 0.25,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.25,
+      "failing_tests": []
     },
     {
       "file": "library/kernel/tools/tests/test_fields_draft.py",
       "status": "ok",
       "rc": 0,
       "tests": 21,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 2,
-      "duration_s": 0.1,
-      "failing_tests": [],
-      "skip_reasons": [],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 0.09,
+      "failing_tests": []
     },
     {
       "file": "library/kernel/tools/tests/test_text_extract.py",
       "status": "ok",
       "rc": 0,
       "tests": 23,
+      "verdict": "OK",
       "failures": 0,
       "errors": 0,
       "skips": 2,
-      "duration_s": 2.98,
-      "failing_tests": [],
-      "skip_reasons": [
-        "pricing-marinha not present"
-      ],
-      "verdict": "OK",
       "expected_failures": 0,
-      "unexpected_successes": 0
+      "duration_s": 3.02,
+      "failing_tests": []
     }
-  ],
-  "parsing_note": "Totals come from each file's final unittest verdict line. Two earlier passes over-counted: matching 'failures=' anywhere in stdout caught test_calc_archetypes.py's printed output, and matching it inside the verdict caught 'expected failures=3'. Both are excluded here.",
-  "cross_check": {
-    "individual_FAIL_or_ERROR_lines": 17,
-    "failures_plus_errors": 17,
-    "agree": true
-  },
-  "runner_modes_executed": [
-    "per-file unittest (authoritative)",
-    "pytest 9.1.1 (auxiliary)"
-  ],
-  "no_collection_errors": true,
-  "no_timeouts": true
+  ]
 }

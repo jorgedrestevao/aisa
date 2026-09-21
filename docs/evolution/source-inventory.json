@@ -1,11 +1,10 @@
 {
-  "schema": "aisa-p0-source-inventory/1",
-  "generated_utc": "2026-09-21T20:44:55Z",
+  "schema": "aisa-p0-source-inventory/2",
+  "generated_utc": "2026-09-21T21:11:18Z",
   "repo": {
-    "commit": "e81d50da3cb0b7fdb5736033cb90d9b6ec8fd270",
+    "commit": "b5491abeda65f6ecf710e707e888661753933e52",
     "branch": "claude/repo-update-hy63kt",
-    "tracked_file_count": 300,
-    "worktree_clean": true
+    "tracked_file_count": 304
   },
   "environment": {
     "python": "3.11.15",
@@ -18,7 +17,12 @@
       "pypdf",
       "python-docx"
     ],
-    "pytest_installed": false
+    "installed_for_measurement": [
+      "pypdf 6.19.0",
+      "python-docx 1.2.0",
+      "cffi 2.1.1",
+      "pytest 9.1.1"
+    ]
   },
   "groups": {
     "kernel_contracts": {
@@ -28,43 +32,36 @@
         {
           "path": "library/kernel/blueprint-contract.md",
           "bytes": 19826,
-          "lines": 209,
           "sha256": "9aa26d2793630e2dcc6a748d993ebdd9fe0ed4922295352a35f53bd4dc48779a"
         },
         {
           "path": "library/kernel/coverage-contract.md",
           "bytes": 77447,
-          "lines": 1099,
           "sha256": "785076e8d4c7f22d759e55d5145dea51d13fde794fb3b16698f4717f13598204"
         },
         {
           "path": "library/kernel/glossary.md",
           "bytes": 14658,
-          "lines": 99,
           "sha256": "752727c0a15c845053ac1e796f713fc9e62ace7f97a1e2f827b4d6a51e3a025b"
         },
         {
           "path": "library/kernel/orchestration.md",
           "bytes": 23126,
-          "lines": 199,
           "sha256": "e37ebf6cfca5e158ebb24b3274b86cde219699d37e74104f9710db46e11f48aa"
         },
         {
           "path": "library/kernel/phases.md",
           "bytes": 18534,
-          "lines": 268,
           "sha256": "4b921f8dd04b63d93aa5b9962db63fe0bf6baf4de55cad7ec41a089b835ef546"
         },
         {
           "path": "library/kernel/render-contract.md",
           "bytes": 19745,
-          "lines": 222,
           "sha256": "b28322756233e9501c67819565f3854282365acd0fff2e6d93875a11cf2df505"
         },
         {
           "path": "library/kernel/states.md",
           "bytes": 25003,
-          "lines": 175,
           "sha256": "daa3282edfa5f3eda24e62a7ca5fa5919c7ff776603c733de5248555203290d9"
         }
       ]
@@ -76,31 +73,26 @@
         {
           "path": "library/kernel/tools/coverage.py",
           "bytes": 206126,
-          "lines": 3943,
           "sha256": "b45015776b64483ec2ca8e3df2bd3455ab5255b7a96ded7fe2ab6c5c03b576e3"
         },
         {
           "path": "library/kernel/tools/dashboard.py",
           "bytes": 393258,
-          "lines": 7939,
           "sha256": "5c316f9c28383f33d0d5c5b4e0fba7b1a715866333db5e51992e20a2fcb7f945"
         },
         {
           "path": "library/kernel/tools/fields_draft.py",
           "bytes": 23569,
-          "lines": 499,
           "sha256": "fa648dcbd1115c771938631fb5ef3c8d698db4f2693a18d0d09fa7984a3a9eff"
         },
         {
           "path": "library/kernel/tools/text_extract.py",
           "bytes": 23445,
-          "lines": 572,
           "sha256": "b248e957fa97dd5119d77e32a4ac17814241917981b7330c39a7a217af05c3a9"
         },
         {
           "path": "library/kernel/tools/xlsx_extract.py",
           "bytes": 149755,
-          "lines": 3001,
           "sha256": "68e87c147130544e8f343a21d76b1d66230daba36a18eac01a228a9da2d97fe2"
         }
       ]
@@ -112,13 +104,11 @@
         {
           "path": "library/kernel/tools/tests/test_fields_draft.py",
           "bytes": 18970,
-          "lines": 382,
           "sha256": "0e4b26abaa38ae20dd0f87e18e90f60729e431de26e9ac48af95654c99334a11"
         },
         {
           "path": "library/kernel/tools/tests/test_text_extract.py",
           "bytes": 22766,
-          "lines": 516,
           "sha256": "9562c3f13907ca2c52c58a352f27075be410eb02fa81d415764532e6380f5890"
         }
       ]
@@ -130,37 +120,31 @@
         {
           "path": "library/kernel/capture-templates/process-model.template.md",
           "bytes": 16315,
-          "lines": 239,
           "sha256": "250e9882ac2b7a77d15cce89eb5def3c495b593453e95f3820b1242c556293ae"
         },
         {
           "path": "library/kernel/synthesis-templates/architecture-story.template.md",
           "bytes": 9435,
-          "lines": 138,
           "sha256": "eca721bd8a2273724c8c8ccb5bb4b0adc3d590d7f98b8f6ebba1d6cbac44b679"
         },
         {
           "path": "library/kernel/synthesis-templates/as-is.template.md",
           "bytes": 3475,
-          "lines": 61,
           "sha256": "e24d8176d1ad6114cd2535e8e779058737850107e1492423b65ec532e737ccb5"
         },
         {
           "path": "library/kernel/synthesis-templates/business-story.template.md",
           "bytes": 1629,
-          "lines": 33,
           "sha256": "614a70e774ba52892f7000effa3d418f21a4819a7a7506d371624cb16235d461"
         },
         {
           "path": "library/kernel/synthesis-templates/financial-story.template.md",
           "bytes": 5762,
-          "lines": 93,
           "sha256": "fc0fd6561c5953c645d37d03c4089b1b59f81bbba221d120d47ca87ecceee1ea"
         },
         {
           "path": "library/kernel/synthesis-templates/risks-and-assumptions.template.md",
           "bytes": 5047,
-          "lines": 78,
           "sha256": "d07d4e11efbc79c6e880ea1e1203a1bf0043c6d694e876b79828daee21f6b475"
         }
       ]
@@ -172,25 +156,21 @@
         {
           "path": "library/packs/generic/pack.yaml",
           "bytes": 2084,
-          "lines": 60,
           "sha256": "324bd53d963784980b3206c5ee82567d99f47a822f120589642862fe320650a6"
         },
         {
           "path": "library/packs/mendix/pack.yaml",
           "bytes": 1702,
-          "lines": 56,
           "sha256": "299614b5ba0f0e4a1c92bb1bda3369b013a82a9826717e04d6e4a83f3e82c91f"
         },
         {
           "path": "library/packs/outsystems/pack.yaml",
           "bytes": 2018,
-          "lines": 58,
           "sha256": "0959248e31d6c49ba44924e3e0b908412352d986ccc41a5797ba8b853cafbde1"
         },
         {
           "path": "library/packs/pp/pack.yaml",
           "bytes": 18189,
-          "lines": 326,
           "sha256": "671945f266b4ed752e39c90425331a1b7f33c5e335735939c95c199fda667b18"
         }
       ]
@@ -202,103 +182,86 @@
         {
           "path": ".claude/commands/answer.md",
           "bytes": 337,
-          "lines": 8,
           "sha256": "7fe3ef5332a3a0ad76f8caabd9868113692b8e5ae8d2680a17d893d937c9d18a"
         },
         {
           "path": ".claude/commands/blueprint.md",
           "bytes": 873,
-          "lines": 17,
           "sha256": "27a0855f4df04ec0691afa7568b3d82b2548191d00d74f036e6078f8bf68fb08"
         },
         {
           "path": ".claude/commands/capture.md",
           "bytes": 297,
-          "lines": 8,
           "sha256": "b957a14ce45b72fbb21e7beee0c5c3d1a37767e6414b2f8e1a8a4e2f2d8fe6f9"
         },
         {
           "path": ".claude/commands/dashboard.md",
           "bytes": 3040,
-          "lines": 53,
           "sha256": "0c42540907c2869b19ca1508d5d57f0a2870a88c8eb31fb4a6ac856a7eaecac4"
         },
         {
           "path": ".claude/commands/decide.md",
           "bytes": 1202,
-          "lines": 28,
           "sha256": "32c3a89c82ade24be344a87976936920f40b114ef362ee32cdcacb59c029a020"
         },
         {
           "path": ".claude/commands/frame.md",
           "bytes": 1169,
-          "lines": 28,
           "sha256": "80388523de5d12f81a3142c94e79ae81ad84e1ba7f562f53c6863a9555a6be75"
         },
         {
           "path": ".claude/commands/options.md",
           "bytes": 1224,
-          "lines": 28,
           "sha256": "fe51577daaee79e8071133e702ab2ee6de4c7717c889885ab9a06718ef91024b"
         },
         {
           "path": ".claude/commands/premortem.md",
           "bytes": 301,
-          "lines": 8,
           "sha256": "2ed1e33fb09aa7a2fa8a2c1f5f2f7040654186d9fd21f2468bc4301935264da5"
         },
         {
           "path": ".claude/commands/render.md",
           "bytes": 642,
-          "lines": 14,
           "sha256": "6b0c86412ce9cefaf4d5be41bbe7fa7f9e6d7d8718a28359874448da6cc22115"
         },
         {
           "path": ".claude/commands/resume.md",
           "bytes": 1828,
-          "lines": 32,
           "sha256": "9293a66932f410d9f8a0abadcd868f8a1687a95b2bf7311ece4a9202e6e131de"
         },
         {
           "path": ".claude/commands/retro.md",
           "bytes": 276,
-          "lines": 8,
           "sha256": "9cb8e7c9c144c9814bc0968b7d1e3567fe4dadc10496533a266a0f3873afca05"
         },
         {
           "path": ".claude/commands/revisit.md",
           "bytes": 305,
-          "lines": 8,
           "sha256": "23dd700f33c09fd3c33ae9a8ec771329440d2115e3418f7a87c1dbd441e6cb53"
         },
         {
           "path": ".claude/commands/round.md",
           "bytes": 229,
-          "lines": 8,
           "sha256": "18b974c35b9e4ac21c18a14ce2686092fddbcb4541c66d2c9a66c34ab9f1dfa4"
         },
         {
           "path": ".claude/commands/simulate.md",
           "bytes": 307,
-          "lines": 8,
           "sha256": "54a6e08d58e8da26181a71c5bb22b51efb73ff97bd9f499624c3527e64291fd6"
         },
         {
           "path": ".claude/commands/start.md",
           "bytes": 200,
-          "lines": 8,
           "sha256": "444ed636e0ff8aee70a0780b6635f512a775c8d3c7ca769f45d4f6dc79d44704"
         },
         {
           "path": ".claude/commands/status.md",
           "bytes": 1028,
-          "lines": 21,
           "sha256": "b9d082ef470988d0488fce35a83c9188b6702fd0e1e37654d12b3fe52b43e537"
         },
         {
           "path": ".claude/commands/synthesize.md",
           "bytes": 278,
-          "lines": 8,
           "sha256": "1a5119ed1c909530294d0c5cae2d356f4348f6a3dafd421c3e2a58a73f24b77d"
         }
       ]
@@ -310,145 +273,121 @@
         {
           "path": ".claude/skills/aisa-answer/SKILL.md",
           "bytes": 16215,
-          "lines": 109,
           "sha256": "66d22d159489354e6f456207b669c37d780594a9d8c9818325b5c9c815bae7c2"
         },
         {
           "path": ".claude/skills/aisa-blueprint/SKILL.md",
           "bytes": 40367,
-          "lines": 318,
           "sha256": "f5a904e0f1a7aff6868cf8d7ae01195b80d37173a5612aeff0c2a51ffcc71893"
         },
         {
           "path": ".claude/skills/aisa-capture/SKILL.md",
           "bytes": 21407,
-          "lines": 129,
           "sha256": "ebe4507e12cb702bbf2751f524a3db2b400b7c68bc505859bb9f4ebaab520146"
         },
         {
           "path": ".claude/skills/aisa-decide/SKILL.md",
           "bytes": 15134,
-          "lines": 190,
           "sha256": "b8bad777eed940febbe532a246b5bd5c562df67e952ff53600160a1e11d498ba"
         },
         {
           "path": ".claude/skills/aisa-frame/SKILL.md",
           "bytes": 22272,
-          "lines": 300,
           "sha256": "f1872a67c16a8fc7d68b192fe30d967c9d46477daa5d121451e2dfc87d5156f5"
         },
         {
           "path": ".claude/skills/aisa-options/SKILL.md",
           "bytes": 17150,
-          "lines": 228,
           "sha256": "ecb58224202fc8af1c8cb2ebf31551abdafa10ca5b9f5598b240fef5eaedcc97"
         },
         {
           "path": ".claude/skills/aisa-orient/SKILL.md",
           "bytes": 8878,
-          "lines": 76,
           "sha256": "e3593a5bad107a3bbdbe4b4a5dd7b207f011a89c648a8fbfcd6d741a501be060"
         },
         {
           "path": ".claude/skills/aisa-premortem/SKILL.md",
           "bytes": 3478,
-          "lines": 63,
           "sha256": "effebd229fbfa2345b33f6f9fa3b2529f6a5cb0c7ba6269eee3ff2da5925d767"
         },
         {
           "path": ".claude/skills/aisa-render/SKILL.md",
           "bytes": 35432,
-          "lines": 399,
           "sha256": "2d932d32de746acf48059db1fca75da5972705d3ec8f1a4665530cbbb05dcbf8"
         },
         {
           "path": ".claude/skills/aisa-retro/SKILL.md",
           "bytes": 3523,
-          "lines": 41,
           "sha256": "c8aa3136ee200baecd2fdba6ade1c52872971c47e5ef33c5650571165279e757"
         },
         {
           "path": ".claude/skills/aisa-revisit/SKILL.md",
           "bytes": 4418,
-          "lines": 63,
           "sha256": "d931b4386cb045d7b79618592963cec8e93f76fa4d7a76e4654a409575692536"
         },
         {
           "path": ".claude/skills/aisa-round/SKILL.md",
           "bytes": 25069,
-          "lines": 98,
           "sha256": "a52f38083e3d897c72f1fcef5ffb070daa5239f3494a38d295b6b72f34da2855"
         },
         {
           "path": ".claude/skills/aisa-simulate/SKILL.md",
           "bytes": 8096,
-          "lines": 57,
           "sha256": "980d3ec04671af54494340c167c68120392e903b1541d5ab148c071175a62329"
         },
         {
           "path": ".claude/skills/aisa-start/SKILL.md",
           "bytes": 11755,
-          "lines": 141,
           "sha256": "18ccc242a1bcb5515295cb29429e8598eaafa96b4a0a0e75838c1ddd4796a480"
         },
         {
           "path": ".claude/skills/aisa-status/SKILL.md",
           "bytes": 34608,
-          "lines": 203,
           "sha256": "bf4218d1dff822f9e8b21ee4a7e584191d47a9ea8aae471af978de9c087e259b"
         },
         {
           "path": ".claude/skills/aisa-synthesize/SKILL.md",
           "bytes": 14602,
-          "lines": 150,
           "sha256": "856c4f95f2158e1494579f17d947fb590d590b2e8d5635af0ded57a4cc49e4c0"
         },
         {
           "path": ".claude/skills/chairman-synthesis/SKILL.md",
           "bytes": 37065,
-          "lines": 480,
           "sha256": "ed3dd2c1638d4c49c7a799d657a5af23569a18fb6b41e3f117c6c6324bcc04c1"
         },
         {
           "path": ".claude/skills/lens-business/SKILL.md",
           "bytes": 6996,
-          "lines": 66,
           "sha256": "a50c646522f194ddd8b1164b1c074a119ba9b32f8787fcd8c7a5c590a4244849"
         },
         {
           "path": ".claude/skills/lens-data/SKILL.md",
           "bytes": 7506,
-          "lines": 68,
           "sha256": "bb2bad25bb81ed43d514dc6647c6a448c5ae0d35a32a5ffd46f492311e1846e5"
         },
         {
           "path": ".claude/skills/lens-financial/SKILL.md",
           "bytes": 8211,
-          "lines": 67,
           "sha256": "1356ed1fecbedc45a0821c4ceecee4f5bcb97d974e639bf79a0cd8493869f131"
         },
         {
           "path": ".claude/skills/lens-governance/SKILL.md",
           "bytes": 8087,
-          "lines": 67,
           "sha256": "391499af86a39ad44a32c0a472b0a9dbff82877f999c31781087e4da07ed3870"
         },
         {
           "path": ".claude/skills/lens-operations/SKILL.md",
           "bytes": 7726,
-          "lines": 68,
           "sha256": "9041b3c09dc79b0320f6fbb65421f34e0ccdd1de693ca458b15f46e7779d31f8"
         },
         {
           "path": ".claude/skills/lens-technology/SKILL.md",
           "bytes": 7683,
-          "lines": 68,
           "sha256": "82bf266d3ee04d39323a019afc6fc4c1f829ed01087cca6f821fa8bf8467a05e"
         },
         {
           "path": ".claude/skills/lens-user/SKILL.md",
           "bytes": 6990,
-          "lines": 66,
           "sha256": "ddbe7ad42e6a4755f1903118acac9abf304ee51c05ed3e08cd6bb89f5a2aedfe"
         }
       ]
@@ -460,49 +399,41 @@
         {
           "path": ".claude/agents/business-analyst.md",
           "bytes": 1971,
-          "lines": 29,
           "sha256": "3169a7605c68776b5d4e52116bb6e087895a19b0c1cf98f8c4421a2cead4b3dc"
         },
         {
           "path": ".claude/agents/cfo-lens.md",
           "bytes": 2727,
-          "lines": 31,
           "sha256": "0a9366a40333377abcae482e9bc7629be4a96eeb4afcef3542cfa4047af1f59f"
         },
         {
           "path": ".claude/agents/chairman.md",
           "bytes": 4706,
-          "lines": 67,
           "sha256": "ba2de17487582e7f8d9b68d7d01c0b4a1d64cf8dd44e4ef09401baebfdaad8e0"
         },
         {
           "path": ".claude/agents/compliance-officer.md",
           "bytes": 2572,
-          "lines": 29,
           "sha256": "18bc7608b95d72c3de044764d92da394d5fc6b1bc1a3b7ebd1888e607e2b7fd8"
         },
         {
           "path": ".claude/agents/data-steward.md",
           "bytes": 2108,
-          "lines": 29,
           "sha256": "67ce925c112695544638d175e41e4aa6fdef5ea259b3161cdf85a44846aa308c"
         },
         {
           "path": ".claude/agents/operations-lead.md",
           "bytes": 1930,
-          "lines": 29,
           "sha256": "0bdc490b2cc535612fdec7d5b7671160f49273d24eb53dac9244a7ab807e21a5"
         },
         {
           "path": ".claude/agents/solution-architect.md",
           "bytes": 3257,
-          "lines": 37,
           "sha256": "04eeabb348e939c580e404055b8991c9a12106612d220792b437df7531fc72b4"
         },
         {
           "path": ".claude/agents/user-advocate.md",
           "bytes": 2005,
-          "lines": 29,
           "sha256": "7469e02e02a3e6bdeedf978674d9135e52b76f6451f9cd440c875a80d9b54886"
         }
       ]
@@ -514,61 +445,51 @@
         {
           "path": ".claude/hooks/_common.py",
           "bytes": 4704,
-          "lines": 142,
           "sha256": "d8f07562196ab388ebfe0565ae75252ee7e443458ec1f7fc6fce587ae1de5d3d"
         },
         {
           "path": ".claude/hooks/blueprint-validate.py",
           "bytes": 7598,
-          "lines": 166,
           "sha256": "a690288999a80f1cfdcf8ec027c78799e8391937a30a71e179a334a56323a398"
         },
         {
           "path": ".claude/hooks/on-su-change.py",
           "bytes": 5203,
-          "lines": 156,
           "sha256": "e1d52e60a1fccff0de65c8a9fd39196d088118dc0f2490f4aabd8492598e5b61"
         },
         {
           "path": ".claude/hooks/phase-completeness.py",
           "bytes": 15477,
-          "lines": 343,
           "sha256": "55235fe74da6f1ef572c671e540e2def9ab5d06871755d0a2d6ce0155f705780"
         },
         {
           "path": ".claude/hooks/phase-gate-check.py",
           "bytes": 8115,
-          "lines": 174,
           "sha256": "4d4d74423f85dd92cb778ace2b8fd445077e7809e703a1ad3cb3212e48669200"
         },
         {
           "path": ".claude/hooks/pre-lens-order-check.py",
           "bytes": 10982,
-          "lines": 276,
           "sha256": "4976b26091b376460ce8981070627dd75d46f2a61db0df69f2a40a887254b12e"
         },
         {
           "path": ".claude/hooks/pre-write-guard.py",
           "bytes": 4360,
-          "lines": 123,
           "sha256": "a6122dc73514a8b77883175efb97f74ced1f9553149798c4ef4360cc2a7a6702"
         },
         {
           "path": ".claude/hooks/render-validate.py",
           "bytes": 29989,
-          "lines": 610,
           "sha256": "eca19a386f419c2037102393baa5846d39d9cb1b99ad70db619effcb4fe44274"
         },
         {
           "path": ".claude/hooks/su-confirmed-guard.py",
           "bytes": 6318,
-          "lines": 176,
           "sha256": "e002341aea06ad5e341abbc9159ceaa67655910bf33dcaa2a279155ffe9e4755"
         },
         {
           "path": ".claude/hooks/synthesis-validate.py",
           "bytes": 5593,
-          "lines": 123,
           "sha256": "87d7809c3895e672a0fa16f6c147c7a4235bd3d5e20c7c27dfe006c221179de0"
         }
       ]
@@ -580,25 +501,21 @@
         {
           "path": ".claude/rules/library-readonly.md",
           "bytes": 395,
-          "lines": 9,
           "sha256": "4437be26cfe94c98d8dbeea0b0be776f04a04992c6284c6d1ee6d205bdea07c9"
         },
         {
           "path": ".claude/rules/no-tech-mention-before-options.md",
           "bytes": 927,
-          "lines": 17,
           "sha256": "c419626f4c17295b155f1e2321766cae6f2468f06697fd3e7e909edf9e94a6c5"
         },
         {
           "path": ".claude/rules/render-on-decision-only.md",
           "bytes": 532,
-          "lines": 9,
           "sha256": "e0e5adbc108c0f860d29a813d17cce36f2f542838922f07c60e63f8df251c28e"
         },
         {
           "path": ".claude/rules/shared-understanding-as-source-of-truth.md",
           "bytes": 534,
-          "lines": 9,
           "sha256": "263e340ae418f4eef0710c6fac7d922526afaf5e12f39b6dbb824be00d738915"
         }
       ]
@@ -610,277 +527,231 @@
         {
           "path": ".claude/tests/test_a5_dictionary_contract.py",
           "bytes": 13495,
-          "lines": 271,
           "sha256": "beb227f3d35546e4ca8e79f6a4d0a3131c104d9ec660e9016e5b7aa06343f2fe"
         },
         {
           "path": ".claude/tests/test_admission_rule.py",
           "bytes": 19471,
-          "lines": 356,
           "sha256": "5725519b5649fd0173531ed1ae391d2ae55cd60252c01711eb6efa0f4afb97e4"
         },
         {
           "path": ".claude/tests/test_arbiter_declarations.py",
           "bytes": 21777,
-          "lines": 440,
           "sha256": "db91b15655477fa0021a7d3b6176650381c1b7eeca161fbfff21e6c40dd1917a"
         },
         {
           "path": ".claude/tests/test_blueprint_yaml.py",
           "bytes": 34567,
-          "lines": 717,
           "sha256": "9d97809a3e6d1e9a0e7bf66de5027350978be20f6dc2e0f0b5fd7ec635f554d2"
         },
         {
           "path": ".claude/tests/test_calc_archetypes.py",
           "bytes": 10457,
-          "lines": 203,
           "sha256": "d813919b7819215dc5b1019c1359214e35191055d1f8347b75f0c39a5cf0c42f"
         },
         {
           "path": ".claude/tests/test_calc_budget.py",
           "bytes": 5460,
-          "lines": 118,
           "sha256": "9b979d22a6bdd0bd0d1324ac7c8a0106faf31ddb7d0f8442d07d8aa172eed088"
         },
         {
           "path": ".claude/tests/test_calc_chain.py",
           "bytes": 7055,
-          "lines": 155,
           "sha256": "6072775e8999a50192e0002639e3bb2a7e3c3f7542a3205f2279f3901ffc9ee0"
         },
         {
           "path": ".claude/tests/test_capability_boundary.py",
           "bytes": 5561,
-          "lines": 112,
           "sha256": "87d16a438528603868a1f88efb89d018c0581d5e9996a44d673620370ac58f6f"
         },
         {
           "path": ".claude/tests/test_council_wiring.py",
           "bytes": 12079,
-          "lines": 279,
           "sha256": "d05d058bd193906003c32fa0891ede1b354245c1f077c73cbc44cd76064d8e39"
         },
         {
           "path": ".claude/tests/test_coverage_contract.py",
           "bytes": 64956,
-          "lines": 1251,
           "sha256": "50577e1da820298a52dfa981704f8e5137edd83902ef46c82be14c6f48792980"
         },
         {
           "path": ".claude/tests/test_coverage_fixtures.py",
           "bytes": 40387,
-          "lines": 831,
           "sha256": "2477df36a3925bc84976f3f511d938c5128e120d0c5aa6c5f4251a6654dcaa7f"
         },
         {
           "path": ".claude/tests/test_coverage_freshness.py",
           "bytes": 33034,
-          "lines": 653,
           "sha256": "63adff7ba896b0efec1345424616d5bce29364b01a0981c4c8c3b77bc182ddec"
         },
         {
           "path": ".claude/tests/test_coverage_integration.py",
           "bytes": 37255,
-          "lines": 769,
           "sha256": "876244b104bc6fb5f20f26a1f3b969fb0588fac1e0c489637b56ba0e86ffca22"
         },
         {
           "path": ".claude/tests/test_coverage_inventory.py",
           "bytes": 49158,
-          "lines": 1008,
           "sha256": "089f221fe45fff2b1cea6663af9bf81fe0ff5ed18ac1130c49df167201d9996d"
         },
         {
           "path": ".claude/tests/test_coverage_phase4.py",
           "bytes": 28951,
-          "lines": 588,
           "sha256": "3dca05eb97d4f30d62a9147e0de8bf3d850366074f0a3f6b1f98bdb57982b3fa"
         },
         {
           "path": ".claude/tests/test_coverage_phase5.py",
           "bytes": 40198,
-          "lines": 771,
           "sha256": "1e8a08f05059efe661f483e5a461385f8f0ac8f538cd7e4e9763d657ebbb3b7e"
         },
         {
           "path": ".claude/tests/test_frame_identity.py",
           "bytes": 8426,
-          "lines": 173,
           "sha256": "0d70617fa35044d2e6c2f0dc01ead06c4c10243eaa3c217991a867f1bda13bbb"
         },
         {
           "path": ".claude/tests/test_hook_invocation.py",
           "bytes": 15816,
-          "lines": 325,
           "sha256": "052c1b58522507c28ec0c880677cd30fdbee7ac4781baa20bb9e35d2e6f18813"
         },
         {
           "path": ".claude/tests/test_hooks_gates.py",
           "bytes": 23765,
-          "lines": 483,
           "sha256": "e5125d18457d36f64da46074f788ab021f949cc75ef5f6b3a335b43f02962168"
         },
         {
           "path": ".claude/tests/test_locator_resolution.py",
           "bytes": 14205,
-          "lines": 342,
           "sha256": "09be52bfa78090506a62c56be0509cf89b3ca2659cc0e7024d81bb0a59275cdd"
         },
         {
           "path": ".claude/tests/test_motor_identity.py",
           "bytes": 12604,
-          "lines": 285,
           "sha256": "1d354657659686d80034b803f99cf9fce885a2edd9b17799206d0fc0d44004db"
         },
         {
           "path": ".claude/tests/test_options_artefact.py",
           "bytes": 28710,
-          "lines": 597,
           "sha256": "ba7628cea6b2511e89ce04b05fca0f1e45236f932fafed014a816a07da827671"
         },
         {
           "path": ".claude/tests/test_orchestrator_wiring.py",
           "bytes": 10334,
-          "lines": 230,
           "sha256": "6c191e1945596be18a9a57bbe985f4049dd411d0321f816f369cf581a743a5ce"
         },
         {
           "path": ".claude/tests/test_pp_architecture_templates.py",
           "bytes": 50347,
-          "lines": 1028,
           "sha256": "3033e72726db42928a5f4facf935effd4f18a21fcc1c5f997dddce4dc2d87999"
         },
         {
           "path": ".claude/tests/test_pp_deliverable_templates.py",
           "bytes": 149909,
-          "lines": 2598,
           "sha256": "28efbee76be9b49131dc281422e7b8baaafd0fcc11437fe166bf5fc9cc66e65d"
         },
         {
           "path": ".claude/tests/test_pp_discovery_runtime.py",
           "bytes": 10522,
-          "lines": 222,
           "sha256": "62459ed1a0801ac3cc600d3652278dd470bfc84d38cf369a0eb89b9e0d2e483d"
         },
         {
           "path": ".claude/tests/test_pp_domain_knowledge.py",
           "bytes": 38186,
-          "lines": 857,
           "sha256": "49cc132a452db79e6ae2c78e5ecccbc798b11260958ddbabc96af6dc31b9ad79"
         },
         {
           "path": ".claude/tests/test_pp_options_decision_model.py",
           "bytes": 33298,
-          "lines": 694,
           "sha256": "017aa69f68559ac3a442cd18913075d77cdea382887b959902a50aeff1fe2b49"
         },
         {
           "path": ".claude/tests/test_pp_pack_integrity.py",
           "bytes": 44640,
-          "lines": 958,
           "sha256": "6b0f3ab056ba0516e8c0bd6c0caac6593a448632f0f339121ca11ceb3b74f5e0"
         },
         {
           "path": ".claude/tests/test_render_validate.py",
           "bytes": 16670,
-          "lines": 382,
           "sha256": "bad0c25b57d52243c071f9ca41842b7f0ee2cbfa5c7fe83487d8b41a682d6c13"
         },
         {
           "path": ".claude/tests/test_reopen_transition.py",
           "bytes": 8861,
-          "lines": 194,
           "sha256": "6a07922a3adb075046bc822b267a79e2f1dc229b6707beb73c3a74c95f488b24"
         },
         {
           "path": ".claude/tests/test_replay_clones.py",
           "bytes": 3446,
-          "lines": 78,
           "sha256": "34bf158325ab5a58323a034fe9170b5247117893d6f057064b6ae3bfb1ec73d8"
         },
         {
           "path": ".claude/tests/test_replay_scope.py",
           "bytes": 6517,
-          "lines": 148,
           "sha256": "8ab8f8566d061962fc6a2a184ab6c9016b82c9a6fe5367140a0ed3cc1e6a3843"
         },
         {
           "path": ".claude/tests/test_replay_severity.py",
           "bytes": 5013,
-          "lines": 102,
           "sha256": "a6076ee37eac397ae4e4f2995e97d5b098cbee6f4893b820ddfb91e88732d6cf"
         },
         {
           "path": ".claude/tests/test_retirement.py",
           "bytes": 8648,
-          "lines": 181,
           "sha256": "4265f97da0857e3215ae34edaded7acdd54c847e6789142c5d3e4acf25baae08"
         },
         {
           "path": ".claude/tests/test_round_in_progress.py",
           "bytes": 18885,
-          "lines": 392,
           "sha256": "4c6f47ed38f46645455414c6a7be2bf1afaace8dd74375fe5d22bcbdc8319b09"
         },
         {
           "path": ".claude/tests/test_scan_limits.py",
           "bytes": 10758,
-          "lines": 229,
           "sha256": "2ea81822530ba88e4730a2977b4064bf08125eef75016494361a4dd8e9c19720"
         },
         {
           "path": ".claude/tests/test_state_scaffold.py",
           "bytes": 7336,
-          "lines": 177,
           "sha256": "e4bf58a3bfd9bd2e0ed0a4d3b504e07a7a04a48dc58482630fd0ea5e4a2eb94c"
         },
         {
           "path": ".claude/tests/test_status_model.py",
           "bytes": 47643,
-          "lines": 1006,
           "sha256": "9c889f510d882957499dd9d656df649d96a37cc94ed42d8985ff0e2984ce035f"
         },
         {
           "path": ".claude/tests/test_step8c_semantic_continuity.py",
           "bytes": 65907,
-          "lines": 1155,
           "sha256": "4bbfb9ecbb33561a226714646aef117d1ac0198a1da84809f5ea33fd1d26b65d"
         },
         {
           "path": ".claude/tests/test_su_table_reader.py",
           "bytes": 23479,
-          "lines": 497,
           "sha256": "541eb104ad4b812625450965ff827db2d058c77e92d56aadd13351bf9ac1d06c"
         },
         {
           "path": ".claude/tests/test_swing_parse.py",
           "bytes": 12591,
-          "lines": 287,
           "sha256": "58ff63161a15370d49fb0db29c99223c57cc4bf4f8b9c68f36683bad622e89b0"
         },
         {
           "path": ".claude/tests/test_synthesis_checks.py",
           "bytes": 31500,
-          "lines": 629,
           "sha256": "d4aae6aba04a3cac324eec72da6c69e19e112835dec576455e4ae848797388ab"
         },
         {
           "path": ".claude/tests/test_synthesis_freshness.py",
           "bytes": 20595,
-          "lines": 426,
           "sha256": "041e1bb1261f02b300dc4cbf7412163c2cc112b84be1a28dd0f751a94c10e0b5"
         },
         {
           "path": ".claude/tests/test_technical_decision_refocus.py",
           "bytes": 20981,
-          "lines": 372,
           "sha256": "9ebf2653d67441838b60ba7dfec1f0e10abb2ec4ab4022669755a2f2eb6d4f86"
         },
         {
           "path": ".claude/tests/test_user_language.py",
           "bytes": 16207,
-          "lines": 348,
           "sha256": "41f39e967ffa6cf05084d3998dfde63d8a10c23f60dddbc0e2dc48036e4b0c6e"
         }
       ]
@@ -892,49 +763,90 @@
         {
           "path": "docs/ARCHITECTURE.md",
           "bytes": 107763,
-          "lines": 1225,
           "sha256": "68159df9a0e8ca6dc1502bf4674eb9aed4db94a809cc91e7f98a2f92ddd92b2e"
         },
         {
           "path": "docs/COMO-USAR.md",
           "bytes": 5297,
-          "lines": 73,
           "sha256": "9ae390c900c64b256e7c07a378fddaabc795273d8a5c99bbab753a6ebad33514"
         },
         {
           "path": "docs/LENS_AUTHORING.md",
           "bytes": 16586,
-          "lines": 162,
           "sha256": "54ebeb912a3e005e992140e4c8e39b00a4fd67b68c60667120710dc440d53dee"
         },
         {
           "path": "docs/ONBOARDING.md",
           "bytes": 26654,
-          "lines": 510,
           "sha256": "99e044acf986dc67e2d9a363247a98342721a34c8b03cfe8484b5da470ab2287"
         },
         {
           "path": "docs/PACK_AUTHORING.md",
           "bytes": 12683,
-          "lines": 185,
           "sha256": "b1f8b18deebd02e1887d88871e249c18cc7a463a3b60ac48e5e87992e3ab910f"
         },
         {
           "path": "docs/PHILOSOPHY.md",
           "bytes": 14709,
-          "lines": 229,
           "sha256": "b20930fdb254601d5285378435028ea514cb414aa113222d80eee0809368a53c"
         }
       ]
     }
   },
+  "support_subtrees": {
+    "docs/pp-pack-authoring": {
+      "root": "docs/pp-pack-authoring",
+      "count": 160,
+      "bytes": 8108048,
+      "runners": [
+        "docs/pp-pack-authoring/pilot/step-9d-evidence/accept_frente_b.py",
+        "docs/pp-pack-authoring/pilot/step-9e-evidence/accept_frente_c.py",
+        "docs/pp-pack-authoring/pilot/step-9e-evidence/accept_p14_runs.py",
+        "docs/pp-pack-authoring/pilot/tools/compare-validation-round.py",
+        "docs/pp-pack-authoring/pilot/tools/extract-direct.py"
+      ],
+      "sha256_of_listing": "c6d6c71f3fccfe42524a91862f1246c8b6c9307210b9cc4394a0b192cd10bbcc"
+    },
+    "docs/runtime-hardening": {
+      "root": "docs/runtime-hardening",
+      "count": 44,
+      "bytes": 512218,
+      "runners": [
+        "docs/runtime-hardening/accept_phase1.py",
+        "docs/runtime-hardening/accept_phase2.py",
+        "docs/runtime-hardening/accept_phase3.py",
+        "docs/runtime-hardening/repro-coverage-phase4-2026-09-15.py",
+        "docs/runtime-hardening/repro-coverage-phase5-2026-09-15.py",
+        "docs/runtime-hardening/repro-coverage-phase6-evidence15-2026-09-16.py",
+        "docs/runtime-hardening/repro-coverage-phase6-flow-2026-09-16.py",
+        "docs/runtime-hardening/repro-coverage-phase6-integrity-2026-09-16.py",
+        "docs/runtime-hardening/repro-coverage-phase6-matrix-2026-09-16.py",
+        "docs/runtime-hardening/repro-coverage-phase6-review-2026-09-16.py",
+        "docs/runtime-hardening/repro-coverage-real-engagement-2026-09-16.py"
+      ],
+      "sha256_of_listing": "baa66397fec072a5c4809b13243119cd639026d3887b1227cafc4c8755b05b18"
+    }
+  },
   "engagement_mount": {
     "path": "projects/",
-    "tracked": [
-      "projects/.gitkeep"
-    ],
     "gitignored_pattern": "projects/*",
-    "engagements_present_in_checkout": 0,
-    "note": "No pilot inputs exist in the tracked repository. P8 pilots must be supplied out-of-band; P1 must record their location and hash."
+    "engagements_present_in_checkout": 4,
+    "engagements": [
+      "cae-automation-pilot-4",
+      "dpt-galp-jp-pilot-4",
+      "kam-onboarding-pilot-4",
+      "pricing-bunkers-pilot-4"
+    ],
+    "inputs": [
+      "projects/cae-automation-pilot-4/inputs/CAEs - Processos para automatiza#U00e7#U00e3o.docx",
+      "projects/cae-automation-pilot-4/inputs/analise_automatizacao_caes.md",
+      "projects/dpt-galp-jp-pilot-4/inputs/Dayly_pending_tickets_Anonimo.xlsx",
+      "projects/kam-onboarding-pilot-4/inputs/Requisitos_Onboarding_KAM_v1.pdf",
+      "projects/kam-onboarding-pilot-4/inputs/Requisitos_Onboarding_KAM_v1.txt",
+      "projects/kam-onboarding-pilot-4/inputs/sponsor-questions-R01.md",
+      "projects/pricing-bunkers-pilot-4/inputs/PRE#U00c7O BANCAS_03_08_26.xlsm",
+      "projects/pricing-bunkers-pilot-4/inputs/Processos Pricing - Marinha-20260126_150836-Grava#U00e7#U00e3o da Reuni#U00e3o-pt-BR.vtt"
+    ],
+    "note": "Supplied out-of-band and deliberately NOT committed: projects/* is gitignored and the folders carry client data."
   }
 }

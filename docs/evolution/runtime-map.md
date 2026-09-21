@@ -116,10 +116,50 @@ NÃO VERIFICADO se o omitem em execução — P1 tem de mapear escritor a escrit
 
 ## 6. Entradas de piloto (P8)
 
-`projects/*` está em `.gitignore`; o checkout tem **zero engagements**.
-Não existe entrada de piloto no repositório versionado.
+`projects/*` está em `.gitignore`. O checkout tem **4 engagements**, fornecidos fora de
+banda e deliberadamente não versionados (dados de cliente):
 
-Candidatos observados fora do repositório (no upload `aisa-rt-fix`, não versionado):
-`PREÇO BANCAS_03_08_26.xlsm` (1,5 MB) e uma transcrição `.vtt` de reunião.
-P1 tem de registar localização e hash; P8 exige **dois** pilotos distintos e
-oráculos preenchidos por inspeção independente da fonte.
+| Engagement | Entradas |
+|---|---|
+| `cae-automation-pilot-4` | `CAEs - Processos para automatização.docx`, `analise_automatizacao_caes.md` |
+| `dpt-galp-jp-pilot-4` | `Dayly_pending_tickets_Anonimo.xlsx` |
+| `kam-onboarding-pilot-4` | `Requisitos_Onboarding_KAM_v1.pdf` / `.txt`, `sponsor-questions-R01.md` |
+| `pricing-bunkers-pilot-4` | `PREÇO BANCAS_03_08_26.xlsm`, transcrição `.vtt` |
+
+Cobrem os dois tipos que P8 exige (operacional/tickets e Excel com regras). Os oráculos
+não estão construídos: `ACCEPTANCE.md` exige inspeção independente da fonte e proíbe
+gerá-los a partir do candidato. Trabalho de P1.
+
+## 7. Subárvores de apoio versionadas
+
+Chegaram como entrada durante P0 e passaram a fazer parte do repositório.
+
+### `docs/runtime-hardening/` — 44 ficheiros
+
+- `patches/f16-decision-ref-alias.patch` — registo da correção já instalada em
+  `dashboard.py` (`bp_decision_id` normaliza `decision_ref` e `concretizes_decision`).
+- `accept_phase1..3.py` — **aceitação executável**. Correm contra os engagements reais em
+  `projects/` (ou `$AISA_ENGAGEMENTS_ROOT`), não escrevem, saem 0/1. Terceiro modo de runner.
+- `repro-coverage-*.py` (8) — ensaios que **escrevem** `docs/review-evidence/`. Não correr
+  em medições de baseline.
+- `coverage-phase-1..6-report.md`, `B1-inventario.md`, `intake-scenarios/`.
+
+### `docs/pp-pack-authoring/` — 160 ficheiros
+
+Evidência de autoria do pack `pp`, marcada em `test_pp_pack_integrity.py` como
+**histórica, nunca runtime activo**. Contém também runners:
+`pilot/step-9e-evidence/accept_frente_c.py` e `accept_p14_runs.py`,
+`pilot/step-9d-evidence/accept_frente_b.py`, `pilot/tools/`.
+`test_user_language.py` declara-se o motor por trás de `accept_frente_c.py`.
+
+Caminhos de que os testes dependem — e só estes:
+`research/pp/authoring/` e `pilot/step-8b-post-pilot-adjudication-report.md`.
+`research/pp/evidence/` (5,2 MB) não é lido por teste nenhum, mas é referenciado por
+ficheiros dentro de `research/pp/authoring/`; separá-lo partiria essas referências.
+
+## 8. Divergência por adjudicar
+
+`accept_phase1.py:387` afirma `TOOL_VERSION == "1.13.0"`;
+`library/kernel/tools/dashboard.py:44` define `TOOL_VERSION = "1.14.0"`.
+O script de aceitação está atrasado face ao motor. Qual dos lados corrigir **NÃO ESTÁ
+DETERMINADO** — P1.

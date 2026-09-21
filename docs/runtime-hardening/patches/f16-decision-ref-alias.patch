@@ -1,0 +1,48 @@
+--- a/library/kernel/tools/dashboard.py
++++ b/library/kernel/tools/dashboard.py
+@@ -3031,12 +3031,25 @@
+         return [str(x) for x in raw if x]
+     if isinstance(raw, str) and raw.strip():
+         return ID_RE.findall(raw) or [raw.strip()]
+     return []
+ 
+ 
++def bp_decision_id(text: str) -> str:
++    """O `D-NNN` que a versao concretiza, venha da chave que vier (F16).
++
++    `bp_validate` aceita `decision_ref` OU `concretizes_decision`
++    (blueprint-contract.md -> Codigos, BP-REQ-KEY); o leitor tem de aceitar as duas, ou
++    uma ligacao documental existente desaparece da projeccao. Normaliza as duas formas
++    reais -- `decisions.md#D-002` e `D-002` -- para o id, e devolve "" quando nao ha id
++    nenhum a ler (nunca inventa)."""
++    raw = yl_scalar_at(text, "decision_ref") or yl_scalar_at(text, "concretizes_decision")
++    m = re.search(r"\bD-\d{2,4}\b", str(raw or ""))
++    return m.group(0) if m else ""
++
++
+ def bp_read(p: Path) -> dict:
+     text = _read(p) or ""
+     oac = yl_find_block(text, "open_architecture_choices", "architecture") \
+         or yl_find_block(text, "open_architecture_choices")
+     po = yl_find_block(text, "proof_obligations", "architecture") \
+         or yl_find_block(text, "proof_obligations")
+@@ -3060,13 +3073,18 @@
+     } for q in yl_list_of_maps(po)]
+     ver = "v" + BP_FILE_RE.match(p.name).group("ver").zfill(2)
+     return {
+         "version": ver, "file": p.name, "rel": "_blueprint/" + p.name,
+         "draft": bool(yl_scalar_at(text, "draft")),
+         "option": yl_scalar_at(text, "option") or yl_scalar_at(text, "option_ref") or "",
+-        "decision_ref": yl_scalar_at(text, "decision_ref") or "",
++        # F16: o alias entra aqui, num sitio so. `decision_ref` conserva o valor CRU
++        # do ficheiro (ha fixtures e snapshots que o leem tal e qual); `decision_id` e a
++        # forma normalizada, que e o que qualquer consumidor deve comparar.
++        "decision_ref": (yl_scalar_at(text, "decision_ref")
++                         or yl_scalar_at(text, "concretizes_decision") or ""),
++        "decision_id": bp_decision_id(text),
+         "authorization": yl_scalar_at(text, "authorization", "architecture") or "",
+         "experience_mode": yl_scalar_at(text, "mode", "experience") or "",
+         "open_choices": choices,
+         "structural_open": [c for c in choices if c["structural"] and not c["resolved"]],
+         "proof_obligations": proofs,
+         "readable": bool(text.strip()),

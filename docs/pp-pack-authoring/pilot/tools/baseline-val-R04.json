@@ -1,0 +1,64 @@
+{
+  "ronda": "R-04",
+  "gerada": "2026-09-08",
+  "fonte": "projects/pricing-marinha-pilot-3 (original intocado)",
+  "nota": "linha de base das duas copias de validacao, identica por construcao (step-9c 5.1). Gerada a partir do ORIGINAL: as copias ja estavam a correr R-05 quando este ficheiro foi escrito, e uma leitura delas teria apanhado estado em voo.",
+  "engagements": [
+    "pricing-marinha-pilot-3-val-sonnet",
+    "pricing-marinha-pilot-3-val-opus"
+  ],
+  "total_rows": 341,
+  "abertas": {
+    "Confirmed": 139,
+    "Assumed": 51,
+    "Unknown": 39,
+    "Conflicted": 1,
+    "Risky": 25
+  },
+  "resolvidas": {
+    "Confirmed": 22,
+    "Assumed": 1,
+    "Unknown": 46,
+    "Conflicted": 8,
+    "Risky": 9
+  },
+  "confirmed_mais_assumed": 190,
+  "confirmed_locator": {
+    "total": 139,
+    "com_locator": 139,
+    "avisos": 0,
+    "excepcao": [
+      "C-002"
+    ]
+  },
+  "round_delta_R04": {
+    "ronda": "R-04",
+    "criadas": 22,
+    "fechadas": 33,
+    "sem_convergencia": false,
+    "abertas_no_fim": 39
+  },
+  "arbiter": {
+    "avaliadas": 39,
+    "sem_declaracao": 21
+  },
+  "enquadramento": {
+    "invariantes": [
+      "M-1",
+      "M-2",
+      "M-3",
+      "M-4",
+      "M-5"
+    ],
+    "rows": [
+      "C-157",
+      "C-158",
+      "C-159",
+      "C-160",
+      "C-161"
+    ]
+  },
+  "saude_pct": 100,
+  "diagnostics": 0,
+  "tool_version": "1.2.0"
+}

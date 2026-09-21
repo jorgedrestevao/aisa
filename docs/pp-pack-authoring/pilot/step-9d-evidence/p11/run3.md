@@ -1,0 +1,21 @@
+## 4. Entidades e estruturas de dados
+
+Fonte: `record_authority[]` do architecture record (ux-blueprint_v05.yaml, aprovado) + `ux-blueprint#entities` (v05 remete para v01). Onde a fonte não declara, a célula diz **não declarado** — não há inferência.
+
+| Entidade | Dono / sistema de registo | Modo de acesso | Campos | Relações | Índices | Notas de implementação | Refs SU |
+|---|---|---|---|---|---|---|---|
+| `DadosMestrePricing` — Dados-Mestre de Pricing | Sistema externo de registo: SQL Server partilhado de pricing | `keep-in-place` | Não itemizados (`fields_itemized: false`). Decomposição dos ~85 campos manuais é escolha de arquitectura aberta (`open_architecture_choices`) | Não declaradas | Não declarados | Dicionário contraparte × combustível × métrica (hoje 291 named ranges no Excel). Máquina de estados: `proposta → aprovada → activa`. Requer passo de aprovação (`approval: true`) | C-017, C-035, R-006, C-057, C-058, C-062 |
+| `CustosLogisticos` — Custos Logísticos | Sistema externo de registo: SQL Server partilhado de pricing | `keep-in-place` | Não itemizados (`fields_itemized: false`) | Não declaradas | Não declarados | Custos por porto e modo de transporte (carro-tanque, barcaça, pipeline); actualização mensal | C-016, C-006, C-057, C-062 |
+| `MargensAlvo` — Margens-Alvo | Sistema externo de registo: SQL Server partilhado de pricing | `keep-in-place` | Não itemizados (`fields_itemized: false`) | Não declaradas | Não declarados | Margem por produto, tipo de cliente e data; decidida no comité diário | C-002, C-008, C-039, C-046, C-006, C-057, C-062 |
+| `HistoricoPrecos` — Histórico de Preços | Sistema externo de registo: SQL Server partilhado de pricing | `keep-in-place` | Não itemizados | Não declaradas | Não declarados | `readonly: true`. Registo estruturado e consultável do histórico diário, substituindo o arquivo de ficheiros soltos | C-018, R-004, C-057, C-060, C-062 |
+| `TermosComerciaisCliente` — Termos Comerciais de Cliente (contrato a termo) | Sistema externo de registo: SAP | `virtualized` | Não itemizados | Não declaradas | Não declarados | `external: true`, `owned_here: false`. Não gerido nesta app — referência só de leitura; SAP é a fonte de verdade | C-052, C-003 |
+| `PrecoDiarioConsolidado` — Preço Diário Consolidado | **Não declarado** — sem domínio correspondente em `record_authority[]` | **Não declarado** | Não itemizados | Não declaradas | Não declarados | `readonly: true`, `feeds_output: true`. Output único, substitui as 6 folhas hoje divergentes (C-041); alimenta o carregamento em X-ALT | C-041, C-001, R-007 |
+| `AprovacaoCarregamento` — Aprovação de Carregamento | **Não declarado** — sem domínio correspondente em `record_authority[]` | **Não declarado** | Não itemizados | Não declaradas | Não declarados | Máquina de estados: `pendente → aprovado → carregado`. Requer passo de aprovação (`approval: true`). Aprovação do superior hierárquico antes do carregamento — resolução de segregação de funções | C-026, C-043 |
+
+### 4.1 Lacunas que bloqueiam a implementação desta secção
+
+1. **Campos.** Nenhuma entidade tem campos itemizados na fonte. As três primeiras declaram-no explicitamente (`fields_itemized: false`); as restantes não trazem campos. A decomposição dos ~85 campos manuais de `DadosMestrePricing` está registada como escolha de arquitectura aberta e tem de ser fechada antes de modelar tabelas.
+2. **Relações.** A fonte não declara nenhuma relação entre entidades. As cardinalidades (ex.: `PrecoDiarioConsolidado` ↔ `MargensAlvo` / `CustosLogisticos` / `DadosMestrePricing`) não estão escritas e não são inferidas aqui.
+3. **Índices.** Sem qualquer fonte. Nada a especificar.
+4. **Dono de duas entidades.** `PrecoDiarioConsolidado` e `AprovacaoCarregamento` não têm domínio em `record_authority[]`. Não estão marcadas `external`, mas isso não é declaração de propriedade — o sistema de registo e o modo de acesso ficam por decidir antes de escolher onde residem os dados.
+5. **Consequência de modo de acesso.** Cinco das sete entidades são sistemas de registo externos (`keep-in-place` ×4 no SQL Server de pricing, `virtualized` ×1 no SAP). Nenhuma dessas estruturas é criada por este projecto: a especificação de dados aqui é de acesso, não de criação de esquema.

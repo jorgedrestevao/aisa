@@ -1,0 +1,13 @@
+{
+  "name": "aisa-power-platform-governance-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-grade Word document generator for the Power Platform governance framework",
+  "scripts": {
+    "build": "node generate-governance-docs.js",
+    "validate": "node validate-governance-docs.js"
+  },
+  "dependencies": {
+    "docx": "9.5.1"
+  }
+}
