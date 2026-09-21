@@ -34,7 +34,7 @@ evidência de P8. Nada foi apagado.
 |---|---|
 | `writer-reader-map.md` | **parcial** — camada Python verificada; camada das skills por ler |
 | `authority-map.md` | por fazer |
-| `integration-adr.md` | por fazer |
+| `integration-adr.md` | **parcial** — ADR-001 (linguagem de runtime) aceite; falta o mapeamento módulo a módulo do doador |
 | `test-map.json` | por fazer |
 | Oráculos dos 2 pilotos | por fazer |
 
@@ -110,9 +110,10 @@ uma e registar a operação declarada, não a menção. É o próximo passo.
 ## Próxima acção concreta
 
 1. Ler as 24 skills; fechar `writer-reader-map.md` e produzir `authority-map.md`.
-2. `integration-adr.md` — mapear os conceitos do doador (`lib/pkg/{schema,storage,checks,
-   query,mutations,context,bootstrap}.mjs`, `lib/ops/projection.mjs`) contra o alvo, com os
-   casos não equivalentes nomeados. O doador é Node; o alvo fica Python.
+2. `integration-adr.md` — **ADR-001 fechado**: Python stdlib-only, Node fora, com medição
+   (arranque 19,0 ms vs 41,9 ms; ~114 ms de hooks por escrita) e o núcleo portável do
+   doador inventariado em 2917 linhas. Falta o mapeamento módulo a módulo contra o alvo,
+   com os casos não equivalentes nomeados.
 3. `test-map.json` — ligar os 61 IDs de `cases.json` a fases e testes.
 4. Oráculos dos dois pilotos, por inspecção independente da fonte.
 
