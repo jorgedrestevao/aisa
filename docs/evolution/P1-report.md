@@ -32,8 +32,8 @@ evidência de P8. Nada foi apagado.
 
 | Entregável | Estado |
 |---|---|
-| `writer-reader-map.md` | **parcial** — camada Python verificada; camada das skills por ler |
-| `authority-map.md` | por fazer |
+| `writer-reader-map.md` | **feito** — camada Python verificada por AST; camada das skills lida |
+| `authority-map.md` | **feito** — 24 skills lidas; autoridades por artefacto e por modo |
 | `integration-adr.md` | **parcial** — ADR-001 (linguagem de runtime) aceite; falta o mapeamento módulo a módulo do doador |
 | `test-map.json` | por fazer |
 | Oráculos dos 2 pilotos | por fazer |
@@ -103,15 +103,45 @@ pino actualizado:
 Terceiro modo de runner verde de ponta a ponta. Somado ao conjunto principal
 (48/48 ficheiros, 2009 testes, 0 falhas), **os três modos de runner passam**.
 
-## Contradição registada, por resolver
+## A «contradição» não existia — resolvida por leitura
 
-O kernel declara que em modo council-independent `chairman-synthesis` é o **único** escritor
-da Shared Understanding, e que a escrita atómica de `_state.json` é princípio inviolável.
-O varrimento das skills dá 7 candidatos a escritor da SU e 7 de `_state.json`, dos quais só
-4 declaram `tmp → mv` no texto.
+A revisão anterior registou uma contradição entre o kernel e as skills: o kernel diz que
+`chairman-synthesis` é o único escritor da Shared Understanding e que a escrita atómica de
+`_state.json` é inviolável, enquanto o varrimento dava 7 candidatos a escritor de cada e só
+4 skills a declarar `tmp → mv`.
 
-O varrimento **sobre-reporta** e não serve de prova. Resolver exige ler as 24 skills uma a
-uma e registar a operação declarada, não a menção. É o próximo passo.
+Lidas as 24 skills uma a uma, **não há contradição**. O varrimento é que estava errado, nos
+dois sentidos.
+
+**Shared Understanding.** A regra do kernel é **por modo**, não global. Em Discovery
+escrevem as 7 lentes, inline, uma linha por achado com `lens=<nome>`. Em Framing e Options
+escreve `chairman-synthesis`, e só ele, append-only. Fora dos dois modos há exactamente
+duas escritas mais, ambas declaradas: `aisa-start` cria o esqueleto (estrutura, não
+conteúdo) e `aisa-status` actualiza o cabeçalho de saúde epistémica — a própria skill
+chama-lhe «the one sanctioned write». Tudo o resto lê. `aisa-round` parecia escritor mas só
+varre a SU para achar o próximo id livre por prefixo.
+
+**`_state.json`.** São **6** escritores, não 7, e os **6** declaram escrita atómica, não 4:
+`aisa-start`, `aisa-frame`, `aisa-options`, `aisa-decide`, `aisa-capture` e
+`chairman-synthesis`. O varrimento contou listas de leitura como escrita e perdeu
+`aisa-capture`, cujo verbo é *Increment* e não *escrever*. O princípio 8 do `CLAUDE.md`
+está cumprido em todos os escritores declarados.
+
+Fica a lição de método, que vale para o resto de P1: menção não é operação, e um cabeçalho
+«Reads:» com dez caminhos produz dez falsos escritores em qualquer varrimento por verbos.
+
+## O que P2 tem de acrescentar, agora delimitado
+
+O alvo já tem as garantias **por artefacto**: `_state.json` atómico nos 6 escritores,
+`coverage.py` com uma única porta de escrita confinada a `_coverage/`, `dashboard.py` com
+escrita atómica e lock próprio, SU append-only. O que falta são três coisas, e nenhuma se
+resolve com mais um hook de `Write|Edit`:
+
+1. **Atomicidade entre artefactos** — uma operação toca SU + `_state.json` + `answers.md`;
+   cada escrita é atómica por si, o conjunto não é.
+2. **Exclusão para além do dashboard** — o único lock existente é do `dashboard.py`.
+3. **Observação de escritas por subprocesso** — `PostToolUse` nunca dispara sobre elas,
+   como o próprio código regista em `on-su-change.py:38-40`.
 
 ## Próxima acção concreta
 

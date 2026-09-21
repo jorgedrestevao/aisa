@@ -59,32 +59,23 @@ Consequência para P2/P3: não existe hoje coordenador de operação. O que exis
 (a) escrita atómica por ficheiro, (b) um lock só do dashboard, (c) hooks que só vêem
 chamadas de ferramenta. Nada disto dá atomicidade **entre** artefactos relacionados.
 
-## 4. Camada das skills — `CANDIDATO`, por verificar
+## 4. Camada das skills — lida, já não é candidata
 
-Varrimento por verbos sobre `.claude/skills/*/SKILL.md`. Conta menções, não operações:
-uma skill que *descreve* o que outra escreve entra como escritora. **Não usar como
-autoridade.** Serve só para dizer onde procurar.
+As 24 skills foram lidas uma a uma. O resultado está em `authority-map.md`; o essencial:
 
-| Artefacto | Candidatos a escritor | Menções de leitura |
-|---|---:|---:|
-| `shared-understanding.md` | 7 | 22 |
-| `_state.json` | 7 | 19 |
-| `decisions.md` | 10 | 11 |
-| `story.md` | 11 | 5 |
-| `council-log.md` | 14 | 4 |
-| `lens-outputs/` | 10 | 12 |
-| `answers.md` | 3 | 11 |
-| `options.md` | 5 | 17 |
-| `frame.md` | 5 | 12 |
+- **Shared Understanding**: 7 lentes escrevem em Discovery (inline); `chairman-synthesis`
+  escreve em Framing/Options (council-independent), append-only; `aisa-start` cria o
+  esqueleto; `aisa-status` actualiza só o cabeçalho de saúde. As outras 11 skills lêem.
+- **`_state.json`**: 6 escritores — `aisa-start`, `aisa-frame`, `aisa-options`,
+  `aisa-decide`, `aisa-capture`, `chairman-synthesis` — e **todos** declaram `tmp → rename`.
 
-Contradição por resolver: o kernel diz que em modo council-independent
-`chairman-synthesis` é o **único** escritor da SU, e que a escrita atómica `tmp → mv` de
-`_state.json` é princípio inviolável — mas só 4 skills declaram o padrão no texto.
-Qual é o comportamento real de cada uma exige ler as 24, uma a uma. É o que falta.
+O varrimento por verbos que esta secção continha estava errado nos dois sentidos: contava
+listas de leitura como escrita e perdia escritores cujo verbo não era «escrever»
+(`aisa-capture` diz *Increment*). Foi substituído, não corrigido à margem.
 
 ## 5. O que falta para fechar este mapa
 
-1. Ler as 24 skills e registar, por artefacto, a operação declarada (append / substituição /
-   transição com `was`), não a menção.
-2. Confirmar se os escritores de `_state.json` que não declaram `tmp → mv` o omitem de facto.
+1. ~~Ler as 24 skills~~ — **feito**; ver `authority-map.md`.
+2. ~~Confirmar os escritores de `_state.json` que não declaram `tmp → mv`~~ — **feito**:
+   não existe nenhum. Os 6 declaram-no.
 3. Ligar cada escritor a uma entrada de mutação, para o coordenador de operações de P2.
