@@ -12,6 +12,9 @@
 projects/*
 !projects/.gitkeep
 
+# Pilot campaigns (real engagement inputs + runs; same nature as projects/)
+campaigns/*
+
 # OS noise
 .DS_Store
 Thumbs.db
@@ -37,3 +40,8 @@ package-lock.json
 
 # Logs
 *.log
+# excepcao: a evidencia bruta de R7 e o proprio artefacto (DEF-P1-02)
+!docs/pilot-runtime-correction/R7-evidence/*.log
+
+# Local test virtualenv (pytest runner; not part of the repo)
+.test-venv/

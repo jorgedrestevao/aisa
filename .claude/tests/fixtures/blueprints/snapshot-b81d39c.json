@@ -1,0 +1,1384 @@
+{
+ "tool_version": "1.12.0",
+ "commit": "b81d39c",
+ "blueprints": {
+  "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v01.yaml": {
+   "version": "v01",
+   "file": "ux-blueprint_v01.yaml",
+   "rel": "_blueprint/ux-blueprint_v01.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Dono formal do dicionário de dados-mestre (291 named ranges) e processo de mudança",
+     "structural": true,
+     "su_refs": [
+      "U-027"
+     ],
+     "would_be_settled_by": "Nomeação pelo sponsor/governance",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Regra de desempate entre as 6 folhas de output já divergentes, antes de consolidar num único modelo de cálculo",
+     "structural": true,
+     "su_refs": [
+      "U-026"
+     ],
+     "would_be_settled_by": "Workshop Pedro O. / operations-lead",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Prazo de retenção legal do histórico de preços",
+     "structural": true,
+     "su_refs": [
+      "X-005"
+     ],
+     "would_be_settled_by": "Confirmação jurídica",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Owner nomeado para os 3 componentes de integração externa (market-data feed, referência SAP, carregamento X-ALT)",
+     "structural": true,
+     "su_refs": [
+      "U-029"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Decomposição exacta em ecrãs dos ~85 campos manuais hoje na sheet Inputs — por entidade lógica; não itemizada nesta captura",
+     "structural": false,
+     "su_refs": [
+      "C-017"
+     ],
+     "would_be_settled_by": "Implementation-spec, uma vez o dicionário de dados-mestre redesenhado",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [
+    {
+     "choice": "Dono formal do dicionário de dados-mestre (291 named ranges) e processo de mudança",
+     "structural": true,
+     "su_refs": [
+      "U-027"
+     ],
+     "would_be_settled_by": "Nomeação pelo sponsor/governance",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Regra de desempate entre as 6 folhas de output já divergentes, antes de consolidar num único modelo de cálculo",
+     "structural": true,
+     "su_refs": [
+      "U-026"
+     ],
+     "would_be_settled_by": "Workshop Pedro O. / operations-lead",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Prazo de retenção legal do histórico de preços",
+     "structural": true,
+     "su_refs": [
+      "X-005"
+     ],
+     "would_be_settled_by": "Confirmação jurídica",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Owner nomeado para os 3 componentes de integração externa (market-data feed, referência SAP, carregamento X-ALT)",
+     "structural": true,
+     "su_refs": [
+      "U-029"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v02.yaml": {
+   "version": "v02",
+   "file": "ux-blueprint_v02.yaml",
+   "rel": "_blueprint/ux-blueprint_v02.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Superfície primária compatível com dados-mestre a residir numa BD SQL Server externa — Canvas app (qualquer conector) vs Record-centric app (exige store nativo) vs híbrido structural: true would_be_settled_by: \"Confirmar com IT se a BD SQL Server partilhada é acessível via conector nativo da plataforma, e decidir a superfície com base nisso\" su_ref: A-009",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Owner nomeado para as integrações SAP (referência) e X-ALT (carregamento) — a peça de BD partilhada já resolveu o feed de mercado/dados-mestre (C-057)",
+     "structural": true,
+     "su_refs": [
+      "U-031"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações — equipa que já gere integrações a SAP/X-ALT hoje",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "RESOLVIDO nesta versão — dono de dados-mestre (Pedro O., com aprovação formal, C-058); regra de desempate entre as 6 folhas (Outputs autoritativa, C-059); retenção legal (piso de 10 anos assumido por desenho, C-060)",
+     "structural": false,
+     "su_refs": [
+      "C-058",
+      "C-059",
+      "C-060"
+     ],
+     "would_be_settled_by": "(já resolvido)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [
+    {
+     "choice": "Owner nomeado para as integrações SAP (referência) e X-ALT (carregamento) — a peça de BD partilhada já resolveu o feed de mercado/dados-mestre (C-057)",
+     "structural": true,
+     "su_refs": [
+      "U-031"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações — equipa que já gere integrações a SAP/X-ALT hoje",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v03.yaml": {
+   "version": "v03",
+   "file": "ux-blueprint_v03.yaml",
+   "rel": "_blueprint/ux-blueprint_v03.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Quem vetou a integração anterior a X-Author e porquê (U-025) — determina se a composição `x-author-load-integration` desta versão pode avançar em segurança, ou repete cegamente o padrão que já matou uma iniciativa comparável para o MESMO sistema (C-064) structural: true would_be_settled_by: \"Pedro O. / compliance-officer apurarem a origem do veto antes de qualquer desenho técnico da composição x-author-load-integration\" su_ref: U-025",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "RESOLVIDO nesta versão — superfície primária confirmada (C-062); owner das integrações SAP/X-Author (C-063); terminologia X-Author corrigida (C-064)",
+     "structural": false,
+     "su_refs": [
+      "C-062",
+      "C-063",
+      "C-064"
+     ],
+     "would_be_settled_by": "(já resolvido)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v04.yaml": {
+   "version": "v04",
+   "file": "ux-blueprint_v04.yaml",
+   "rel": "_blueprint/ux-blueprint_v04.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Formato exacto do Excel exportado para a iniciativa de carregamento em X-Author",
+     "structural": false,
+     "su_refs": [
+      "C-065"
+     ],
+     "would_be_settled_by": "Alinhamento com o dono dessa outra iniciativa",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "RESOLVIDO nesta versão — bloqueador ligado a U-025 dissolvido: a integração viva com o X-Author não é âmbito desta app (C-065); a composição que a exigia foi removida structural: false would_be_settled_by: \"(já resolvido — âmbito clarificado)\" su_ref: C-065",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v05.yaml": {
+   "version": "v05",
+   "file": "ux-blueprint_v05.yaml",
+   "rel": "_blueprint/ux-blueprint_v05.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Formato exacto do Excel exportado para a iniciativa de carregamento em X-Author",
+     "structural": false,
+     "su_refs": [
+      "C-065"
+     ],
+     "would_be_settled_by": "Alinhamento com o dono dessa outra iniciativa",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "A11.substituição-de-artefacto-existente nunca foi formalmente activada, apesar de esta solução substituir na prática o ficheiro Excel actual — identificado como gap no dry-run de /render (secção \"Migração e cutover\" da Implementation Specification ficaria \"não aplicável\" sem isto, apesar de haver migração real a fazer) structural: false would_be_settled_by: \"Revisão explícita do blueprint (v06) activando o conditional de substituição de artefacto, antes da Implementation Specification ser gerada a sério\" su_ref: R-004",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Dono explícito do controlo de release (aprovação Dev→Produção)",
+     "structural": false,
+     "su_refs": [
+      "C-067"
+     ],
+     "would_be_settled_by": "Confirmação directa com IT centralizado — inferido por extensão de C-063, não confirmado",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v06.yaml": {
+   "version": "v06",
+   "file": "ux-blueprint_v06.yaml",
+   "rel": "_blueprint/ux-blueprint_v06.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Mecanismo de acesso a dados por domínio material e o seu fit (reabre A-009)",
+     "structural": true,
+     "su_refs": [
+      "U-032"
+     ],
+     "would_be_settled_by": "O mecanismo por domínio estabelecido por base B (U-036: identidade, PK, triggers, topologia) e/ou base C (spike medido), E o fit registado por domínio contra auditoria, ponto de imposição da autorização, forma/volume de consulta, semântica de escrita e constraints de schema. A conectividade (A-010) por si não fecha nada. Fecho coerente: `virtualized`/`data-virtualization` ou `replicated`/`data-replication` por domínio, ou `direct` só para chamadas de custom page/canvas/flow ao conector.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Base de auditoria e localização do estado de workflow/aprovação — owned no store nativo (A-012) vs desenhado do lado SQL",
+     "structural": true,
+     "su_refs": [
+      "U-040"
+     ],
+     "would_be_settled_by": "Aceitação do sponsor e do dono da BD (U-040) + eventos/consumidor/adulteração exigidos (U-038) + aceitação de temporal tables/journal pelo dono da BD",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Ponto de imposição server-side da autorização e identidade que chega à BD (partilhada vs por utilizador) — e se existe requisito duro de linha/coluna",
+     "structural": true,
+     "su_refs": [
+      "U-036"
+     ],
+     "would_be_settled_by": "U-036 (identidade da ligação, confirmada pelo IT) + U-037 (requisito duro sim/não, sponsor/governance)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Superfície primária / composição — record-centric puro, record-centric backbone + custom pages, ou canvas sobre o conector",
+     "structural": true,
+     "su_refs": [
+      "U-039"
+     ],
+     "would_be_settled_by": "U-032 (mecanismo por domínio — determina onde a escrita e o cálculo acontecem) + U-039 (what-if interactivo?) + U-034 (forma da tarefa de 2ª-feira). Nunca pela conectividade.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Consumidor e obrigatoriedade de `Outputs BIOS` (família de output inteira)",
+     "structural": false,
+     "su_refs": [
+      "U-033"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O. — gate da Implementation Spec/Estimate, não da forma da arquitectura",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Que colunas ficam vazias 2ª/3ª e qual o workaround actual (forma do motor de estimativa)",
+     "structural": false,
+     "su_refs": [
+      "U-034"
+     ],
+     "would_be_settled_by": "Spike com o analista (PM-U-002)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "`Base DFA/RF` load-bearing ou abandonadas (âmbito da paridade)",
+     "structural": false,
+     "su_refs": [
+      "U-035"
+     ],
+     "would_be_settled_by": "Confirmação do mantenedor do ficheiro",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Mecanismo de leitura da referência SAP (API/conector)",
+     "structural": false,
+     "su_refs": [
+      "C-063"
+     ],
+     "would_be_settled_by": "IT centralizado nomeia o mecanismo (C-063)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação deve ser preservada nalgum canal fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Formato exacto do Excel exportado para a iniciativa X-Author",
+     "structural": false,
+     "su_refs": [
+      "C-065"
+     ],
+     "would_be_settled_by": "Alinhamento com o dono dessa iniciativa",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "A11 substituição do artefacto Excel actual nunca formalmente activada",
+     "structural": false,
+     "su_refs": [
+      "R-004"
+     ],
+     "would_be_settled_by": "Revisão explícita do blueprint activando o conditional, antes da Implementation Specification",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Dono explícito do controlo de release (Dev→Produção) e da mudança do schema partilhado",
+     "structural": false,
+     "su_refs": [
+      "C-067"
+     ],
+     "would_be_settled_by": "Confirmação directa com IT centralizado / dono da BD",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [
+    {
+     "choice": "Mecanismo de acesso a dados por domínio material e o seu fit (reabre A-009)",
+     "structural": true,
+     "su_refs": [
+      "U-032"
+     ],
+     "would_be_settled_by": "O mecanismo por domínio estabelecido por base B (U-036: identidade, PK, triggers, topologia) e/ou base C (spike medido), E o fit registado por domínio contra auditoria, ponto de imposição da autorização, forma/volume de consulta, semântica de escrita e constraints de schema. A conectividade (A-010) por si não fecha nada. Fecho coerente: `virtualized`/`data-virtualization` ou `replicated`/`data-replication` por domínio, ou `direct` só para chamadas de custom page/canvas/flow ao conector.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Base de auditoria e localização do estado de workflow/aprovação — owned no store nativo (A-012) vs desenhado do lado SQL",
+     "structural": true,
+     "su_refs": [
+      "U-040"
+     ],
+     "would_be_settled_by": "Aceitação do sponsor e do dono da BD (U-040) + eventos/consumidor/adulteração exigidos (U-038) + aceitação de temporal tables/journal pelo dono da BD",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Ponto de imposição server-side da autorização e identidade que chega à BD (partilhada vs por utilizador) — e se existe requisito duro de linha/coluna",
+     "structural": true,
+     "su_refs": [
+      "U-036"
+     ],
+     "would_be_settled_by": "U-036 (identidade da ligação, confirmada pelo IT) + U-037 (requisito duro sim/não, sponsor/governance)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Superfície primária / composição — record-centric puro, record-centric backbone + custom pages, ou canvas sobre o conector",
+     "structural": true,
+     "su_refs": [
+      "U-039"
+     ],
+     "would_be_settled_by": "U-032 (mecanismo por domínio — determina onde a escrita e o cálculo acontecem) + U-039 (what-if interactivo?) + U-034 (forma da tarefa de 2ª-feira). Nunca pela conectividade.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    },
+    {
+     "claim": "Inspecção do arranjo SQL efectivo (base B): topologia (on-prem/Azure/MI), identidade da ligação/gateway, dono e autoridade de mudança do schema partilhado, tabelas/vistas previstas, PK (GUID/int) e coluna de nome primário, triggers nas tabelas a escrever, volumes/forma de consulta, uso actual da ligação",
+     "level": "V1",
+     "method": "inspecção documental/configuração com o IT centralizado e a equipa que opera a BD; resultado entra no SU via /answer U-036",
+     "owner": "IT centralizado (C-063) / equipa que opera a BD (C-057)",
+     "funded": false
+    },
+    {
+     "claim": "Spike medido de tabelas virtuais (fornecedor SQL) sobre a BD partilhada: CRUD numa tabela de escrita (margens-alvo), leitura de vista read-only (preço consolidado, 4 unidades), consulta ao histórico com filtro positivo por intervalo de datas (tecto 1.000 / paging), latência sob a identidade real",
+     "level": "V2",
+     "method": "spike contra a BD partilhada em ambiente Dev; 'mandatory measured spike before commitment' (dataverse.md §14); só se M1 permanecer candidato após U-036",
+     "owner": "arquitectura / Power Platform developer",
+     "funded": false
+    },
+    {
+     "claim": "Prova do mecanismo de auditoria e atribuição: journal/aprovação owned (se U-040) ou temporal tables SQL; correlação inputs → cálculo → aprovação → exportação; aceitação do dono da BD",
+     "level": "V2",
+     "method": "protótipo do trilho para um ciclo diário completo; verificação de que a atribuição não colapsa sob a identidade de ligação",
+     "owner": "arquitectura + equipa que opera a BD",
+     "funded": false
+    },
+    {
+     "claim": "Paridade do motor de cálculo contra o workbook (folha `Outputs` autoritativa, C-059) em casos representativos",
+     "level": "V3",
+     "method": "casos mínimos: (a) dia normal com todas as cotações; (b) 2ª/3ª com cotações em falta — regra conservadora aplicada, registada e nunca zero (C-074, U-034); (c) regra por porto (custos logísticos por porto/modo, PM-005); (d) blend BIOS (B30, HVO100 — C-072, condicional a U-033); (e) as 4 variantes de unidade (C-071); (f) referência até/após com a regra de arredondamento (C-070); (g) override manual legítimo (registado, não silencioso — PM-013/C-041); (h) aprovação antes da exportação/carregamento (C-026/C-043, A-011). Referência: `Outputs` (C-059); `Base DFA/RF` só se U-035 confirmar load-bearing. Não é teste de implementação agora — é a obrigação de arquitectura.",
+     "owner": "equipa de pricing (SME) + developer",
+     "funded": false
+    },
+    {
+     "claim": "(CONDICIONAL — não criada) protótipo de interacção what-if/projecção",
+     "level": "V2",
+     "method": "só se U-039 = interactivo; então protótipo de custom page/canvas com o motor SQL",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v01.yaml": {
+   "version": "v01",
+   "file": "ux-blueprint_v01.yaml",
+   "rel": "_blueprint/ux-blueprint_v01.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Dono formal do dicionário de dados-mestre (291 named ranges) e processo de mudança",
+     "structural": true,
+     "su_refs": [
+      "U-027"
+     ],
+     "would_be_settled_by": "Nomeação pelo sponsor/governance",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Regra de desempate entre as 6 folhas de output já divergentes, antes de consolidar num único modelo de cálculo",
+     "structural": true,
+     "su_refs": [
+      "U-026"
+     ],
+     "would_be_settled_by": "Workshop Pedro O. / operations-lead",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Prazo de retenção legal do histórico de preços",
+     "structural": true,
+     "su_refs": [
+      "X-005"
+     ],
+     "would_be_settled_by": "Confirmação jurídica",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Owner nomeado para os 3 componentes de integração externa (market-data feed, referência SAP, carregamento X-ALT)",
+     "structural": true,
+     "su_refs": [
+      "U-029"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Decomposição exacta em ecrãs dos ~85 campos manuais hoje na sheet Inputs — por entidade lógica; não itemizada nesta captura",
+     "structural": false,
+     "su_refs": [
+      "C-017"
+     ],
+     "would_be_settled_by": "Implementation-spec, uma vez o dicionário de dados-mestre redesenhado",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [
+    {
+     "choice": "Dono formal do dicionário de dados-mestre (291 named ranges) e processo de mudança",
+     "structural": true,
+     "su_refs": [
+      "U-027"
+     ],
+     "would_be_settled_by": "Nomeação pelo sponsor/governance",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Regra de desempate entre as 6 folhas de output já divergentes, antes de consolidar num único modelo de cálculo",
+     "structural": true,
+     "su_refs": [
+      "U-026"
+     ],
+     "would_be_settled_by": "Workshop Pedro O. / operations-lead",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Prazo de retenção legal do histórico de preços",
+     "structural": true,
+     "su_refs": [
+      "X-005"
+     ],
+     "would_be_settled_by": "Confirmação jurídica",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Owner nomeado para os 3 componentes de integração externa (market-data feed, referência SAP, carregamento X-ALT)",
+     "structural": true,
+     "su_refs": [
+      "U-029"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v02.yaml": {
+   "version": "v02",
+   "file": "ux-blueprint_v02.yaml",
+   "rel": "_blueprint/ux-blueprint_v02.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Superfície primária compatível com dados-mestre a residir numa BD SQL Server externa — Canvas app (qualquer conector) vs Record-centric app (exige store nativo) vs híbrido structural: true would_be_settled_by: \"Confirmar com IT se a BD SQL Server partilhada é acessível via conector nativo da plataforma, e decidir a superfície com base nisso\" su_ref: A-009",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Owner nomeado para as integrações SAP (referência) e X-ALT (carregamento) — a peça de BD partilhada já resolveu o feed de mercado/dados-mestre (C-057)",
+     "structural": true,
+     "su_refs": [
+      "U-031"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações — equipa que já gere integrações a SAP/X-ALT hoje",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "RESOLVIDO nesta versão — dono de dados-mestre (Pedro O., com aprovação formal, C-058); regra de desempate entre as 6 folhas (Outputs autoritativa, C-059); retenção legal (piso de 10 anos assumido por desenho, C-060)",
+     "structural": false,
+     "su_refs": [
+      "C-058",
+      "C-059",
+      "C-060"
+     ],
+     "would_be_settled_by": "(já resolvido)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [
+    {
+     "choice": "Owner nomeado para as integrações SAP (referência) e X-ALT (carregamento) — a peça de BD partilhada já resolveu o feed de mercado/dados-mestre (C-057)",
+     "structural": true,
+     "su_refs": [
+      "U-031"
+     ],
+     "would_be_settled_by": "Nomeação de IT/operações — equipa que já gere integrações a SAP/X-ALT hoje",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v03.yaml": {
+   "version": "v03",
+   "file": "ux-blueprint_v03.yaml",
+   "rel": "_blueprint/ux-blueprint_v03.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Quem vetou a integração anterior a X-Author e porquê (U-025) — determina se a composição `x-author-load-integration` desta versão pode avançar em segurança, ou repete cegamente o padrão que já matou uma iniciativa comparável para o MESMO sistema (C-064) structural: true would_be_settled_by: \"Pedro O. / compliance-officer apurarem a origem do veto antes de qualquer desenho técnico da composição x-author-load-integration\" su_ref: U-025",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "RESOLVIDO nesta versão — superfície primária confirmada (C-062); owner das integrações SAP/X-Author (C-063); terminologia X-Author corrigida (C-064)",
+     "structural": false,
+     "su_refs": [
+      "C-062",
+      "C-063",
+      "C-064"
+     ],
+     "would_be_settled_by": "(já resolvido)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v04.yaml": {
+   "version": "v04",
+   "file": "ux-blueprint_v04.yaml",
+   "rel": "_blueprint/ux-blueprint_v04.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Formato exacto do Excel exportado para a iniciativa de carregamento em X-Author",
+     "structural": false,
+     "su_refs": [
+      "C-065"
+     ],
+     "would_be_settled_by": "Alinhamento com o dono dessa outra iniciativa",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "RESOLVIDO nesta versão — bloqueador ligado a U-025 dissolvido: a integração viva com o X-Author não é âmbito desta app (C-065); a composição que a exigia foi removida structural: false would_be_settled_by: \"(já resolvido — âmbito clarificado)\" su_ref: C-065",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v05.yaml": {
+   "version": "v05",
+   "file": "ux-blueprint_v05.yaml",
+   "rel": "_blueprint/ux-blueprint_v05.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação hoje usada no Excel deve ser preservada nalgum canal, mesmo fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045/U-021)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Formato exacto do Excel exportado para a iniciativa de carregamento em X-Author",
+     "structural": false,
+     "su_refs": [
+      "C-065"
+     ],
+     "would_be_settled_by": "Alinhamento com o dono dessa outra iniciativa",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "A11.substituição-de-artefacto-existente nunca foi formalmente activada, apesar de esta solução substituir na prática o ficheiro Excel actual — identificado como gap no dry-run de /render (secção \"Migração e cutover\" da Implementation Specification ficaria \"não aplicável\" sem isto, apesar de haver migração real a fazer) structural: false would_be_settled_by: \"Revisão explícita do blueprint (v06) activando o conditional de substituição de artefacto, antes da Implementation Specification ser gerada a sério\" su_ref: R-004",
+     "structural": false,
+     "su_refs": [],
+     "would_be_settled_by": "",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Dono explícito do controlo de release (aprovação Dev→Produção)",
+     "structural": false,
+     "su_refs": [
+      "C-067"
+     ],
+     "would_be_settled_by": "Confirmação directa com IT centralizado — inferido por extensão de C-063, não confirmado",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  },
+  "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v06.yaml": {
+   "version": "v06",
+   "file": "ux-blueprint_v06.yaml",
+   "rel": "_blueprint/ux-blueprint_v06.yaml",
+   "draft": false,
+   "option": "O-004",
+   "decision_ref": "decisions.md#D-002",
+   "authorization": "authorized",
+   "experience_mode": "owned-internal",
+   "open_choices": [
+    {
+     "choice": "Mecanismo de acesso a dados por domínio material e o seu fit (reabre A-009)",
+     "structural": true,
+     "su_refs": [
+      "U-032"
+     ],
+     "would_be_settled_by": "O mecanismo por domínio estabelecido por base B (U-036: identidade, PK, triggers, topologia) e/ou base C (spike medido), E o fit registado por domínio contra auditoria, ponto de imposição da autorização, forma/volume de consulta, semântica de escrita e constraints de schema. A conectividade (A-010) por si não fecha nada. Fecho coerente: `virtualized`/`data-virtualization` ou `replicated`/`data-replication` por domínio, ou `direct` só para chamadas de custom page/canvas/flow ao conector.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Base de auditoria e localização do estado de workflow/aprovação — owned no store nativo (A-012) vs desenhado do lado SQL",
+     "structural": true,
+     "su_refs": [
+      "U-040"
+     ],
+     "would_be_settled_by": "Aceitação do sponsor e do dono da BD (U-040) + eventos/consumidor/adulteração exigidos (U-038) + aceitação de temporal tables/journal pelo dono da BD",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Ponto de imposição server-side da autorização e identidade que chega à BD (partilhada vs por utilizador) — e se existe requisito duro de linha/coluna",
+     "structural": true,
+     "su_refs": [
+      "U-036"
+     ],
+     "would_be_settled_by": "U-036 (identidade da ligação, confirmada pelo IT) + U-037 (requisito duro sim/não, sponsor/governance)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Superfície primária / composição — record-centric puro, record-centric backbone + custom pages, ou canvas sobre o conector",
+     "structural": true,
+     "su_refs": [
+      "U-039"
+     ],
+     "would_be_settled_by": "U-032 (mecanismo por domínio — determina onde a escrita e o cálculo acontecem) + U-039 (what-if interactivo?) + U-034 (forma da tarefa de 2ª-feira). Nunca pela conectividade.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Consumidor e obrigatoriedade de `Outputs BIOS` (família de output inteira)",
+     "structural": false,
+     "su_refs": [
+      "U-033"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O. — gate da Implementation Spec/Estimate, não da forma da arquitectura",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Que colunas ficam vazias 2ª/3ª e qual o workaround actual (forma do motor de estimativa)",
+     "structural": false,
+     "su_refs": [
+      "U-034"
+     ],
+     "would_be_settled_by": "Spike com o analista (PM-U-002)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "`Base DFA/RF` load-bearing ou abandonadas (âmbito da paridade)",
+     "structural": false,
+     "su_refs": [
+      "U-035"
+     ],
+     "would_be_settled_by": "Confirmação do mantenedor do ficheiro",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Mecanismo de leitura da referência SAP (API/conector)",
+     "structural": false,
+     "su_refs": [
+      "C-063"
+     ],
+     "would_be_settled_by": "IT centralizado nomeia o mecanismo (C-063)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Blast radius de DF_GRID_1 (#REF!) — artefacto morto ou activo",
+     "structural": false,
+     "su_refs": [
+      "R-008"
+     ],
+     "would_be_settled_by": "Confirmação directa do Pedro O.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Confirmar com amostra de KAM se a capacidade de simulação deve ser preservada nalgum canal fora desta app",
+     "structural": false,
+     "su_refs": [
+      "R-012"
+     ],
+     "would_be_settled_by": "Sessão de validação KAM já autorizada (C-045)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Formato exacto do Excel exportado para a iniciativa X-Author",
+     "structural": false,
+     "su_refs": [
+      "C-065"
+     ],
+     "would_be_settled_by": "Alinhamento com o dono dessa iniciativa",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "A11 substituição do artefacto Excel actual nunca formalmente activada",
+     "structural": false,
+     "su_refs": [
+      "R-004"
+     ],
+     "would_be_settled_by": "Revisão explícita do blueprint activando o conditional, antes da Implementation Specification",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Dono explícito do controlo de release (Dev→Produção) e da mudança do schema partilhado",
+     "structural": false,
+     "su_refs": [
+      "C-067"
+     ],
+     "would_be_settled_by": "Confirmação directa com IT centralizado / dono da BD",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "structural_open": [
+    {
+     "choice": "Mecanismo de acesso a dados por domínio material e o seu fit (reabre A-009)",
+     "structural": true,
+     "su_refs": [
+      "U-032"
+     ],
+     "would_be_settled_by": "O mecanismo por domínio estabelecido por base B (U-036: identidade, PK, triggers, topologia) e/ou base C (spike medido), E o fit registado por domínio contra auditoria, ponto de imposição da autorização, forma/volume de consulta, semântica de escrita e constraints de schema. A conectividade (A-010) por si não fecha nada. Fecho coerente: `virtualized`/`data-virtualization` ou `replicated`/`data-replication` por domínio, ou `direct` só para chamadas de custom page/canvas/flow ao conector.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Base de auditoria e localização do estado de workflow/aprovação — owned no store nativo (A-012) vs desenhado do lado SQL",
+     "structural": true,
+     "su_refs": [
+      "U-040"
+     ],
+     "would_be_settled_by": "Aceitação do sponsor e do dono da BD (U-040) + eventos/consumidor/adulteração exigidos (U-038) + aceitação de temporal tables/journal pelo dono da BD",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Ponto de imposição server-side da autorização e identidade que chega à BD (partilhada vs por utilizador) — e se existe requisito duro de linha/coluna",
+     "structural": true,
+     "su_refs": [
+      "U-036"
+     ],
+     "would_be_settled_by": "U-036 (identidade da ligação, confirmada pelo IT) + U-037 (requisito duro sim/não, sponsor/governance)",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    },
+    {
+     "choice": "Superfície primária / composição — record-centric puro, record-centric backbone + custom pages, ou canvas sobre o conector",
+     "structural": true,
+     "su_refs": [
+      "U-039"
+     ],
+     "would_be_settled_by": "U-032 (mecanismo por domínio — determina onde a escrita e o cálculo acontecem) + U-039 (what-if interactivo?) + U-034 (forma da tarefa de 2ª-feira). Nunca pela conectividade.",
+     "owner": "",
+     "resolved": false,
+     "closure_basis": ""
+    }
+   ],
+   "proof_obligations": [
+    {
+     "claim": "Prova em ambiente produtivo (scope de solução inteira)",
+     "level": "V4",
+     "method": "not specified further",
+     "owner": "not named",
+     "funded": false
+    },
+    {
+     "claim": "Inspecção do arranjo SQL efectivo (base B): topologia (on-prem/Azure/MI), identidade da ligação/gateway, dono e autoridade de mudança do schema partilhado, tabelas/vistas previstas, PK (GUID/int) e coluna de nome primário, triggers nas tabelas a escrever, volumes/forma de consulta, uso actual da ligação",
+     "level": "V1",
+     "method": "inspecção documental/configuração com o IT centralizado e a equipa que opera a BD; resultado entra no SU via /answer U-036",
+     "owner": "IT centralizado (C-063) / equipa que opera a BD (C-057)",
+     "funded": false
+    },
+    {
+     "claim": "Spike medido de tabelas virtuais (fornecedor SQL) sobre a BD partilhada: CRUD numa tabela de escrita (margens-alvo), leitura de vista read-only (preço consolidado, 4 unidades), consulta ao histórico com filtro positivo por intervalo de datas (tecto 1.000 / paging), latência sob a identidade real",
+     "level": "V2",
+     "method": "spike contra a BD partilhada em ambiente Dev; 'mandatory measured spike before commitment' (dataverse.md §14); só se M1 permanecer candidato após U-036",
+     "owner": "arquitectura / Power Platform developer",
+     "funded": false
+    },
+    {
+     "claim": "Prova do mecanismo de auditoria e atribuição: journal/aprovação owned (se U-040) ou temporal tables SQL; correlação inputs → cálculo → aprovação → exportação; aceitação do dono da BD",
+     "level": "V2",
+     "method": "protótipo do trilho para um ciclo diário completo; verificação de que a atribuição não colapsa sob a identidade de ligação",
+     "owner": "arquitectura + equipa que opera a BD",
+     "funded": false
+    },
+    {
+     "claim": "Paridade do motor de cálculo contra o workbook (folha `Outputs` autoritativa, C-059) em casos representativos",
+     "level": "V3",
+     "method": "casos mínimos: (a) dia normal com todas as cotações; (b) 2ª/3ª com cotações em falta — regra conservadora aplicada, registada e nunca zero (C-074, U-034); (c) regra por porto (custos logísticos por porto/modo, PM-005); (d) blend BIOS (B30, HVO100 — C-072, condicional a U-033); (e) as 4 variantes de unidade (C-071); (f) referência até/após com a regra de arredondamento (C-070); (g) override manual legítimo (registado, não silencioso — PM-013/C-041); (h) aprovação antes da exportação/carregamento (C-026/C-043, A-011). Referência: `Outputs` (C-059); `Base DFA/RF` só se U-035 confirmar load-bearing. Não é teste de implementação agora — é a obrigação de arquitectura.",
+     "owner": "equipa de pricing (SME) + developer",
+     "funded": false
+    },
+    {
+     "claim": "(CONDICIONAL — não criada) protótipo de interacção what-if/projecção",
+     "level": "V2",
+     "method": "só se U-039 = interactivo; então protótipo de custom page/canvas com o motor SQL",
+     "owner": "not named",
+     "funded": false
+    }
+   ],
+   "readable": true
+  }
+ }
+}

@@ -14,3 +14,10 @@ Internal Portuguese public-sector tools must meet **Decreto-Lei nº 83/2018** (t
 
 ## Language is rarely "just Portuguese"
 Multi-national operations frequently need PT + EN. Customer-facing tools may need ES or FR depending on the customer base. Probe even when the engagement is "obviously Portuguese".
+
+---
+
+Same reading rule as `anti-patterns.md`: a constraint here is a **hypothesis with its
+requirement and its technical consequence**, never a standing order. It fires where the
+requirement is present; it says which of the eight axes moves; and an organisational gap
+becomes the target's requirement, never pending work.

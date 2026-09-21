@@ -1,0 +1,789 @@
+{
+ "artefact": "aisa.capture.extraction",
+ "tool": {
+  "name": "xlsx_extract.py",
+  "version": "1.2.0",
+  "openpyxl": "3.1.5",
+  "python": "3.11.9"
+ },
+ "extracted_at": "2026-09-14T23:15:51",
+ "identity": {
+  "filename": "registo-de-lotes.xlsx",
+  "source_path": "C:\\Users\\jorge.estevao\\Documents\\Galp\\Claude Code Projects\\aisa-rt-fix\\.claude\\tests\\fixtures\\coverage\\fx-coverage-f06\\inputs\\registo-de-lotes.xlsx",
+  "size_bytes": 7703,
+  "sha256": "f2f2462e1f032365a678c9bc01b7504abb19f1414e3935d27f2a365d965b264e",
+  "modified": "2026-09-14T23:15:50"
+ },
+ "status": "ok",
+ "workbook": {
+  "named_ranges": [
+   {
+    "name": "Factor_Resultado",
+    "target": "Parametros!$B$2",
+    "scope": "workbook"
+   },
+   {
+    "name": "Base_Aditivo",
+    "target": "Parametros!$B$3",
+    "scope": "workbook"
+   },
+   {
+    "name": "Lote_Lista",
+    "target": "Entradas!$B$2:$B$13",
+    "scope": "workbook"
+   },
+   {
+    "name": "Custo_Posto_D",
+    "target": "Entradas!$I$2:$I$13",
+    "scope": "workbook"
+   }
+  ],
+  "flags": {
+   "vba_present": false,
+   "vba_modules": [],
+   "external_links": [],
+   "pivot_tables": [],
+   "protected_sheets": []
+  }
+ },
+ "sheets": [
+  {
+   "name": "Entradas",
+   "state": "visible",
+   "dimensions": "A1:H13",
+   "max_row": 13,
+   "max_col": 8,
+   "frozen_panes": null,
+   "header_row": 1,
+   "data_start_row": 2,
+   "data_end_row": 13,
+   "header_basis": "string-density",
+   "anomalies": {
+    "whitespace": [],
+    "mixed_types": [],
+    "duplicate_keys": []
+   },
+   "validations": [],
+   "conditional_formatting": [],
+   "fills": [],
+   "comments": [],
+   "columns": [
+    {
+     "column": "A",
+     "header": "Data",
+     "inferred_type": "str",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 12,
+     "top_values": [
+      {
+       "value": "2026-01-01",
+       "count": 1
+      },
+      {
+       "value": "2026-01-02",
+       "count": 1
+      },
+      {
+       "value": "2026-01-03",
+       "count": 1
+      },
+      {
+       "value": "2026-01-04",
+       "count": 1
+      },
+      {
+       "value": "2026-01-05",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": true
+    },
+    {
+     "column": "B",
+     "header": "Lote",
+     "inferred_type": "str",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 12,
+     "top_values": [
+      {
+       "value": "L001",
+       "count": 1
+      },
+      {
+       "value": "L002",
+       "count": 1
+      },
+      {
+       "value": "L003",
+       "count": 1
+      },
+      {
+       "value": "L004",
+       "count": 1
+      },
+      {
+       "value": "L005",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": true
+    },
+    {
+     "column": "C",
+     "header": "Produto",
+     "inferred_type": "str",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 2,
+     "top_values": [
+      {
+       "value": "P-1",
+       "count": 6
+      },
+      {
+       "value": "P-2",
+       "count": 6
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "D",
+     "header": "ValorMedido",
+     "inferred_type": "number",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 12,
+     "top_values": [
+      {
+       "value": "10.5",
+       "count": 1
+      },
+      {
+       "value": "11",
+       "count": 1
+      },
+      {
+       "value": "11.5",
+       "count": 1
+      },
+      {
+       "value": "12",
+       "count": 1
+      },
+      {
+       "value": "12.5",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "min": 10.5,
+     "max": 16,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "E",
+     "header": "Operador",
+     "inferred_type": "str",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 3,
+     "top_values": [
+      {
+       "value": "op1",
+       "count": 4
+      },
+      {
+       "value": "op2",
+       "count": 4
+      },
+      {
+       "value": "op0",
+       "count": 4
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "F",
+     "header": "Custo_Posto_A",
+     "inferred_type": "number",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 12,
+     "top_values": [
+      {
+       "value": "5",
+       "count": 1
+      },
+      {
+       "value": "6",
+       "count": 1
+      },
+      {
+       "value": "7",
+       "count": 1
+      },
+      {
+       "value": "8",
+       "count": 1
+      },
+      {
+       "value": "9",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "min": 5,
+     "max": 16,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "G",
+     "header": "Custo_Posto_B",
+     "inferred_type": "number",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 12,
+     "top_values": [
+      {
+       "value": "5.5",
+       "count": 1
+      },
+      {
+       "value": "6.5",
+       "count": 1
+      },
+      {
+       "value": "7.5",
+       "count": 1
+      },
+      {
+       "value": "8.5",
+       "count": 1
+      },
+      {
+       "value": "9.5",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "min": 5.5,
+     "max": 16.5,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "H",
+     "header": "Custo_Posto_C",
+     "inferred_type": "number",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 12,
+     "top_values": [
+      {
+       "value": "6",
+       "count": 1
+      },
+      {
+       "value": "7",
+       "count": 1
+      },
+      {
+       "value": "8",
+       "count": 1
+      },
+      {
+       "value": "9",
+       "count": 1
+      },
+      {
+       "value": "10",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "min": 6,
+     "max": 17,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    }
+   ]
+  },
+  {
+   "name": "Resumo de Lotes",
+   "state": "visible",
+   "dimensions": "A1:D13",
+   "max_row": 13,
+   "max_col": 4,
+   "frozen_panes": null,
+   "header_row": 1,
+   "data_start_row": 2,
+   "data_end_row": 13,
+   "header_basis": "string-density",
+   "anomalies": {
+    "whitespace": [],
+    "mixed_types": [],
+    "duplicate_keys": []
+   },
+   "validations": [],
+   "conditional_formatting": [],
+   "fills": [],
+   "comments": [],
+   "columns": [
+    {
+     "column": "A",
+     "header": "Data",
+     "inferred_type": "empty",
+     "rows_nonempty": 0,
+     "nulls": 12,
+     "distinct": 0,
+     "top_values": [],
+     "formula_count": 12,
+     "typed_count": 0,
+     "formula": {
+      "count": 12,
+      "dominant_pattern": "=Entradas!RC",
+      "dominant_count": 12,
+      "coverage_of_formulas": 1.0,
+      "coverage_of_nonempty": 1.0,
+      "patterns": [
+       {
+        "pattern": "=Entradas!RC",
+        "count": 12
+       }
+      ],
+      "other_pattern_count": 0,
+      "exceptions": {
+       "divergent_formulas": [],
+       "typed_overrides": [],
+       "formula_in_manual_column": []
+      }
+     },
+     "reads": [
+      "Entradas!A10",
+      "Entradas!A11",
+      "Entradas!A12",
+      "Entradas!A13",
+      "Entradas!A2",
+      "Entradas!A3",
+      "Entradas!A4",
+      "Entradas!A5",
+      "Entradas!A6",
+      "Entradas!A7",
+      "Entradas!A8",
+      "Entradas!A9"
+     ],
+     "class": "derived",
+     "class_basis": "12 formula cells vs 0 typed",
+     "key_like": false
+    },
+    {
+     "column": "B",
+     "header": "Lote",
+     "inferred_type": "empty",
+     "rows_nonempty": 0,
+     "nulls": 12,
+     "distinct": 0,
+     "top_values": [],
+     "formula_count": 12,
+     "typed_count": 0,
+     "formula": {
+      "count": 12,
+      "dominant_pattern": "=Entradas!RC",
+      "dominant_count": 12,
+      "coverage_of_formulas": 1.0,
+      "coverage_of_nonempty": 1.0,
+      "patterns": [
+       {
+        "pattern": "=Entradas!RC",
+        "count": 12
+       }
+      ],
+      "other_pattern_count": 0,
+      "exceptions": {
+       "divergent_formulas": [],
+       "typed_overrides": [],
+       "formula_in_manual_column": []
+      }
+     },
+     "reads": [
+      "Entradas!B10",
+      "Entradas!B11",
+      "Entradas!B12",
+      "Entradas!B13",
+      "Entradas!B2",
+      "Entradas!B3",
+      "Entradas!B4",
+      "Entradas!B5",
+      "Entradas!B6",
+      "Entradas!B7",
+      "Entradas!B8",
+      "Entradas!B9"
+     ],
+     "class": "derived",
+     "class_basis": "12 formula cells vs 0 typed",
+     "key_like": false
+    },
+    {
+     "column": "C",
+     "header": "Resultado",
+     "inferred_type": "empty",
+     "rows_nonempty": 0,
+     "nulls": 12,
+     "distinct": 0,
+     "top_values": [],
+     "formula_count": 12,
+     "typed_count": 0,
+     "formula": {
+      "count": 12,
+      "dominant_pattern": "=Entradas!D%d*Parametros!R2C2",
+      "dominant_count": 12,
+      "coverage_of_formulas": 1.0,
+      "coverage_of_nonempty": 1.0,
+      "patterns": [
+       {
+        "pattern": "=Entradas!D%d*Parametros!R2C2",
+        "count": 12
+       }
+      ],
+      "other_pattern_count": 0,
+      "exceptions": {
+       "divergent_formulas": [],
+       "typed_overrides": [],
+       "formula_in_manual_column": []
+      }
+     },
+     "reads": [
+      "Parametros!$B$2"
+     ],
+     "class": "derived",
+     "class_basis": "12 formula cells vs 0 typed",
+     "key_like": false
+    },
+    {
+     "column": "D",
+     "header": "Estado",
+     "inferred_type": "str",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 1,
+     "top_values": [
+      {
+       "value": "Libertado",
+       "count": 12
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "formula": null,
+     "class": "manual",
+     "class_basis": "typed values on a sheet with derived columns = human-maintained field",
+     "key_like": false
+    }
+   ]
+  },
+  {
+   "name": "Resumo Aditivos",
+   "state": "visible",
+   "dimensions": "A1:D13",
+   "max_row": 13,
+   "max_col": 4,
+   "frozen_panes": null,
+   "header_row": 1,
+   "data_start_row": 2,
+   "data_end_row": 13,
+   "header_basis": "string-density",
+   "anomalies": {
+    "whitespace": [],
+    "mixed_types": [],
+    "duplicate_keys": []
+   },
+   "validations": [],
+   "conditional_formatting": [],
+   "fills": [],
+   "comments": [],
+   "columns": [
+    {
+     "column": "A",
+     "header": "Data",
+     "inferred_type": "empty",
+     "rows_nonempty": 0,
+     "nulls": 12,
+     "distinct": 0,
+     "top_values": [],
+     "formula_count": 12,
+     "typed_count": 0,
+     "formula": {
+      "count": 12,
+      "dominant_pattern": "=Entradas!RC",
+      "dominant_count": 12,
+      "coverage_of_formulas": 1.0,
+      "coverage_of_nonempty": 1.0,
+      "patterns": [
+       {
+        "pattern": "=Entradas!RC",
+        "count": 12
+       }
+      ],
+      "other_pattern_count": 0,
+      "exceptions": {
+       "divergent_formulas": [],
+       "typed_overrides": [],
+       "formula_in_manual_column": []
+      }
+     },
+     "reads": [
+      "Entradas!A10",
+      "Entradas!A11",
+      "Entradas!A12",
+      "Entradas!A13",
+      "Entradas!A2",
+      "Entradas!A3",
+      "Entradas!A4",
+      "Entradas!A5",
+      "Entradas!A6",
+      "Entradas!A7",
+      "Entradas!A8",
+      "Entradas!A9"
+     ],
+     "class": "derived",
+     "class_basis": "12 formula cells vs 0 typed",
+     "key_like": false
+    },
+    {
+     "column": "B",
+     "header": "Lote",
+     "inferred_type": "empty",
+     "rows_nonempty": 0,
+     "nulls": 12,
+     "distinct": 0,
+     "top_values": [],
+     "formula_count": 12,
+     "typed_count": 0,
+     "formula": {
+      "count": 12,
+      "dominant_pattern": "=Entradas!RC",
+      "dominant_count": 12,
+      "coverage_of_formulas": 1.0,
+      "coverage_of_nonempty": 1.0,
+      "patterns": [
+       {
+        "pattern": "=Entradas!RC",
+        "count": 12
+       }
+      ],
+      "other_pattern_count": 0,
+      "exceptions": {
+       "divergent_formulas": [],
+       "typed_overrides": [],
+       "formula_in_manual_column": []
+      }
+     },
+     "reads": [
+      "Entradas!B10",
+      "Entradas!B11",
+      "Entradas!B12",
+      "Entradas!B13",
+      "Entradas!B2",
+      "Entradas!B3",
+      "Entradas!B4",
+      "Entradas!B5",
+      "Entradas!B6",
+      "Entradas!B7",
+      "Entradas!B8",
+      "Entradas!B9"
+     ],
+     "class": "derived",
+     "class_basis": "12 formula cells vs 0 typed",
+     "key_like": false
+    },
+    {
+     "column": "C",
+     "header": "Aditivo",
+     "inferred_type": "str",
+     "rows_nonempty": 12,
+     "nulls": 0,
+     "distinct": 1,
+     "top_values": [
+      {
+       "value": "AD-1",
+       "count": 12
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 12,
+     "formula": null,
+     "class": "manual",
+     "class_basis": "typed values on a sheet with derived columns = human-maintained field",
+     "key_like": false
+    },
+    {
+     "column": "D",
+     "header": "Percentagem",
+     "inferred_type": "empty",
+     "rows_nonempty": 0,
+     "nulls": 12,
+     "distinct": 0,
+     "top_values": [],
+     "formula_count": 12,
+     "typed_count": 0,
+     "formula": {
+      "count": 12,
+      "dominant_pattern": "=Entradas!RC/Parametros!R3C2",
+      "dominant_count": 12,
+      "coverage_of_formulas": 1.0,
+      "coverage_of_nonempty": 1.0,
+      "patterns": [
+       {
+        "pattern": "=Entradas!RC/Parametros!R3C2",
+        "count": 12
+       }
+      ],
+      "other_pattern_count": 0,
+      "exceptions": {
+       "divergent_formulas": [],
+       "typed_overrides": [],
+       "formula_in_manual_column": []
+      }
+     },
+     "reads": [
+      "Entradas!D10",
+      "Entradas!D11",
+      "Entradas!D12",
+      "Entradas!D13",
+      "Entradas!D2",
+      "Entradas!D3",
+      "Entradas!D4",
+      "Entradas!D5",
+      "Entradas!D6",
+      "Entradas!D7",
+      "Entradas!D8",
+      "Entradas!D9",
+      "Parametros!$B$3"
+     ],
+     "class": "derived",
+     "class_basis": "12 formula cells vs 0 typed",
+     "key_like": false
+    }
+   ]
+  },
+  {
+   "name": "Parametros",
+   "state": "visible",
+   "dimensions": "A1:B4",
+   "max_row": 4,
+   "max_col": 2,
+   "frozen_panes": null,
+   "header_row": 1,
+   "data_start_row": 2,
+   "data_end_row": 4,
+   "header_basis": "string-density",
+   "anomalies": {
+    "whitespace": [],
+    "mixed_types": [],
+    "duplicate_keys": []
+   },
+   "validations": [],
+   "conditional_formatting": [],
+   "fills": [],
+   "comments": [],
+   "columns": [
+    {
+     "column": "A",
+     "header": "Chave",
+     "inferred_type": "str",
+     "rows_nonempty": 3,
+     "nulls": 0,
+     "distinct": 3,
+     "top_values": [
+      {
+       "value": "factor_resultado",
+       "count": 1
+      },
+      {
+       "value": "base_aditivo",
+       "count": 1
+      },
+      {
+       "value": "limite_alerta",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 3,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": true
+    },
+    {
+     "column": "B",
+     "header": "Valor",
+     "inferred_type": "number",
+     "rows_nonempty": 3,
+     "nulls": 0,
+     "distinct": 3,
+     "top_values": [
+      {
+       "value": "1.2",
+       "count": 1
+      },
+      {
+       "value": "40",
+       "count": 1
+      },
+      {
+       "value": "95",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 3,
+     "min": 1.2,
+     "max": 95,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    }
+   ]
+  }
+ ]
+}

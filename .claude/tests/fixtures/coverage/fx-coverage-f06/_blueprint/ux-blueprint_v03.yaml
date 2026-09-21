@@ -1,0 +1,229 @@
+version: v03
+blueprint_id: bp-fx-coverage-f06-v03
+engagement: fx-coverage-f06
+concretizes_decision: D-002
+draft: false
+
+architecture:
+  scope: "registo, resumo, libertação e as saídas de resumo; ficheiro de integração para o sistema de lotes (fora da fronteira de construção, D-002)"
+  authorization: authorized
+  authorization_basis: "viável com pré-condições (decisions.md#D-002)"
+  architectability_basis: "o composto escolhido é uma aplicação da plataforma activa — arquitectável por este pacote"
+  experience:
+    mode: owned-internal
+    primary_surface: "Record-centric app (model-driven)"
+    su_refs: [C-001]
+  record_authority:
+    - domain: "Lotes"
+      authority: "governed relational store"
+      access_mode: owned
+      key: lotes
+      su_refs: [C-003, C-004]
+      grain: {row: "um lote por dia", dims: [data, lote]}
+      volume: {rows: "3000 · ano", cadence: diária, state: Assumed, source: "shared-understanding.md#A-001"}
+      schema_owner: {value: "equipa de sistemas", state: Assumed, su_ref: A-002, open: null}
+      fields:
+        - {name: data, name_basis: header, type: date, required: true, index: primary, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/A", disposition: ADOPT}
+        - {name: lote, name_basis: named_range, type: identifier, required: true, index: primary, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/B", disposition: ADOPT}
+        - {name: valor_medido, name_basis: header, type: number, required: true, index: none, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/D", disposition: ADOPT}
+        - {name: resultado, name_basis: header, type: number, required: true, index: none, computed: true, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/C", disposition: ADOPT}
+        - {name: percentagem_aditivo, name_basis: header, type: number, required: true, index: none, computed: true, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/D", disposition: ADOPT}
+        - {name: estado, name_basis: header, type: choice, required: true, index: none, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/D", disposition: ADOPT}
+        - {name: registado_por, name_basis: design, type: identifier, required: true, index: none, state: Confirmed, source: "shared-understanding.md#C-010", disposition: ADOPT}
+        - {name: libertado_por, name_basis: design, type: identifier, required: false, index: none, state: Confirmed, source: "shared-understanding.md#C-010", disposition: ADOPT}
+    - domain: "Publicações de resumo"
+      authority: "governed relational store"
+      access_mode: owned
+      key: publicacoes
+      su_refs: [C-006, C-007]
+      grain: {row: "uma publicação por saída e por dia", dims: [data, saida]}
+      volume: {rows: "500 · ano", cadence: diária, state: Assumed, source: "shared-understanding.md#A-001"}
+      schema_owner: {value: "equipa de sistemas", state: Assumed, su_ref: A-002, open: null}
+      fields:
+        - {name: data, name_basis: design, type: date, required: true, index: primary, state: Confirmed, source: "shared-understanding.md#C-007", disposition: ADOPT}
+        - {name: saida, name_basis: design, type: choice, required: true, index: primary, values: [resumo-de-lotes, resumo-aditivos], state: Confirmed, source: "shared-understanding.md#C-006", disposition: ADOPT}
+        - {name: canal, name_basis: design, type: choice, required: true, index: none, values: [email, area-partilhada], state: Confirmed, source: "shared-understanding.md#C-007", disposition: ADOPT}
+        - {name: local_publicacao, name_basis: design, type: text, required: true, index: none, state: Confirmed, source: "shared-understanding.md#C-007", disposition: ADOPT}
+        - {name: publicado_em, name_basis: design, type: datetime, required: true, index: none, state: Confirmed, source: "shared-understanding.md#C-007", disposition: ADOPT}
+    - domain: "Parâmetros"
+      authority: "governed relational store"
+      access_mode: owned
+      key: parametros
+      su_refs: [C-004]
+      grain: {row: "um parâmetro", dims: [chave]}
+      volume: {rows: "10 · total", cadence: raro, state: Assumed, source: "_capture/registo-de-lotes.xlsx.extraction.json#Parametros"}
+      schema_owner: {value: "equipa de sistemas", state: Assumed, su_ref: A-002, open: null}
+      fields:
+        - {name: chave, name_basis: header, type: identifier, required: true, index: primary, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Parametros/A", disposition: ADOPT}
+        - {name: valor, name_basis: header, type: number, required: true, index: none, state: Confirmed, source: "_capture/registo-de-lotes.xlsx.fields-draft.json#Parametros/B", disposition: ADOPT}
+  compositions:
+    - component: resumo-email
+      pattern: direct
+      forced_by: "C-006 — o Resumo de Lotes segue por email para as equipas de produção"
+      boundary: in-platform
+      owner: "equipa de sistemas — não nomeada"
+    - component: resumo-aditivos-publicacao
+      pattern: direct
+      forced_by: "C-007 — o Resumo Aditivos não segue por email; fica disponível para consulta porque o ficheiro é gravado diariamente na área partilhada"
+      boundary: outside-platform
+      owner: "equipa de sistemas — não nomeada"
+    - component: imposicao-segregacao-no-armazenamento
+      pattern: direct
+      forced_by: "C-010 — a regra de que quem regista não liberta é imposta ao nível da base de dados; acesso directo ao armazenamento fica sujeito à mesma regra"
+      boundary: outside-platform
+      owner: "equipa de sistemas — não nomeada"
+    - component: lote-export
+      pattern: direct
+      forced_by: "C-008 — ficheiro de integração para o sistema de lotes, duas colunas, diário"
+      boundary: outside-platform
+      owner: "equipa que opera o sistema de lotes — não nomeada"
+  relocated_responsibilities: []
+  proof_obligations:
+    - claim: "paridade de cálculo entre o sistema novo e a folha, sobre um período de referência"
+      level: V2
+      method: "comparação de resultados sobre um mês de referência"
+      owner: developer
+      funded: no
+    - claim: "uma escrita directa no armazenamento com a identidade de quem registou é recusada pela regra"
+      level: V2
+      method: "tentativa de libertação pelo próprio registador, em ambiente de teste, pela aplicação e por acesso directo"
+      owner: developer
+      funded: no
+    - claim: "o ficheiro do Resumo Aditivos aparece na área partilhada todos os dias úteis e é legível por quem consulta"
+      level: V2
+      method: "observação da publicação em ambiente de teste durante uma semana"
+      owner: developer
+      funded: no
+  open_architecture_choices:
+    - choice: "Ponto de imposição da segregação entre quem regista e quem liberta — na base de dados ou na aplicação"
+      structural: true
+      would_be_settled_by: "U-009 (equipa de sistemas) — a configuração do ambiente decide qual dos dois ramos é sustentável"
+      su_refs: [U-009, C-010]
+      resolved: true
+      closure_basis: "C-010 — a equipa de sistemas respondeu que a regra fica na base de dados, confirmado pelo dono (answers.md#U-009); o ramo está escolhido e desenhado no componente imposicao-segregacao-no-armazenamento"
+    - choice: "Indicador observável que autoriza sair antes de todas as análises chegarem"
+      structural: false
+      would_be_settled_by: "U-010 (dono do processo)"
+      su_ref: U-010
+      resolved: false
+
+app:
+  name: "Registo de Lotes"
+  device_targets: [desktop]
+  language: pt-PT
+
+personas:
+  - name: Registador
+    label: "Quem regista as entradas"
+    rbac_group: registadores
+    su_refs: [C-002, C-005]
+  - name: Libertador
+    label: "Quem liberta o lote"
+    rbac_group: libertadores
+    su_refs: [C-002, C-005]
+  - name: Consultor
+    label: "Quem consulta o resumo de aditivos"
+    rbac_group: consulta
+    su_refs: [C-007]
+
+entities:
+  - name: Lote
+    expected_volume: "8 a 14 por dia útil"
+    state_machine: "Registado -> Verificado -> Libertado"
+    su_refs: [C-003, C-005]
+    authority: lotes
+  - name: ResumoDeLotes
+    expected_volume: "um por dia útil"
+    state_machine: null
+    su_refs: [C-006]
+    authority: lotes
+  - name: ResumoAditivos
+    expected_volume: "um por dia útil"
+    state_machine: null
+    su_refs: [C-007]
+    authority: lotes
+  - name: PublicacaoDeResumo
+    expected_volume: "duas por dia útil"
+    state_machine: "Gerado -> Publicado -> Falhado"
+    su_refs: [C-006, C-007]
+    authority: publicacoes
+  - name: Parametro
+    expected_volume: "estável"
+    state_machine: null
+    su_refs: [C-004]
+    authority: parametros
+
+navigation:
+  home_registador: LoteFormScreen
+  home_libertador: LoteListScreen
+  home_consultor: ResumoAditivosConsultaScreen
+  screen_map:
+    - LoteFormScreen
+    - LoteListScreen
+    - ResumoAditivosConsultaScreen
+
+screens:
+  - name: LoteFormScreen
+    pattern: form
+    purpose: "registar as entradas do turno"
+    primary_persona: Registador
+    density: média
+    su_refs: [C-003]
+    data:
+      entity: Lote
+      primary_columns: [data, lote, valor_medido]
+      secondary_columns: [estado]
+      su_refs: [C-003, C-004]
+    actions:
+      primary: [Guardar, Submeter]
+      secondary: [Cancelar]
+      su_refs: [C-005]
+    rbac_visibility: "Registador: escrita; Libertador: leitura"
+    ui_states: [loading, empty, error]
+  - name: LoteListScreen
+    pattern: list
+    purpose: "ver os lotes do dia e libertar"
+    primary_persona: Libertador
+    density: alta
+    su_refs: [C-005]
+    data:
+      entity: Lote
+      primary_columns: [data, lote, resultado, estado]
+      secondary_columns: [registado_por, libertado_por]
+      su_refs: [C-005, C-006, C-010]
+    actions:
+      primary: [Libertar]
+      secondary: [Devolver]
+      su_refs: [C-002, C-005]
+    rbac_visibility: "Libertador: Libertar/Devolver; Registador: leitura"
+    ui_states: [loading, empty, error]
+  - name: ResumoAditivosConsultaScreen
+    pattern: list
+    purpose: "consultar o Resumo Aditivos publicado e o estado da publicação diária"
+    primary_persona: Consultor
+    density: média
+    su_refs: [C-007]
+    data:
+      entity: PublicacaoDeResumo
+      primary_columns: [data, saida, canal, publicado_em]
+      secondary_columns: [local_publicacao]
+      su_refs: [C-007]
+    actions:
+      primary: [Abrir ficheiro publicado]
+      secondary: [Republicar]
+      su_refs: [C-007]
+    rbac_visibility: "Consultor: leitura; Libertador: leitura e Republicar"
+    ui_states: [loading, empty, error]
+
+excluded_from_ui:
+  - field: "colunas Custo_Posto_A/B/C da folha de entradas"
+    reason: "resíduo de um estudo antigo, sem entrada em nenhum cálculo — mecânica do as-is, não campo de ecrã"
+    su_refs: [C-009]
+
+open_questions:
+  - U-009
+  - U-010
+
+validation:
+  caps_checked: true
+  violations: []

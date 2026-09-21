@@ -1,0 +1,18 @@
+# aisa — development / test environment
+#
+# Runtime itself is stdlib-only by design (the kernel motors in
+# library/kernel/tools/ must run on a bare Python 3.11+). These are what the
+# test suite and the capture pipeline need.
+#
+#     python -m pip install -r requirements-dev.txt
+#
+# Running the suite (unittest, no pytest needed — every file is executable):
+#
+#     for f in .claude/tests/test_*.py; do python "$f" || exit 1; done
+#
+# The 2026-09-08 adversarial review could not run the full suite because PyYAML
+# was missing, and "inconclusive" was read as "green" (P-15). No frente is
+# declared validated before every file above prints OK.
+
+PyYAML>=6.0        # pack.yaml / ux-blueprint_vNN.yaml parsing in the tests
+openpyxl>=3.1      # xlsx_extract.py — .xlsx/.xlsm extraction and replay

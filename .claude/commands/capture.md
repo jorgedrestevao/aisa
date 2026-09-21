@@ -1,5 +1,5 @@
 ---
-description: Run process capture (L1 extract → L3 replay → L2 process model) on engagement inputs.
+description: Run process capture on engagement inputs — xlsx tier (L1 extract → L3 replay → L2 process model) + capture-lite text tier (.docx/.pdf/.vtt) + evidence index.
 argument-hint: "[file]"
 ---
 

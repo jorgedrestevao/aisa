@@ -1,0 +1,437 @@
+{
+  "schema_version": 1,
+  "version": "v13",
+  "engagement": "fx-coverage-f06",
+  "stage": "blueprint",
+  "generated_at": "2026-03-10T10:00:00+01:00",
+  "based_on": [
+    "coverage_v01.json"
+  ],
+  "target": {
+    "file": "_blueprint/ux-blueprint_v01.yaml",
+    "kind": "blueprint",
+    "identity": "v01",
+    "sha256": "f7e97d08c099869b3a451010f7c7bf289ba17cd4a7116e03778db5282d48207f"
+  },
+  "basis": {
+    "inventory_sha256": "b31c2af5507500ef2272d791693f3335b4be63f86ff8a781a8436d1cc253fb81",
+    "su_fingerprint": "b31c2af5507500ef2272d791693f3335b4be63f86ff8a781a8436d1cc253fb81",
+    "decision_fingerprint": "b31c2af5507500ef2272d791693f3335b4be63f86ff8a781a8436d1cc253fb81",
+    "sources": [
+      {
+        "path": "_capture/evidence-index.md",
+        "sha256": "1d6dc3aff83f792a64e416301855096cf72169000921d62244d5b717cd6010e4",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/process-model.md",
+        "sha256": "ddfaae63860c786aedb4bc923a68e8a4b9865369b1faeeca4d02a24b6da5341d",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes-2024.xlsx.extraction.json",
+        "sha256": "94861f3666a1f272e392802632fac290ed6961e9ed55d2e589c8a76ade378ab1",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes.xlsx.extraction.json",
+        "sha256": "5071e125c15cf18935e12f52f0249629b20b66ea3d749b9600174f61871361ff",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes.xlsx.fields-draft.json",
+        "sha256": "258b513a2e7bef1720ab78f6bc40dff3293fc636c5bb21c3f7cd196ad157b01d",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes.xlsx.replay.md",
+        "sha256": "15877f54619043ef095019843bba9bdc73ad9d3bc5b5c99dde7d96da5bc98428",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_state.json",
+        "sha256": "d2a2a0e2f0180626c6c8485c0f9bd75fe51c2461b6030b87648d866249a72da9",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "answers.md",
+        "sha256": "f5958349c17630df9611efc2c11dfc32355eb7a9a069f528c08072dab0342e47",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "context.json",
+        "sha256": "d028c4aa5defc66c1e1ec3e418a4cebf85bcf4d3d3df7cbd469946c3b3c7add1",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "decisions.md",
+        "sha256": "1afac1b150d278efcb4894ca2e2bf1ede22a69a08e6d5356468234ce1c1ddea0",
+        "role": "engagement",
+        "use": "informative"
+      },
+      {
+        "path": "enquadramento.md",
+        "sha256": "84e1c0e99646e884b15080aaf667ad762781b3849967c1818a3e7a09c20f5006",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "frame.md",
+        "sha256": "aca0d6f49ce947179f5211c12bc9b6625fea5e91afa9b885dc6bec2d9fb55a63",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "inputs/fluxo-de-libertacao.pptx",
+        "sha256": "a49d8f149a39fb7b3b2c294f65377ac8782e8248a1177059f6ec120d5a7bf73f",
+        "role": "input",
+        "use": "freshness"
+      },
+      {
+        "path": "inputs/registo-de-lotes-2024.xlsx",
+        "sha256": "363b5e713a4730c298c34919a9a35b438db0665b24bdfacb4d3b81c5b7be9949",
+        "role": "input",
+        "use": "freshness"
+      },
+      {
+        "path": "inputs/registo-de-lotes.xlsx",
+        "sha256": "f2f2462e1f032365a678c9bc01b7504abb19f1414e3935d27f2a365d965b264e",
+        "role": "input",
+        "use": "freshness"
+      },
+      {
+        "path": "lens-outputs/data.md",
+        "sha256": "ea0ff30dad3a9cfa84801e7fa5ae78e237f7e9288b965ab118ee596449aee071",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "lens-outputs/operations.md",
+        "sha256": "36f85224ab18a0a9feb3b41fb0559bfae95526fd109abf33e42ac67a1660e483",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "options.md",
+        "sha256": "1488e6a665275e0024b739de184c5149d58522ebb40e4494622264e328460885",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "premortem.md",
+        "sha256": "76ae7ddb9efad272aae9fb7557be11da6afb48e8e6decab19a37d372ff53c9ac",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "shared-understanding.md",
+        "sha256": "8ce7b14ff20c549602180b42aa8b02fdc401f517abfbb03cb6f3b32f3a1b3a18",
+        "role": "engagement",
+        "use": "informative"
+      }
+    ],
+    "authorities": [],
+    "decision_ref": "D-002",
+    "contract_version": "1",
+    "pack": "pp"
+  },
+  "source_review": [
+    {
+      "id": "sr-001",
+      "unit_refs": [
+        "answers.md#U-004"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Relida na passagem fonte -> destino: e a obrigacao de saida em causa.",
+      "links": {
+        "su_refs": [
+          "C-007",
+          "A-003"
+        ],
+        "coverage_items": [
+          "item-001"
+        ],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-002",
+      "unit_refs": [
+        "shared-understanding.md#C-006"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Relida: a outra saida de resumo, para nao confundir os dois canais.",
+      "links": {
+        "su_refs": [
+          "C-006"
+        ],
+        "coverage_items": [
+          "item-002"
+        ],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-003",
+      "unit_refs": [
+        "shared-understanding.md#C-008"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Relida: C-008 nao revoga C-006 nem C-007, sao saidas distintas.",
+      "links": {
+        "su_refs": [
+          "C-008"
+        ],
+        "coverage_items": [
+          "item-003"
+        ],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-004",
+      "unit_refs": [
+        "enquadramento.md#M-2"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Relida: o invariante de segregacao.",
+      "links": {
+        "su_refs": [
+          "C-002",
+          "C-005"
+        ],
+        "coverage_items": [
+          "item-004"
+        ],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-005",
+      "unit_refs": [
+        "answers.md#U-009"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Relida: a resposta que diz onde a regra e imposta.",
+      "links": {
+        "su_refs": [
+          "C-010"
+        ],
+        "coverage_items": [
+          "item-005"
+        ],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-006",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/F",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/G",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/H"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Grupo de colunas de forma repetida, membros enumerados: sem entrada em calculo (C-009). Exclusao herdada da reconciliacao.",
+      "links": {
+        "su_refs": [
+          "C-009"
+        ],
+        "coverage_items": [
+          "item-006"
+        ],
+        "obligations": []
+      }
+    }
+  ],
+  "coverage": [
+    {
+      "id": "item-001",
+      "requirement_refs": [
+        "C-007"
+      ],
+      "source_unit_refs": [
+        "answers.md#U-004"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [
+        {
+          "file": "_blueprint/ux-blueprint_v01.yaml",
+          "selector": "entities[name=ResumoAditivos]",
+          "kind": "entity",
+          "role": "projection"
+        }
+      ],
+      "assessment": {
+        "status": "missing",
+        "rationale": "O desenho tem a entidade ResumoAditivos, e nao tem percurso nenhum de publicacao nem de consulta: nenhuma composicao, nenhum ecra e nenhum campo de entrega. Existir como entidade nao e entregar a saida.",
+        "acceptance_basis_refs": [
+          "C-007"
+        ]
+      },
+      "unresolved_refs": [],
+      "required_action": "Concretizar a publicacao diaria e a consulta no desenho.",
+      "responsible_role": "arquitetura"
+    },
+    {
+      "id": "item-002",
+      "requirement_refs": [
+        "C-006"
+      ],
+      "source_unit_refs": [
+        "enquadramento.md#T4"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [
+        {
+          "file": "_blueprint/ux-blueprint_v01.yaml",
+          "selector": "architecture/compositions[component=resumo-email]",
+          "kind": "composition",
+          "role": "implementation"
+        }
+      ],
+      "assessment": {
+        "status": "covered",
+        "rationale": "A saida por email tem componente propria.",
+        "acceptance_basis_refs": [
+          "C-006"
+        ]
+      },
+      "unresolved_refs": []
+    },
+    {
+      "id": "item-003",
+      "requirement_refs": [
+        "C-002",
+        "C-005"
+      ],
+      "source_unit_refs": [
+        "enquadramento.md#M-2"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [
+        {
+          "file": "_blueprint/ux-blueprint_v01.yaml",
+          "selector": "screens[name=LoteListScreen]",
+          "kind": "screen",
+          "role": "implementation"
+        },
+        {
+          "file": "_blueprint/ux-blueprint_v01.yaml",
+          "selector": "personas[name=Libertador]",
+          "kind": "persona",
+          "role": "implementation"
+        }
+      ],
+      "assessment": {
+        "status": "covered",
+        "rationale": "O percurso separa quem regista de quem liberta, com accoes e visibilidade distintas por papel.",
+        "acceptance_basis_refs": [
+          "C-002",
+          "C-005"
+        ]
+      },
+      "unresolved_refs": []
+    },
+    {
+      "id": "item-004",
+      "requirement_refs": [
+        "C-010"
+      ],
+      "source_unit_refs": [
+        "answers.md#U-009"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [
+        {
+          "file": "_blueprint/ux-blueprint_v01.yaml",
+          "selector": "architecture/open_architecture_choices[su_ref=U-009]",
+          "kind": "open_architecture_choice",
+          "role": "open_choice"
+        }
+      ],
+      "assessment": {
+        "status": "missing",
+        "rationale": "C-010 exige imposicao ao nivel do armazenamento. A v01 so tem a escolha em aberto; nao ha componente, campo nem obrigacao de prova que a concretize.",
+        "acceptance_basis_refs": [
+          "C-010"
+        ]
+      },
+      "unresolved_refs": [],
+      "required_action": "Desenhar o ponto de imposicao no armazenamento.",
+      "responsible_role": "arquitetura"
+    },
+    {
+      "id": "item-005",
+      "requirement_refs": [
+        "C-009"
+      ],
+      "source_unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/F",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/G",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/H"
+      ],
+      "disposition": "retire",
+      "scope_basis_refs": [
+        "C-009"
+      ],
+      "targets": [
+        {
+          "file": "_blueprint/ux-blueprint_v01.yaml",
+          "selector": "excluded_from_ui[0]",
+          "kind": "section",
+          "role": "implementation"
+        }
+      ],
+      "assessment": {
+        "status": "excluded",
+        "rationale": "Exclusao herdada da reconciliacao, com a mesma autoridade: colunas sem entrada em calculo, fora da UI por fundamento de desenho.",
+        "acceptance_basis_refs": [
+          "C-009"
+        ]
+      },
+      "unresolved_refs": [],
+      "required_action": "—",
+      "responsible_role": "arquitetura"
+    }
+  ],
+  "semantic_review": {
+    "status": "completed",
+    "performed_by": {
+      "kind": "agent",
+      "name": "executor do aisa (fixture)"
+    },
+    "method": "source-to-target and target-to-source",
+    "passes": {
+      "source_to_target": true,
+      "target_to_source": true
+    },
+    "limitations": [
+      "Revisao documental; nao executa a solucao."
+    ],
+    "findings": [
+      "item-001",
+      "item-004",
+      "item-005"
+    ],
+    "completed_at": "2026-03-10T10:00:00+01:00"
+  }
+}
