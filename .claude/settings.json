@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pre-write-guard.py"
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/pre-write-guard.py\""
           }
         ]
       },
@@ -22,7 +22,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pre-lens-order-check.py"
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/pre-lens-order-check.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/phase-gate-check.py\""
           }
         ]
       }
@@ -33,24 +42,33 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/on-su-change.py"
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/on-su-change.py\""
           },
           {
             "type": "command",
-            "command": "python .claude/hooks/synthesis-validate.py"
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/su-confirmed-guard.py\""
           },
           {
             "type": "command",
-            "command": "python .claude/hooks/render-validate.py"
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/synthesis-validate.py\""
+          },
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/render-validate.py\""
+          },
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/blueprint-validate.py\""
           }
         ]
-      },
+      }
+    ],
+    "Stop": [
       {
-        "matcher": "Skill",
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/phase-gate-check.py"
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/phase-completeness.py\""
           }
         ]
       }
@@ -58,6 +76,8 @@
   },
   "env": {
     "AISA_KERNEL_VERSION": "0.2.0",
-    "AISA_GUARD_MODE": "enforce"
+    "AISA_GUARD_MODE": "enforce",
+    "AISA_DASHBOARD_RELOAD": "5",
+    "AISA_DASHBOARD_DEBOUNCE": "2"
   }
 }

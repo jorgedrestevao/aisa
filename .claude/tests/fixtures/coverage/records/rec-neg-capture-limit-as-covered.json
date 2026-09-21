@@ -1,0 +1,1374 @@
+{
+  "schema_version": 1,
+  "version": "v19",
+  "engagement": "fx-coverage-f06",
+  "stage": "reconciliation",
+  "generated_at": "2026-03-10T10:00:00+01:00",
+  "based_on": [],
+  "target": null,
+  "basis": {
+    "inventory_sha256": "b31c2af5507500ef2272d791693f3335b4be63f86ff8a781a8436d1cc253fb81",
+    "su_fingerprint": "b31c2af5507500ef2272d791693f3335b4be63f86ff8a781a8436d1cc253fb81",
+    "decision_fingerprint": "b31c2af5507500ef2272d791693f3335b4be63f86ff8a781a8436d1cc253fb81",
+    "sources": [
+      {
+        "path": "_capture/evidence-index.md",
+        "sha256": "1d6dc3aff83f792a64e416301855096cf72169000921d62244d5b717cd6010e4",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/process-model.md",
+        "sha256": "ddfaae63860c786aedb4bc923a68e8a4b9865369b1faeeca4d02a24b6da5341d",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes-2024.xlsx.extraction.json",
+        "sha256": "94861f3666a1f272e392802632fac290ed6961e9ed55d2e589c8a76ade378ab1",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes.xlsx.extraction.json",
+        "sha256": "5071e125c15cf18935e12f52f0249629b20b66ea3d749b9600174f61871361ff",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes.xlsx.fields-draft.json",
+        "sha256": "258b513a2e7bef1720ab78f6bc40dff3293fc636c5bb21c3f7cd196ad157b01d",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_capture/registo-de-lotes.xlsx.replay.md",
+        "sha256": "15877f54619043ef095019843bba9bdc73ad9d3bc5b5c99dde7d96da5bc98428",
+        "role": "capture",
+        "use": "freshness"
+      },
+      {
+        "path": "_state.json",
+        "sha256": "d2a2a0e2f0180626c6c8485c0f9bd75fe51c2461b6030b87648d866249a72da9",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "answers.md",
+        "sha256": "f5958349c17630df9611efc2c11dfc32355eb7a9a069f528c08072dab0342e47",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "context.json",
+        "sha256": "d028c4aa5defc66c1e1ec3e418a4cebf85bcf4d3d3df7cbd469946c3b3c7add1",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "decisions.md",
+        "sha256": "1afac1b150d278efcb4894ca2e2bf1ede22a69a08e6d5356468234ce1c1ddea0",
+        "role": "engagement",
+        "use": "informative"
+      },
+      {
+        "path": "enquadramento.md",
+        "sha256": "84e1c0e99646e884b15080aaf667ad762781b3849967c1818a3e7a09c20f5006",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "frame.md",
+        "sha256": "aca0d6f49ce947179f5211c12bc9b6625fea5e91afa9b885dc6bec2d9fb55a63",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "inputs/fluxo-de-libertacao.pptx",
+        "sha256": "a49d8f149a39fb7b3b2c294f65377ac8782e8248a1177059f6ec120d5a7bf73f",
+        "role": "input",
+        "use": "freshness"
+      },
+      {
+        "path": "inputs/registo-de-lotes-2024.xlsx",
+        "sha256": "363b5e713a4730c298c34919a9a35b438db0665b24bdfacb4d3b81c5b7be9949",
+        "role": "input",
+        "use": "freshness"
+      },
+      {
+        "path": "inputs/registo-de-lotes.xlsx",
+        "sha256": "f2f2462e1f032365a678c9bc01b7504abb19f1414e3935d27f2a365d965b264e",
+        "role": "input",
+        "use": "freshness"
+      },
+      {
+        "path": "lens-outputs/data.md",
+        "sha256": "ea0ff30dad3a9cfa84801e7fa5ae78e237f7e9288b965ab118ee596449aee071",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "lens-outputs/operations.md",
+        "sha256": "36f85224ab18a0a9feb3b41fb0559bfae95526fd109abf33e42ac67a1660e483",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "options.md",
+        "sha256": "1488e6a665275e0024b739de184c5149d58522ebb40e4494622264e328460885",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "premortem.md",
+        "sha256": "76ae7ddb9efad272aae9fb7557be11da6afb48e8e6decab19a37d372ff53c9ac",
+        "role": "engagement",
+        "use": "freshness"
+      },
+      {
+        "path": "shared-understanding.md",
+        "sha256": "8ce7b14ff20c549602180b42aa8b02fdc401f517abfbb03cb6f3b32f3a1b3a18",
+        "role": "engagement",
+        "use": "informative"
+      }
+    ],
+    "authorities": [],
+    "decision_ref": "D-002",
+    "contract_version": "1",
+    "pack": "pp"
+  },
+  "source_review": [
+    {
+      "id": "sr-001",
+      "unit_refs": [
+        "context.json#literal_request"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-002",
+      "unit_refs": [
+        "context.json#requester"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-003",
+      "unit_refs": [
+        "context.json#inputs"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-004",
+      "unit_refs": [
+        "context.json#funding_gate"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-005",
+      "unit_refs": [
+        "enquadramento.md#T1"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-006",
+      "unit_refs": [
+        "enquadramento.md#T2"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-007",
+      "unit_refs": [
+        "enquadramento.md#T3"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-008",
+      "unit_refs": [
+        "enquadramento.md#T4"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-009",
+      "unit_refs": [
+        "enquadramento.md#T5"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-010",
+      "unit_refs": [
+        "enquadramento.md#T6"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-011",
+      "unit_refs": [
+        "enquadramento.md#T7"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-012",
+      "unit_refs": [
+        "enquadramento.md#M-1"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-013",
+      "unit_refs": [
+        "enquadramento.md#M-2"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-014",
+      "unit_refs": [
+        "answers.md#U-001"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-015",
+      "unit_refs": [
+        "answers.md#U-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-016",
+      "unit_refs": [
+        "answers.md#U-004"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-017",
+      "unit_refs": [
+        "answers.md#U-006"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-018",
+      "unit_refs": [
+        "answers.md#U-007"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-019",
+      "unit_refs": [
+        "answers.md#U-009"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-020",
+      "unit_refs": [
+        "shared-understanding.md#C-001"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-021",
+      "unit_refs": [
+        "shared-understanding.md#C-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-022",
+      "unit_refs": [
+        "shared-understanding.md#C-003"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-023",
+      "unit_refs": [
+        "shared-understanding.md#C-004"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-024",
+      "unit_refs": [
+        "shared-understanding.md#C-005"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-025",
+      "unit_refs": [
+        "shared-understanding.md#C-006"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-026",
+      "unit_refs": [
+        "shared-understanding.md#C-007"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-027",
+      "unit_refs": [
+        "shared-understanding.md#C-008"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-028",
+      "unit_refs": [
+        "shared-understanding.md#C-009"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-029",
+      "unit_refs": [
+        "shared-understanding.md#C-010"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-030",
+      "unit_refs": [
+        "shared-understanding.md#D-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-031",
+      "unit_refs": [
+        "shared-understanding.md#A-001"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-032",
+      "unit_refs": [
+        "shared-understanding.md#A-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-033",
+      "unit_refs": [
+        "shared-understanding.md#A-003"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-034",
+      "unit_refs": [
+        "shared-understanding.md#U-009"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-035",
+      "unit_refs": [
+        "shared-understanding.md#U-010"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-036",
+      "unit_refs": [
+        "shared-understanding.md#R-001"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-037",
+      "unit_refs": [
+        "shared-understanding.md#R-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-038",
+      "unit_refs": [
+        "decisions.md#D-001"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-039",
+      "unit_refs": [
+        "decisions.md#D-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-040",
+      "unit_refs": [
+        "inputs/fluxo-de-libertacao.pptx"
+      ],
+      "assessment": "not_applicable",
+      "materiality": "material",
+      "rationale": "Sem extractor para este formato.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-041",
+      "unit_refs": [
+        "inputs/registo-de-lotes-2024.xlsx"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-042",
+      "unit_refs": [
+        "inputs/registo-de-lotes.xlsx"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-043",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/A"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-044",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/B"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-045",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/C"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-046",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/D"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-047",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/E"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-048",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/A"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-049",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/B"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-050",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/C"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-051",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/D"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-052",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/A"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-053",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/B"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-054",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/C"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-055",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/D"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-056",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Parametros/A"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Parametro de calculo; nao e obrigacao de negocio.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-057",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Parametros/B"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Parametro de calculo; nao e obrigacao de negocio.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-058",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#dictionary/entries_without_data/Custo_Posto_D"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-059",
+      "unit_refs": [
+        "_capture/registo-de-lotes-2024.xlsx.extraction.json#sheets[name=Entradas]"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-060",
+      "unit_refs": [
+        "_capture/registo-de-lotes-2024.xlsx.extraction.json#sheets[name=Resumo Aditivos]"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-061",
+      "unit_refs": [
+        "_capture/process-model.md#PM-U-001"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-062",
+      "unit_refs": [
+        "_capture/process-model.md#PM-U-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-063",
+      "unit_refs": [
+        "_capture/process-model.md#PM-U-003"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-064",
+      "unit_refs": [
+        "_capture/process-model.md#PM-001"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-065",
+      "unit_refs": [
+        "_capture/process-model.md#PM-002"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-066",
+      "unit_refs": [
+        "_capture/process-model.md#PM-003"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-067",
+      "unit_refs": [
+        "_capture/process-model.md#PM-004"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-068",
+      "unit_refs": [
+        "_capture/process-model.md#PM-005"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-069",
+      "unit_refs": [
+        "_capture/process-model.md#PM-006"
+      ],
+      "assessment": "reviewed",
+      "materiality": "material",
+      "rationale": "Unidade lida na passagem fonte -> destino.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-070",
+      "unit_refs": [
+        "_capture/evidence-index.md"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Fonte auxiliar; nao cria obrigacao propria.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-071",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.replay.md"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Fonte auxiliar; nao cria obrigacao propria.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-072",
+      "unit_refs": [
+        "frame.md"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Fonte auxiliar; nao cria obrigacao propria.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-073",
+      "unit_refs": [
+        "options.md"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Fonte auxiliar; nao cria obrigacao propria.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-074",
+      "unit_refs": [
+        "premortem.md"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Fonte auxiliar; nao cria obrigacao propria.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-075",
+      "unit_refs": [
+        "lens-outputs/data.md"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Fonte auxiliar; nao cria obrigacao propria.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-076",
+      "unit_refs": [
+        "lens-outputs/operations.md"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Fonte auxiliar; nao cria obrigacao propria.",
+      "links": {
+        "su_refs": [],
+        "coverage_items": [],
+        "obligations": []
+      }
+    },
+    {
+      "id": "sr-077",
+      "unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/F",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/G",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/H"
+      ],
+      "assessment": "reviewed",
+      "materiality": "not-material",
+      "rationale": "Grupo de colunas de forma repetida, membros enumerados: residuo de um estudo antigo, sem entrada em nenhum calculo (C-009).",
+      "links": {
+        "su_refs": [
+          "C-009"
+        ],
+        "coverage_items": [],
+        "obligations": []
+      }
+    }
+  ],
+  "coverage": [
+    {
+      "id": "item-001",
+      "requirement_refs": [
+        "C-007"
+      ],
+      "source_unit_refs": [
+        "answers.md#U-004",
+        "shared-understanding.md#C-007"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [],
+      "assessment": {
+        "status": "covered",
+        "rationale": "A obrigacao de manter a saida e o seu canal esta escrita em C-007 e a hipotese de consumidor externo ficou registada em A-003.",
+        "acceptance_basis_refs": [
+          "C-007"
+        ]
+      },
+      "unresolved_refs": []
+    },
+    {
+      "id": "item-002",
+      "requirement_refs": [
+        "C-006"
+      ],
+      "source_unit_refs": [
+        "enquadramento.md#T4"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [],
+      "assessment": {
+        "status": "covered",
+        "rationale": "A saida por email esta escrita em C-006.",
+        "acceptance_basis_refs": [
+          "C-006"
+        ]
+      },
+      "unresolved_refs": []
+    },
+    {
+      "id": "item-003",
+      "requirement_refs": [
+        "C-008"
+      ],
+      "source_unit_refs": [
+        "answers.md#U-006"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [],
+      "assessment": {
+        "status": "covered",
+        "rationale": "O contrato do ficheiro de integracao esta escrito em C-008.",
+        "acceptance_basis_refs": [
+          "C-008"
+        ]
+      },
+      "unresolved_refs": []
+    },
+    {
+      "id": "item-004",
+      "requirement_refs": [
+        "C-002",
+        "C-005"
+      ],
+      "source_unit_refs": [
+        "enquadramento.md#M-2"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [],
+      "assessment": {
+        "status": "covered",
+        "rationale": "O invariante de segregacao esta em C-002 e o comportamento real em C-005.",
+        "acceptance_basis_refs": [
+          "C-002",
+          "C-005"
+        ]
+      },
+      "unresolved_refs": []
+    },
+    {
+      "id": "item-005",
+      "requirement_refs": [
+        "C-010"
+      ],
+      "source_unit_refs": [
+        "answers.md#U-009"
+      ],
+      "disposition": "preserve",
+      "scope_basis_refs": [],
+      "targets": [],
+      "assessment": {
+        "status": "covered",
+        "rationale": "A resposta da equipa de sistemas fixou o ponto de imposicao e esta escrita em C-010.",
+        "acceptance_basis_refs": [
+          "C-010"
+        ]
+      },
+      "unresolved_refs": []
+    },
+    {
+      "id": "item-006",
+      "requirement_refs": [
+        "C-009"
+      ],
+      "source_unit_refs": [
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/F",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/G",
+        "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/H"
+      ],
+      "disposition": "retire",
+      "scope_basis_refs": [
+        "C-009"
+      ],
+      "targets": [],
+      "assessment": {
+        "status": "excluded",
+        "rationale": "Grupo de colunas sem entrada em calculo; a resposta do dono fechou o tema em C-009. Todas as unidades do grupo estao declaradas nao materiais, com razao.",
+        "acceptance_basis_refs": [
+          "C-009"
+        ]
+      },
+      "unresolved_refs": [],
+      "required_action": "—",
+      "responsible_role": "arquitetura"
+    }
+  ],
+  "semantic_review": {
+    "status": "completed",
+    "performed_by": {
+      "kind": "agent",
+      "name": "executor do aisa (fixture)"
+    },
+    "method": "source-to-target and target-to-source",
+    "passes": {
+      "source_to_target": true,
+      "target_to_source": true
+    },
+    "limitations": [
+      "Revisao documental; nao executa a solucao."
+    ],
+    "findings": [
+      "item-006"
+    ],
+    "completed_at": "2026-03-10T10:00:00+01:00"
+  }
+}

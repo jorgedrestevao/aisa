@@ -1,0 +1,422 @@
+{
+  "artefact": "aisa.coverage.inventory-expected",
+  "contract_version": "1",
+  "engagement": "fx-coverage-f06",
+  "note": "Denominador ESPERADO da fase 1, derivado dos ficheiros da fixture. A fase 2 reproduz esta lista ou justifica a diferenca no seu relatorio. Nao e output de motor: o motor ainda nao existe.",
+  "counts_by_class": {
+    "answer-section": 6,
+    "capture-index": 1,
+    "context-field": 4,
+    "decision-block": 2,
+    "enquadramento-theme": 7,
+    "input-file": 3,
+    "invariant": 2,
+    "lens-output": 2,
+    "phase-artefact": 3,
+    "process-question": 3,
+    "process-rule": 6,
+    "replay-report": 1,
+    "su-row": 18,
+    "xlsx-column": 18,
+    "xlsx-dictionary-entry": 1,
+    "xlsx-sheet": 2
+  },
+  "total": 79,
+  "units": [
+    {
+      "unit_key": "context.json#literal_request",
+      "class": "context-field",
+      "note": ""
+    },
+    {
+      "unit_key": "context.json#requester",
+      "class": "context-field",
+      "note": ""
+    },
+    {
+      "unit_key": "context.json#inputs",
+      "class": "context-field",
+      "note": ""
+    },
+    {
+      "unit_key": "context.json#funding_gate",
+      "class": "context-field",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#T1",
+      "class": "enquadramento-theme",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#T2",
+      "class": "enquadramento-theme",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#T3",
+      "class": "enquadramento-theme",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#T4",
+      "class": "enquadramento-theme",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#T5",
+      "class": "enquadramento-theme",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#T6",
+      "class": "enquadramento-theme",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#T7",
+      "class": "enquadramento-theme",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#M-1",
+      "class": "invariant",
+      "note": ""
+    },
+    {
+      "unit_key": "enquadramento.md#M-2",
+      "class": "invariant",
+      "note": ""
+    },
+    {
+      "unit_key": "answers.md#U-001",
+      "class": "answer-section",
+      "note": ""
+    },
+    {
+      "unit_key": "answers.md#U-002",
+      "class": "answer-section",
+      "note": ""
+    },
+    {
+      "unit_key": "answers.md#U-004",
+      "class": "answer-section",
+      "note": ""
+    },
+    {
+      "unit_key": "answers.md#U-006",
+      "class": "answer-section",
+      "note": ""
+    },
+    {
+      "unit_key": "answers.md#U-007",
+      "class": "answer-section",
+      "note": ""
+    },
+    {
+      "unit_key": "answers.md#U-009",
+      "class": "answer-section",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-001",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-002",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-003",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-004",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-005",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-006",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-007",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-008",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-009",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#C-010",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#D-002",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#A-001",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#A-002",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#A-003",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#U-009",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#U-010",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#R-001",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "shared-understanding.md#R-002",
+      "class": "su-row",
+      "note": ""
+    },
+    {
+      "unit_key": "decisions.md#D-001",
+      "class": "decision-block",
+      "note": ""
+    },
+    {
+      "unit_key": "decisions.md#D-002",
+      "class": "decision-block",
+      "note": ""
+    },
+    {
+      "unit_key": "inputs/fluxo-de-libertacao.pptx",
+      "class": "input-file",
+      "note": "formato fora dos tiers de captura"
+    },
+    {
+      "unit_key": "inputs/registo-de-lotes-2024.xlsx",
+      "class": "input-file",
+      "note": ""
+    },
+    {
+      "unit_key": "inputs/registo-de-lotes.xlsx",
+      "class": "input-file",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/A",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/B",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/C",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/D",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/E",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/F",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/G",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Entradas/H",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/A",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/B",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/C",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo de Lotes/D",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/A",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/B",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/C",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Resumo Aditivos/D",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Parametros/A",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#Parametros/B",
+      "class": "xlsx-column",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.fields-draft.json#dictionary/entries_without_data/Custo_Posto_D",
+      "class": "xlsx-dictionary-entry",
+      "note": "nome sem dados: entra no denominador"
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes-2024.xlsx.extraction.json#sheets[name=Entradas]",
+      "class": "xlsx-sheet",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes-2024.xlsx.extraction.json#sheets[name=Resumo Aditivos]",
+      "class": "xlsx-sheet",
+      "note": "mesmo nome de folha noutro workbook: chave distinta pelo ficheiro"
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-U-001",
+      "class": "process-question",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-U-002",
+      "class": "process-question",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-U-003",
+      "class": "process-question",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-001",
+      "class": "process-rule",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-002",
+      "class": "process-rule",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-003",
+      "class": "process-rule",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-004",
+      "class": "process-rule",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-005",
+      "class": "process-rule",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/process-model.md#PM-006",
+      "class": "process-rule",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/evidence-index.md",
+      "class": "capture-index",
+      "note": ""
+    },
+    {
+      "unit_key": "_capture/registo-de-lotes.xlsx.replay.md",
+      "class": "replay-report",
+      "note": "limitacoes de replay entram como limitacao, nao como facto novo"
+    },
+    {
+      "unit_key": "frame.md",
+      "class": "phase-artefact",
+      "note": "fonte auxiliar: nao cria verdade mais forte que a SU"
+    },
+    {
+      "unit_key": "options.md",
+      "class": "phase-artefact",
+      "note": "fonte auxiliar: nao cria verdade mais forte que a SU"
+    },
+    {
+      "unit_key": "premortem.md",
+      "class": "phase-artefact",
+      "note": "fonte auxiliar: nao cria verdade mais forte que a SU"
+    },
+    {
+      "unit_key": "lens-outputs/data.md",
+      "class": "lens-output",
+      "note": "fonte auxiliar: nao cria verdade mais forte que a SU"
+    },
+    {
+      "unit_key": "lens-outputs/operations.md",
+      "class": "lens-output",
+      "note": "fonte auxiliar: nao cria verdade mais forte que a SU"
+    }
+  ]
+}

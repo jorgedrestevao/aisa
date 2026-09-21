@@ -1,0 +1,55 @@
+# Fixture — the C-057 regression shape, version BEFORE the new fact (mirrors Pilot-1 blueprint v01).
+blueprint_id: bp-v01
+architecture:
+  scope: whole solution
+  authorization: authorized
+  experience:
+    mode: owned-internal
+    primary_surface: "Record-centric app (model-driven)"
+    su_refs: [C-013, C-002, C-056]
+    rationale: >
+      Internal audience; data-dense, record-centric work with automatic relational navigation,
+      row/column security and audit inherited from the governed store.
+  record_authority:
+    - domain: "Pricing master data"
+      authority: governed relational store
+      access_mode: owned
+      su_refs: [C-017, C-035]
+    - domain: "Target margins and daily logistics costs"
+      authority: governed relational store
+      access_mode: owned
+      su_refs: [C-006, C-016]
+    - domain: "Daily price history"
+      authority: governed relational store
+      access_mode: owned
+      su_refs: [C-018, R-004]
+    - domain: "Term-contract client terms"
+      authority: external system of record (SAP)
+      access_mode: virtualized
+      su_refs: [C-052, C-003]
+  compositions:
+    - component: market-data-feed-integration
+      pattern: direct
+      forced_by: "Automatic quotes already come from a market feed; the app consumes it (C-016)."
+      boundary: outside-platform
+      owner: UNKNOWN
+    - component: sap-term-pricing-reference
+      pattern: direct
+      forced_by: "The app references term-contract prices already computed by SAP (C-003)."
+      boundary: outside-platform
+      owner: UNKNOWN
+  proof_obligations:
+    - claim: "Production-grade proof (whole solution)"
+      level: V4
+      method: not specified further
+      owner: not named
+      funded: no
+  open_architecture_choices:
+    - choice: "Formal owner of the master-data dictionary and change process"
+      structural: true
+      would_be_settled_by: "Nomination by sponsor/governance"
+      su_ref: U-027
+    - choice: "Owner named for the external integration components"
+      structural: true
+      would_be_settled_by: "IT/operations nomination"
+      su_ref: U-029

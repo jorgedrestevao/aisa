@@ -1,0 +1,104 @@
+version: 1
+engagement: fixture-eng
+decision_ref: decisions.md#D-002
+option_ref: O-001
+draft: false
+generated: 2026-09-10T10:00:00Z
+
+app:
+  name: FixtureApp
+  device_targets: [desktop]
+  language: pt
+
+architecture:
+  scope: whole solution
+  authorization: authorized
+  authorization_basis: >
+    "it fits with stated, funded conditions" (options.md#O-001, decisions.md#D-002)
+  architectability_basis: "PP application built from scratch — this pack's scope (architecture-templates/README.md §4)"
+  experience:
+    mode: owned-internal
+    primary_surface: "Record-centric app (model-driven)"
+    su_refs: [C-001]
+  record_authority:
+    - domain: "Pedidos"
+      authority: "governed relational store"
+      access_mode: owned
+      key: pedidos
+      su_refs: [C-001, C-002]
+      grain: {row: "um pedido", dims: [cliente, data]}
+      volume: {rows: "200 · mês", cadence: mensal, state: Confirmed, source: "inputs/x.xlsx#Pedidos!A"}
+      schema_owner: {value: "equipa de dados", state: Assumed, su_ref: A-001, open: null}
+      fields:
+        - {name: id, name_basis: header, type: identifier, required: true, index: primary, state: Confirmed, source: "inputs/x.xlsx#Pedidos!A1", disposition: ADOPT}
+        - {name: cliente, name_basis: header, type: reference, required: true, index: none, state: Confirmed, source: "inputs/x.xlsx#Pedidos!B1", disposition: ADOPT}
+    - domain: "Histórico"
+      authority: "external system of record (SQL)"
+      access_mode: keep-in-place
+      key: historico
+      su_refs: [C-003]
+      access_contract:
+        reads: [{name: preco, type: number, state: Confirmed, source: "inputs/x.xlsx#Hist!C"}]
+        writes: []
+        readonly: true
+        key: [id]
+        store_facts:
+          primary_key_type: {value: int, state: Confirmed, su_ref: C-003}
+        confidentiality:
+          row_level: {value: none, state: Confirmed, su_ref: C-003}
+          column_level: {value: none, state: Confirmed, su_ref: C-003}
+  compositions:
+    - component: sql-history
+      pattern: data-virtualization
+      forced_by: "C-003 — histórico já reside em SQL"
+      boundary: outside-platform
+      owner: "equipa que opera a BD"
+  relocated_responsibilities: []
+  proof_obligations:
+    - claim: "tabela virtual lê 10 anos de histórico com filtro por data"
+      level: V2
+      method: "consulta de amostra em ambiente de teste"
+      owner: developer
+      funded: yes
+  open_architecture_choices:
+    - choice: "Superfície da grelha diária"
+      structural: false
+      would_be_settled_by: "sessão com os analistas"
+      su_refs: [U-001]
+      resolved: false
+
+personas:
+  - name: Analista
+    label: "Analista"
+    rbac_group: analistas
+    su_refs: [C-001]
+
+entities:
+  - name: Pedido
+    label: "Pedido"
+    authority: pedidos
+    su_refs: [C-001, C-002]
+    state_machine: [novo, aprovado]
+
+navigation:
+  home: {Analista: PedidoListScreen}
+
+screens:
+  - name: PedidoListScreen
+    type: gallery
+    entity: Pedido
+    personas: [Analista]
+    su_refs: [C-001]
+    actions:
+      - {name: aprovar, kind: primary, su_refs: [C-002]}
+
+excluded_from_ui:
+  - field_or_area: "margem interna"
+    reason: "sensível"
+    su_refs: [C-002]
+
+open_questions: [U-001]
+
+validation:
+  caps_checked: {max_entities_per_screen: "3 — ok"}
+  violations: []

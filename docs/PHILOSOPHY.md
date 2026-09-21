@@ -2,6 +2,11 @@
 
 **Por que existe esta ferramenta, e o que ela recusa fazer.**
 
+<!-- SCOPE-STATEMENT v1 -->
+> O aisa faz discovery de um processo para chegar a uma decisão técnica fundamentada: que tecnologia e que padrão, com que alternativas e a que custo. Não é uma plataforma de discovery de negócio sem destino; uma pergunta só entra quando a resposta pode mudar a decisão.
+>
+> É nesta direcção que se resolve a tensão entre *discovery de negócio* e *decisão técnica*: um problema de negócio sem consequência técnica visível **não é ignorado** — entra como invariante do enquadramento (`M-n`) ou como requisito do que o alvo tem de garantir, nunca como pergunta pendente do projecto. A organização não saber uma coisa descreve a organização; não é trabalho do projecto.
+
 > Versão: v0.1.0 — DRAFT para revisão da equipa
 > Data: 2026-05-27
 > Audiência: sponsors, executivos, equipa alargada — qualquer pessoa que precise de perceber **por que** existe aisa sem ler arquitectura técnica.
@@ -183,7 +188,9 @@ Em uma analogia:
 - ❌ Não é um substituto de consultor experiente. É um amplificador: torna 1 consultor mais eficaz em discovery que 3 numa reunião desestruturada.
 - ❌ Não é um sistema de governance burocrática. Os gates são advisory; o consultor pode sempre overrider com justificação registada.
 - ❌ Não é IA "decisora". É IA **facilitadora**: gera perguntas, sintetiza contexto, detecta inconsistências. As decisões são humanas.
+- ❌ Não substitui o raciocínio natural por cognição determinística. O determinismo existe para que o entendimento produzido pelo raciocínio natural se torne **estado durável e epistemicamente honesto** — que sobrevive à compressão, às transições de fase, à mudança de evidência e ao reinício de sessão. Governa *o que* tem de sobreviver, *quem* é a autoridade, *o que* não pode ser promovido ou perdido em silêncio, *o que* tem de ser revalidado e *o que* uma sessão nova recarrega — nunca *como* se pensa: `reason deeply → persist selectively → claim conservatively → rehydrate selectively → revalidate when premises change`.
 - ❌ Não é um wrapper de chat sobre Claude. É um pipeline opinated com fases declaradas, perspectivas isoladas, e entregas first-class.
+- ❌ **Não é prova de que a solução funciona.** O aisa verifica que um artefacto está bem formado e que carrega o que as fontes pediram; regista que o negócio aprovou uma versão concreta. Nenhuma destas três é a quarta — *funciona ponta-a-ponta?* —, que se prova a construir e a testar, e que este framework nunca declara por ninguém. São quatro perguntas separadas de propósito, cada uma com a sua resposta e a sua linha: a distinção nasceu de um desenho que passou a verificação estrutural com zero problemas e tinha deixado cair um requisito que o registo já carregava (`library/kernel/coverage-contract.md`).
 
 ---
 

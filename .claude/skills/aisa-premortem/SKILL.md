@@ -47,7 +47,12 @@ Conflicted resolvidas com tensão residual), `frame.md`, `options.md`, `_simulat
    ```
 
 5. Se `story.md` existir (engagements v2.3+), appendar um episódio; sempre: linha ao `council-log.md`.
-6. Output: as causas em 1 linha cada + "leva isto ao /decide: N tripwires candidatos, M requisitos".
+6. Output — as causas em 1 linha cada, depois (linguagem de negócio — `CLAUDE.md` → *Duas línguas*):
+   ```user-output
+   Obituário escrito — <horizonte> meses no futuro: <N> causas de morte, uma linha cada (acima), cada uma ancorada no que hoje sabemos ou ainda não sabemos.
+   Para levar à escolha: <N> condições de revisão candidatas (tripwires) · <M> requisitos novos.
+   A seguir: escolher com isto à frente → `/decide`.
+   ```
 
 ## Hard rules
 

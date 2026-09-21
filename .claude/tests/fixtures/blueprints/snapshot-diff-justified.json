@@ -1,0 +1,80 @@
+{
+ "commit": "b81d39c",
+ "rule_legend": {
+  "Y7-in-Y4": "block scalar `>`/`|` as the FIRST pair of a `- k: v` item: the b81d39c reader folded the item's sibling keys (structural, would_be_settled_by, su_ref) into the scalar text; the Y1-Y7 reader keeps them as keys (blueprint-contract.md -> Validação estrutural, A2)"
+ },
+ "justified": [
+  {
+   "file": "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v02.yaml",
+   "key": "open_choices",
+   "item": 0,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v02.yaml",
+   "key": "structural_open",
+   "item": null,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v03.yaml",
+   "key": "open_choices",
+   "item": 0,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v03.yaml",
+   "key": "structural_open",
+   "item": null,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v04.yaml",
+   "key": "open_choices",
+   "item": 3,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1-val-b/_blueprint/ux-blueprint_v05.yaml",
+   "key": "open_choices",
+   "item": 3,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v02.yaml",
+   "key": "open_choices",
+   "item": 0,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v02.yaml",
+   "key": "structural_open",
+   "item": null,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v03.yaml",
+   "key": "open_choices",
+   "item": 0,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v03.yaml",
+   "key": "structural_open",
+   "item": null,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v04.yaml",
+   "key": "open_choices",
+   "item": 3,
+   "rule": "Y7-in-Y4"
+  },
+  {
+   "file": "projects/pricing-marinha-pilot-1/_blueprint/ux-blueprint_v05.yaml",
+   "key": "open_choices",
+   "item": 3,
+   "rule": "Y7-in-Y4"
+  }
+ ]
+}

@@ -14,3 +14,10 @@ The migration plan starts and ends with whether the new system can preserve the 
 
 ## Audit retention
 For most Portuguese regulated processes: 5-7 years legal retention; for financial processes: 10 years (per Código Comercial). Confirm the floor; default to longest stated obligation.
+
+---
+
+Same reading rule as `anti-patterns.md`: a constraint here is a **hypothesis with its
+requirement and its technical consequence**, never a standing order. It fires where the
+requirement is present; it says which of the eight axes moves; and an organisational gap
+becomes the target's requirement, never pending work.

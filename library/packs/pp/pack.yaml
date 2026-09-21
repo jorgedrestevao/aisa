@@ -1,92 +1,326 @@
 pack_id: pp
-pack_version: 1.2.0
+pack_version: 1.9.0
 display_name: "Power Platform Discovery"
+# SCOPE-STATEMENT v1
+# aisa runs discovery on a process to reach a grounded technical decision: which technology and pattern, against which alternatives, at what cost. It is not an open-ended business-discovery platform; a question is admitted only when its answer can change the decision.
 language: pt
 description: >
   Discovery and sensemaking pack tuned for Power Platform engagements.
-  Vocabulary, question-bank, and deliverable templates aligned with
-  Canvas Apps, Model-driven Apps, Power Automate, Dataverse.
+  Discovery vocabulary and question-bank are technology-neutral, derived
+  from the Areas 1-12 + Block D canonical research baseline; vendor/product
+  content (Canvas Apps, Model-driven Apps, Power Automate, Dataverse) is
+  scoped to the Options phase and beyond.
+
+# pack_version 1.9.0 - PLATFORM FORMS ARE NAMED IN OPTIONS. One semantic addition, no removal:
+#   this pack's platform stops being a single candidate "in its several forms" and becomes a class
+#   whose MEMBERS are named `surface x store` pairs (alternatives-register.md 1.2, generated at S1,
+#   re-read at S9). decision-tree.md 14.1 makes the form a MANDATORY returned field for a
+#   platform candidate, in products, one option per form. Cause: an Options round can otherwise
+#   render "this platform over the store that already runs" and never name the surface - the
+#   sponsor is asked to approve a decision they were never shown (observed in pricing-bunkers
+#   O-01, where two distinct forms shared one option row and no option named a surface).
+#   A form becoming unavailable stays an in-platform redirect, never an exclusion outcome.
+#   No stage, concern, option class, outcome class, composed row, blocking entry, knowledge unit,
+#   architecture unit or deliverable contract was altered; decision-model/ still holds 5 files.
+#
+# pack_version 1.8.2 (Step 8C) - PILOT-1 BOUNDED SEMANTIC-CONTINUITY ENFORCEMENT REPAIR. No semantic
+# model change: no stage, concern, option class, outcome class, register row, knowledge unit,
+# architecture unit, deliverable contract, activation rule, source edge or estimate mode was altered.
+# Runtime-only repair around the frozen model, decided in Step 8B + its semantic-continuity addendum:
+#   PR-1  technical-claim closure enforcement (aisa-answer step 4b / aisa-blueprint step 11) - fact != fit;
+#         a structural architecture choice closes on ONE sufficient basis (RESEARCH read against the
+#         material requirements | engagement-verifiable evidence | proof/measurement) or stays open.
+#   PR-2A/4/5/8  comprehension-survival contract - the L2 process model reads ALL normalized evidence
+#         (cross-source synopsis in process-model.md §4, OBSERVED/INFERRED/HYPOTHESIS/UNKNOWN markers,
+#         labelled material lines); every material synopsis line and PM-U row receives MAP/ADOPT/DISMISS
+#         in Discovery; frame.md gains the id-anchored "What must survive into Options" projection.
+#   PR-7  targeted semantic revalidation on premise change (aisa-answer step 7, aisa-blueprint step 11b)
+#         through existing references - no dependency graph, no depends_on field.
+#   PR-6  selective session rehydration - derived "Read to resume" block in aisa-status; phase != session.
+#   PR-3  (experience-surface / task derivation) deliberately NOT implemented - Pilot-2 watch item.
+# See docs/pp-pack-authoring/pilot/step-8c-consolidated-runtime-repair-report.md
+#
+# pack_version 1.8.1 (Step 7) - FINAL AUTHORING INTEGRITY CLEANUP. No semantic model change:
+# no stage, concern, option class, outcome class, register row, knowledge unit, architecture unit,
+# deliverable contract, activation rule, source edge or estimate mode was altered. The Step 7
+# targeted re-gate repaired runtime residue AROUND the frozen model:
+#   R-1  .claude/agents/chairman.md - removed a duplicate, pre-Step-3 `options.md` artefact schema
+#        (it still emitted a retired branch field); the agent now POINTS at
+#        .claude/skills/chairman-synthesis/SKILL.md, the sole serialization authority.
+#   R-2  solution-architect standing memory - retired branch-shortlisting procedure and the
+#        pass/risky/blocker ladder replaced by S1/S5/S9 + the decision-tree.md §3 vocabulary.
+#   R-3  solution-architect diary - removed the simulated fixture that taught the retired model.
+#   R-4  library/packs/pp-backup/ (a selectable retired v1.2.0 pack) moved out of the
+#        pack-resolution root to docs/pp-pack-authoring/archive/pp-backup-v1.2.0/.
+#   R-5  cfo-lens / business-analyst / compliance-officer standing memory - removed unsourced
+#        monetary anchors; the rate is now an engagement fact carrying its provenance.
+#   Also: the same retired verdict ladder removed from aisa-simulate and the architecture-story
+#   synthesis template (vocabulary only; carriage unchanged).
+# See docs/pp-pack-authoring/research/pp/authoring/step-7-final-pack-integrity-gate-report.md
+#
+# pack_version 1.8.0 (Step 6B) — the DELIVERABLE PROJECTION layer was implemented. The six
+# canonical deliverables are now explicit PROJECTION CONTRACTS: each template declares
+# `canonical_deliverable`, `activation`, `authority_sources`, `conditional_sources`,
+# `forbidden_sources`, `permitted_transformations` and `forbidden_transformations`.
+# MANIFEST CHANGES: `applies_to` is REPLACED by `activation` (+ `canonical_deliverable`).
+# `applies_to: [technology]` was the wrong discriminator: whether the decision happened to be
+# technological is not the question. The real discriminator is "does an architecture
+# authorization exist for at least one scope?", plus the per-deliverable applicability the
+# template declares (experience mode, approved UX blueprint, estimation authority, input mode).
+# This is DECLARATIVE APPLICABILITY METADATA, not a router: no outcome->template map, no
+# concern->deliverable map, no product map, no load order, no state machine. `aisa-render`
+# resolves slots as it already did; `library/kernel/render-contract.md` owns the semantics.
+#
+# pack_version 1.7.0 (Step 5B) — the architecture-template layer was replaced: the three
+# store-first branch shapes were retired and superseded by one fixed entry point plus fragments
+# (architecture-templates/architecture-core.md + 3 experience fragments + 1 boundary fragment).
+# That file never manifested architecture-template paths, so no path here changed. No
+# architecture routing and no product map is introduced — selection is one recorded field
+# resolved by one include.
 
 deliverables:
-  # applies_to: which decision types the deliverable makes sense for.
-  # "all" = technology AND non-technology/do-nothing decisions; [technology] = skipped
-  # (with a logged reason, not a gap) when the decision is non-tech. Default: all.
+  # SIX canonical deliverables. Six in, six out — none added, renamed or removed.
+  #
+  # `activation` is DECLARATIVE APPLICABILITY, not routing. The authoritative statement of a
+  # deliverable's activation, blocking and not-applicable conditions lives in its own template
+  # frontmatter (`activation` / `blocked_when` / `not_applicable_when`); this manifest mirrors
+  # it so the pipeline can list deliverables without opening every template.
+  # `not applicable` => the deliverable is NOT produced and a SKIP with its reason is logged to
+  # render-log.md. A skip is never an entry in render-gaps.md.
   - id: discovery-report
+    canonical_deliverable: discovery-report
     mandatory: true
-    applies_to: all
+    activation: always
     template: deliverable-templates/discovery-report.template.md
   - id: executive-report
+    canonical_deliverable: executive-report
     mandatory: true
-    applies_to: all
+    activation: always
     template: deliverable-templates/executive-report.template.md
   - id: solution-blueprint
+    # Runtime id / file / CLI argument stay `solution-blueprint`; the canonical deliverable
+    # name is Architecture Blueprint. Alias, not a contradiction.
+    canonical_deliverable: architecture-blueprint
     mandatory: true
-    applies_to: [technology]
+    activation: an architecture authorization exists for at least one scope
     template: deliverable-templates/solution-blueprint.template.md
   - id: implementation-spec
+    canonical_deliverable: implementation-specification
     mandatory: true
-    applies_to: [technology]
+    activation: an architecture authorization exists for at least one scope AND the blueprint is approved
     template: deliverable-templates/implementation-spec.template.md
   - id: claude-design-brief
+    canonical_deliverable: claude-design-brief
     mandatory: true
-    applies_to: [technology]
+    activation: experience.mode in {owned-internal, owned-external, inherited} AND an approved UX blueprint exists
     template: deliverable-templates/claude-design-brief.template.md
   - id: estimate
+    canonical_deliverable: estimate
     mandatory: false
-    applies_to: all
+    activation: a decided scope exists AND the work is inside this pack's estimation authority AND one of the two input modes resolves
+    owns_calculation: true   # semantic owner of the implementation-effort calculation;
+                             # executor is aisa-render, and nothing else computes effort
     template: deliverable-templates/estimate.template.md
 
 lenses_config:
+  # Discovery `extra_signals` are attention cues — things worth NOTICING in a Power
+  # Platform engagement that a universal lens would not cue on its own. Never questions,
+  # never solutions, never coverage: `aisa-round` injects them verbatim with the clause
+  # "cues, not a checklist; an uncovered cue is not a gap".
+  # They stay technology-neutral (.claude/rules/no-tech-mention-before-options.md); the PP
+  # mapping happens in Options via lens-technology.
+  # A cue is listed only where its absence would materially reduce the lens's ability to
+  # notice a PP-specific issue. Authoring provenance (which canonical criterion each cue
+  # derives from) lives in the authoring reports, never here — see
+  # docs/pp-pack-authoring/research/pp/authoring/runtime-simplification-phase-g-report.md.
   business:
-    # Discovery signals stay vendor-neutral (see .claude/rules/no-tech-mention-before-options.md);
-    # the PP mapping happens in Options via lens-technology.
-    extra_signals: [licensing_baseline, integration_licensing_exposure, sponsor_authority_level]
+    extra_signals:
+      - business_criticality_class
+      - differentiation_class
+      - existing_capability_overlap
+      - scope_reach
+      - expected_lifespan_and_change_frequency
   operations:
-    extra_signals: [excel_anchors, sharepoint_lists_anchors, manual_handoffs]
+    extra_signals:
+      - work_shape_class
+      - long_running_wait_and_approval_shape
+      - partial_failure_behaviour_today
+      - stable_business_key_availability
+      - system_without_programmatic_interface
+      - compute_intensive_step_present
+      - spreadsheet_and_mailbox_anchors
   user:
-    extra_signals: [personas_count, mobile_need, offline_need]
+    extra_signals:
+      - user_population_identity_class
+      - interaction_bespokeness_and_design_obligation
+      - offline_operating_requirement
+      - native_distribution_and_push_need
+      - response_and_freshness_expectation
   data:
-    extra_signals: [structured_vs_document_storage_today, master_data_owners, retention_policy]
-  technology:
-    # Active only in Options phase
-    constraints_to_check:
-      - premium_licensing
-      - dataflow_capacity
-      - ALM_environments
-      - dataverse_storage_quota
-      - DLP_policy_compatibility
+    extra_signals:
+      - relational_depth_and_integrity
+      - queried_volume_per_access_path
+      - access_granularity_requirement
+      - atomicity_span_and_consistency_window
+      - analytical_versus_operational_need
+      - attachment_and_binary_volume
+      - external_exchange_profile
   governance:
-    extra_signals: [DLP_policies, environment_strategy, sensitivity_labels, RBAC_complexity]
+    extra_signals:
+      - deployment_model_constraint
+      - connectivity_and_egress_policy_posture
+      - vendor_trust_boundary_requirement
+      - authorization_enforcement_point
+      - maker_and_platform_governance_model
+      - release_control_and_reversibility_expectation
+      - vendor_change_tolerance
   financial:
-    extra_signals: [licensing_cost_baseline, internal_chargeback_model]
+    extra_signals:
+      - audience_and_frequency_shape
+      - existing_entitlement_baseline
+      - mandated_control_funding_gap
+      - cost_driver_growth_at_horizon
+      - cost_attribution_requirement
+  technology:
+    # Active only in the Options phase.
+    #
+    # `constraints_to_check` is a STANDING-ATTENTION FLOOR, never a ceiling and never the
+    # coverage object. Each entry is examined in every Options engagement because its silent
+    # omission is a known failure mode — each is either an absolute decided before any
+    # architecture work, a decision-blocking question, or an input to a registered composed row.
+    #
+    # Coverage is set by the twelve material decision concerns and the emergent-concern
+    # obligation in decision-tree.md (§5, §7.3), NOT by this list. A material concern outside
+    # this list is evaluated anyway; adding entries here does not widen coverage.
+    constraints_to_check:
+      - deployment_model_and_residency
+      - regulatory_and_control_mandates
+      - service_permissibility_and_egress
+      - entitlement_fit
+      - throughput_and_capacity_envelope
+      - environment_and_release_topology
+      - reversibility_mechanism
+      - operator_and_support_availability
+      - observability_and_evidence_retention
+      - authorization_enforcement_point
 
 domain_knowledge:
-  - domain-knowledge/powerfx-patterns.md
-  - domain-knowledge/screen-patterns.md
-  - domain-knowledge/security-patterns.md
-  - domain-knowledge/delegation-matrix.md
-  # Transplanted 2026-05-28 — references repo (with old vocabulary stripped)
-  - domain-knowledge/excel-patterns.md
-  - domain-knowledge/dataverse-reference.md
-  - domain-knowledge/azure-sql-reference.md
-  - domain-knowledge/sharepoint-reference.md
-  - domain-knowledge/anonymization.md
-  - domain-knowledge/flows-patterns.md
-  - domain-knowledge/estimation-model.md
-  - domain-knowledge/screen-consolidation-rules.md
-  # Team delivery conventions (naming, ALM, traceability stamping) — added 2026-08-31
-  - domain-knowledge/delivery-conventions.md
+  # A MANIFEST — the units that exist. NOT a load order, NOT a routing table, NOT a
+  # concern map, NOT a priority list. Domain knowledge is PULL-BASED: the reasoner opens
+  # the unit that answers the concrete question in front of it (decision-tree.md §9), and
+  # `domain-knowledge/README.md` carries the use contract. No canonical research ids here.
+  - domain-knowledge/README.md
 
+  # RESEARCH units (15) — supported platform and domain knowledge.
+  - domain-knowledge/application/application-surfaces.md
+  - domain-knowledge/data/store-boundaries.md
+  - domain-knowledge/data/dataverse.md
+  - domain-knowledge/data/sharepoint.md
+  - domain-knowledge/data/azure-sql.md
+  - domain-knowledge/data/query-and-delegation.md
+  - domain-knowledge/automation/automation-mechanisms.md
+  - domain-knowledge/integration/integration-mechanisms.md
+  - domain-knowledge/security/security-controls.md
+  - domain-knowledge/governance/governance-and-environments.md
+  - domain-knowledge/alm/release-and-lifecycle.md
+  - domain-knowledge/performance/performance-and-scale.md
+  - domain-knowledge/economics/licensing-and-cost-drivers.md
+  - domain-knowledge/operations/operability-and-support.md
+  - domain-knowledge/architecture/patterns.md
+
+  # CRAFT units (10) — delivery practice. Never an Options D3 pull target, and they state
+  # no platform limit of their own; where one is needed they cite the RESEARCH unit that
+  # owns it. `craft/screen-consolidation-rules.md` is the named hard contract of
+  # library/kernel/blueprint-contract.md and `aisa-blueprint`.
+  - domain-knowledge/craft/powerfx.md
+  - domain-knowledge/craft/screen-patterns.md
+  - domain-knowledge/craft/screen-consolidation-rules.md
+  - domain-knowledge/craft/excel-translation.md
+  - domain-knowledge/craft/flow-craft.md
+  - domain-knowledge/craft/security-craft.md
+  - domain-knowledge/craft/sql-delivery-conventions.md
+  - domain-knowledge/craft/anonymization.md
+  - domain-knowledge/craft/estimation-model.md
+  - domain-knowledge/craft/delivery-conventions.md
 question_bank: question-bank.md
 glossary: glossary.md
 
 decision_tree:
+  # The Options spine: an ordered, technology-neutral evaluation procedure
+  # (12 material decision concerns x 10 ordered stages). Rewritten in Step 3B1.
   source: decision-tree.md
   consulted_in_phase: options  # never in discovery
+
+decision_model:
+  # Stage-local registers the spine runs against. They are consulted ONLY at the stage named
+  # below — never preloaded, and there is no router: the procedure itself says what it consults.
+  # `volatility` has no owning stage: it is read only where an active decision question depends
+  # on a volatile fact or a dated tripwire (decision-tree.md §11).
+  alternatives:
+    source: decision-model/alternatives-register.md
+    stage: S1
+  blocking:
+    source: decision-model/blocking-set.md
+    stage: S3
+  composed:
+    source: decision-model/composed-disqualifiers.md
+    stage: S6
+  outcomes:
+    source: decision-model/outcome-classes.md
+    stage: S9
+  volatility:
+    source: decision-model/volatility-register.md
+    loading: on-demand
 
 epistemics:
   # Half-life overrides for this pack's domain. Empty = the kernel defaults apply
   # (library/kernel/states.md -> "Epistemic half-lives").
-  # TODO(team): calibrate at the pilot retro (e.g. plataforma-tecnica: 9 meses
-  # if platform limits churn faster than the kernel default).
+  #
+  # Step 4B examined the proposal to set `plataforma-tecnica: 9 meses` and
+  # `financeiro: 3 meses` and did NOT adopt it. The canonical baseline supports the
+  # DIRECTION (it flags several facts as short-half-life, and records two that changed
+  # once during the research window) but names no duration anywhere: its freshness model
+  # is TRIGGER-based, not duration-based — re-verify on a named event, which is what
+  # decision-model/volatility-register.md implements. Adopting 9 and 3 would be inventing
+  # decay periods.
+  #
+  # OPEN — needs an explicit authoring decision or pilot calibration. See
+  # docs/pp-pack-authoring/research/pp/authoring/step-4b-domain-knowledge-implementation-report.md
   half_lives_override: {}
+
+blueprint:
+  # Runtime hardening / bloco A — keys this pack ADDS to the kernel's required top-level
+  # keys of ux-blueprint_vNN.yaml (blueprint-contract.md -> Validação estrutural, BP-REQ-KEY).
+  # Empty: the kernel's list is enough for this pack today.
+  required_keys: []
+
+vendor_terms:
+  # Termos que NOMEIAM UMA SOLUCAO desta plataforma. Lidos por
+  # `dashboard.py::pack_vendor_terms`, que os impoe nos topic packs neutros
+  # (business-story, as-is, risks-and-assumptions, financial-story) e no
+  # architecture-story quando NENHUMA arquitectura foi autorizada.
+  #
+  # NAO e a lista do grep de Discovery (test_pp_discovery_runtime.py), que inclui
+  # `sharepoint`, `microsoft`, `azure`, `excel`: esses nomeiam o ESTADO ACTUAL e sao
+  # legitimos num as-is. Confundir as duas listas transforma a descricao do que ja
+  # existe num falso positivo de neutralidade.
+  solution:
+    - power platform
+    - power apps
+    - power automate
+    - power fx
+    - power pages
+    - dataverse
+    - canvas app
+    - model-driven
+    - copilot studio
+    - premium connector
+    - managed solution
+
+enquadramento:
+  # Temas que ESTE pacote acrescenta a entrevista de enquadramento do kernel
+  # (library/kernel/phases.md -> Phase 0). Lista de {id, question_pt, when}.
+  # Vazia: os sete temas do kernel bastam a este pacote, e o conjunto condicional
+  # `pricing` vive no kernel porque pricing e uma forma que um processo tem, nao uma
+  # propriedade de uma plataforma de digitalizacao.
+  extra_themes: []

@@ -1,0 +1,43 @@
+# Fixture — the DEFECT shape observed in Pilot 1 (blueprint v03): the structural surface choice was marked
+# resolved on a connectivity answer, the store-dependent rationale was carried forward as settled, and
+# access_mode/pattern were recorded as keep-in-place/direct with no mechanism. The tests expect this to FAIL.
+blueprint_id: bp-v03
+architecture:
+  scope: whole solution
+  authorization: authorized
+  experience:
+    mode: owned-internal
+    primary_surface: "Record-centric app (model-driven)"
+    su_refs: [C-013, C-002, C-056, C-057, C-062]
+    rationale: >
+      The structural tension closes: a connection/gateway between low-code tooling and the shared
+      database is already configured (C-062) — native connectivity sustains the record-centric surface.
+      Surface confirmed; row/column security and audit inherited from the store.
+  record_authority:
+    - domain: "Pricing master data"
+      authority: "external system of record (shared pricing database)"
+      access_mode: keep-in-place
+      su_refs: [C-017, C-057, C-062]
+    - domain: "Daily price history"
+      authority: "external system of record (shared pricing database)"
+      access_mode: keep-in-place
+      su_refs: [C-018, R-004, C-057, C-062]
+  compositions:
+    - component: shared-pricing-database
+      pattern: direct
+      forced_by: "All pricing data lives in the shared database (C-057), connectivity confirmed (C-062)."
+      boundary: outside-platform
+      owner: "team operating the shared pricing database"
+      su_refs: [C-057, C-062]
+  proof_obligations:
+    - claim: "Production-grade proof (whole solution)"
+      level: V4
+      method: not specified further
+      owner: not named
+      funded: no
+  open_architecture_choices:
+    - choice: "RESOLVED in this version — primary surface confirmed (C-062)"
+      structural: false
+      would_be_settled_by: "(already resolved)"
+      su_ref: "C-062"
+      closure_basis: "sponsor answer: a connection/gateway is configured"

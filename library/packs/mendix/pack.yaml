@@ -33,3 +33,24 @@ glossary: glossary.md
 decision_tree:
   source: decision-tree.md
   consulted_in_phase: options
+
+blueprint:
+  # Runtime hardening / bloco A — keys this pack ADDS to the kernel's required top-level
+  # keys of ux-blueprint_vNN.yaml (blueprint-contract.md -> Validação estrutural, BP-REQ-KEY).
+  # Empty: the kernel's list is enough for this pack today.
+  required_keys: []
+
+vendor_terms:
+  # Termos que nomeiam uma solucao deste pacote (ver pp/pack.yaml para a regra).
+  solution:
+    - mendix
+    - mendix studio
+    - mendix cloud
+
+enquadramento:
+  # Temas que ESTE pacote acrescenta a entrevista de enquadramento do kernel
+  # (library/kernel/phases.md -> Phase 0). Lista de {id, question_pt, when}.
+  # Vazia: os sete temas do kernel bastam a este pacote, e o conjunto condicional
+  # `pricing` vive no kernel porque pricing e uma forma que um processo tem, nao uma
+  # propriedade de uma plataforma de digitalizacao.
+  extra_themes: []

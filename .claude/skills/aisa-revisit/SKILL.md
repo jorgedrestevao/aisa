@@ -24,8 +24,37 @@ description: Compare the present against a frozen counterfactual when a decision
    b. **Como estaria o ramo rejeitado HOJE?** — update the frozen projection with what is now known (new Confirmed rows, resolved Unknowns, expired assumptions). The frozen file is NEVER edited; the update lives in this artefact.
    c. **Custo de mudar agora vs custo de ficar** — migração/retrabalho/moral vs o dano acumulado de manter o ramo atual.
    d. **Recomendação** — `MANTER` (o tripwire disparou mas o ramo atual continua superior — dizer porquê) / `ADAPTAR` (a decisão sobrevive com um ajuste concreto — dizer qual) / `REABRIR` (justifica nova ronda de Options).
-3. Write `_simulation/revisit_<data>_<alvo>.md` with the four answers + the tripwire evidence. Append an episode to `story.md` ("um alarme tocou — fomos ver") + a line to `council-log.md`.
-4. If `REABRIR`: suggest `/options` (a new O-NN round) — NEVER alter `decisions.md` or the SU yourself. If `ADAPTAR`: the adjustment enters the SU by the normal path (`/answer`, new rows), not by editing the decision.
+3. Write `_simulation/revisit_<data>_<alvo>.md` with the four answers + the tripwire evidence.
+   It **opens with a fixed header**, so that `/options` can read the verdict instead of parsing
+   prose (`library/kernel/phases.md` → *Transition rules*; a verdict inferred from prose would
+   be the motor judging):
+
+   ```markdown
+   # Revisit — <slug> — <TW-n | O-NNN>
+
+   - **Decision**: D-00x
+   - **Target**: <TW-n | O-NNN>
+   - **Counterfactual**: _simulation/counterfactuals/<O-NNN>.md
+   - **Fired**: yes | no
+   - **Recomendação**: MANTER | ADAPTAR | REABRIR
+   - **Timestamp**: <ISO-8601>
+   ```
+
+   The four answers follow, unchanged. Append an episode to `story.md` ("um alarme tocou —
+   fomos ver") + a line to `council-log.md`.
+4. If `REABRIR`: the reopening path is `/options` with no flag — this artefact IS the
+   justification, and `aisa-options` pre-flight 1 reads `Recomendação` from the header above.
+   NEVER alter `decisions.md` or the SU yourself: the previous decision stays, and the new one
+   (written later by `/decide`) is what carries `Supersedes`. If `ADAPTAR`: the adjustment
+   enters the SU by the normal path (`/answer`, new rows), not by editing the decision.
+5. Output (business language — `CLAUDE.md` → *Duas línguas*; kernel labels and ids only between parentheses):
+   ```user-output
+   Condição de revisão (<TW-n | O-NNN>): <disparou mesmo — <a prova, em meia linha> (ids) | falso alarme — <porquê>>.
+   O caminho que não seguimos, se o tivéssemos seguido, hoje: <duas linhas, com o que se sabe agora (ids)>.
+   Mudar agora vs ficar: <custo de mudar> vs <dano acumulado de ficar>.
+   Recomendação: <MANTER — <porquê> | ADAPTAR — <ajuste concreto> | REABRIR — <porquê justifica nova comparação>>.
+   A seguir: <manter → nada muda | adaptar → o ajuste entra pelo caminho normal, `/answer <id> "…"` | reabrir → nova comparação de alternativas, `/options` (sem mais nada: este registo é a razão)> — a decisão só muda por decisão tua.
+   ```
 
 ## Hard rules
 

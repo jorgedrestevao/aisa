@@ -1,6 +1,7 @@
 # aisa
 
-**Pre-development discovery & sensemaking platform.**
+<!-- SCOPE-STATEMENT v1 -->
+**aisa runs discovery on a process to reach a grounded technical decision: which technology and pattern, against which alternatives, at what cost. It is not an open-ended business-discovery platform; a question is admitted only when its answer can change the decision.**
 
 Built for engagements that precede the choice of digitalization technology (Power Platform, OutSystems, Mendix, custom). Powered by Claude Code.
 

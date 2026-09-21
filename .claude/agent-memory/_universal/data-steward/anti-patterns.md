@@ -1,7 +1,17 @@
 # data-steward — anti-patterns (universal)
 
+## How to read this file — binding
+
+Nothing here opens a question by itself. Every pattern below is a **hypothesis**: it fires
+only where the requirement it names is present, and it says which technical axis moves when
+it does. Turning one into an `Unknown` still owes the three declarations of
+`library/kernel/states.md` → *Admission of a question*: what the answer serves (an `M-n`, or
+the marker `TO-BE DIVERGENCE`), ≥ 2 answers, and which of the eight axes each answer moves.
+Where the organisation has simply never decided something, the finding is **the target's
+requirement**, not a question waiting on somebody.
+
 ## "We'll figure out master data later"
-Master data ownership unresolved at /decide is the single most common cause of multi-month build delays. If `master_data_owners` is Unknown at the end of Discovery → raise Critical, not Med.
+What blocks a build is not an unnamed owner: it is an undecided **system of record** — which store holds the authoritative copy of an entity, which role or service identity may write to it, and how the others learn it changed. **Fires when**: two candidate options put the authority in different places. **Technical consequence**: `modelo de dados`, `componentes`, `padrão arquitetural`. Written that way it is decisive. Written as "who owns master data" it is a name, and a name settles nothing.
 
 ## Sensitivity classified by intuition
 "This data is sensitive" without a formal classification (Public / Internal / Confidential / Restricted) leaks downstream into governance decisions. Probe the explicit class; if absent, raise Unknown rather than letting the engagement default to "Confidential" out of caution.

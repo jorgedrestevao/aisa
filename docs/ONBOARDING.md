@@ -2,6 +2,9 @@
 
 **Setup + primeira engagement, do zero ao /render --all em 1-2 horas.**
 
+<!-- SCOPE-STATEMENT v1 -->
+> O aisa faz discovery de um processo para chegar a uma decisão técnica fundamentada: que tecnologia e que padrão, com que alternativas e a que custo. Não é uma plataforma de discovery de negócio sem destino; uma pergunta só entra quando a resposta pode mudar a decisão.
+
 > Versão: v0.1.0 — DRAFT
 > Data: 2026-05-27
 > Audiência: novo consultor (ou desenvolvedor) a usar aisa pela primeira vez.
@@ -15,8 +18,7 @@
 
 - **Claude Code instalado** (CLI, VS Code extension, ou desktop app). Verificar: `claude --version`.
 - **Git** instalado. Verificar: `git --version`.
-- **Python 3.10+** — obrigatório, não alternativa. Os hooks são todos Python (`.claude/hooks/*.py`) e a captura de processo corre um script Python. Verificar: `python --version` (em Linux/macOS pode ser `python3`; o `settings.json` invoca `python`, portanto garante que o nome resolve).
-- **`openpyxl`** — necessário para a captura de processo ler ficheiros Excel: `pip install openpyxl`. Sem ele a captura é **saltada** com aviso (não é erro): as lenses lêem os ficheiros pelo caminho normal, mas perdes o modelo de processo e o relatório de replay.
+- **Python 3.10+** ou PowerShell 5.1+ (depende do OS).
 - **Pandoc** (para conversão markdown → docx). Opcional para MVP; necessário para `/render` em formato docx.
 - **Acesso ao grupo Galp** que dá acesso ao repositório privado `aisa-engagements-galp`.
 
@@ -121,16 +123,21 @@ No Claude Code, executar:
 Output esperado:
 
 ```
-✓ aisa/ repo: OK (kernel v0.1.0)
-✓ aisa-engagements-galp/ mount: OK (0 engagements)
-✓ active pack: none (definido per-engagement em /start)
-✓ MCP servers: 0 configured (não MVP)
+✓ kernel: 6/6 protocol files · synthesis-templates 5/5 · capture-templates 1/1 · tools 3/3
+✓ dashboard.py 1.1.0 (status model)
+✓ packs: pp (+ generic, mendix, outsystems)
+✓ engagements root: projects/ (ou $AISA_ENGAGEMENTS_ROOT)
+✓ hooks: pre-write-guard.py, on-su-change.py (Python)
 ✓ ready.
 ```
 
+O pack activo não aparece aqui: é declarado por engagement em `/start`, não globalmente.
+
 Se falha:
-- `aisa/ repo: FAIL` → não estás no directório `aisa/`.
-- `aisa-engagements-galp/ mount: FAIL` → junction/symlink/env var não configurados (rever §2.2).
+- `kernel: FAIL` → não estás na raiz do repo `aisa/`, ou falta um ficheiro do kernel.
+- `dashboard.py: FAIL` → `python` não está no PATH, ou a versão é anterior a 1.1.0 (sem o
+  modelo de status, `/status` não consegue produzir a vista).
+- `engagements root: FAIL` → junction/symlink/env var não configurados (rever §2.2).
 
 ---
 
@@ -173,26 +180,7 @@ O `aisa-start` vai:
    ```
    (`round: R-00` = nenhuma ronda corrida ainda; o primeiro `/round` corre e regista `R-01`.)
 5. Output esperado:
-   > `Engagement galp-adv criado. Phase: discovery. Captura de processo: 1 ficheiro (12 regras, 8 perguntas, 3 achados). Próximo passo: /round (corre Discovery completo) ou /round business (lens-a-lens).`
-
-### 3.2b Passo 1b — a captura de processo (automática)
-
-Se puseste um `.xlsx`/`.xlsm` em `inputs/`, o `/start` corre a **captura de processo** no fim, antes de qualquer lens. Não tens de a invocar; aparece no output do `/start`.
-
-O que ela faz, por ficheiro:
-
-1. **Lê a estrutura e a lógica** — folhas (incluindo as escondidas), colunas classificadas como *entrada*, *calculada* ou *manual*, padrões de fórmula, regras de validação e de formatação condicional, cor usada como dado, comentários, anomalias.
-2. **Re-executa as contas** contra os próprios dados do ficheiro: lookups, chaves duplicadas, espaços a mais, antiguidade dos pendentes, células que quebram o padrão da coluna. É assim que falhas silenciosas aparecem por método e não por sorte.
-3. **Reconstrói o processo** em `_capture/process-model.md`: as regras de negócio que o ficheiro **prova** (cada uma com a célula que a prova) e a lista de perguntas que o ficheiro **levanta mas não responde**.
-
-Duas coisas a saber:
-
-- **Uma coluna preenchida à mão é um passo humano do processo.** É o sinal mais forte que um ficheiro dá, e a captura marca-os todos.
-- **O modelo não substitui as pessoas.** O ficheiro é o *artefacto* do processo, não o processo. Por isso cada lens é obrigada a **confirmar pelo menos uma afirmação do modelo contra o ficheiro original** antes de a citar; se não bater certo, entra como conflito e o ficheiro original ganha.
-
-As perguntas que a captura levantou entram no `/status` como qualquer outra, já com preço — e é normal que as primeiras respostas do sponsor venham daí.
-
-Se não houver ficheiros Excel em `inputs/`, este passo é saltado em silêncio. Para o correr à mão depois de acrescentares um ficheiro: `/capture` (ou `/capture <ficheiro>`). O `/round` também verifica sozinho se algum ficheiro mudou desde a última captura e re-corre o que for preciso.
+   > `Engagement galp-adv criado. Phase: discovery. Próximo passo: /round (corre Discovery completo) ou /round business (lens-a-lens).`
 
 ### 3.3 Passo 2 — `/round` (Discovery completo)
 
@@ -200,7 +188,7 @@ Se não houver ficheiros Excel em `inputs/`, este passo é saltado em silêncio.
 /round
 ```
 
-O `aisa-round` em Discovery corre as 6 lenses **sequencialmente** na ordem fixa (business → operations → user → data → governance → financial). Em modo `inline`, cada lens vê o que as anteriores escreveram.
+O `aisa-round` em Discovery corre as 6 lenses **sequencialmente** na ordem habitual (business → operations → user → data → governance → financial) — obrigatória quando correm todas numa passagem (`/round`). `/round <lens>` corre **uma lens isolada, sem pré-requisito, por qualquer ordem**; a passagem fecha quando as 6 tiverem escrito ou com `/round --close`. Em modo `inline`, cada lens vê o que as anteriores escreveram.
 
 Cada lens:
 1. Lê `context.json` + `shared-understanding.md` + `lens-outputs/` anteriores (se existirem).
@@ -219,39 +207,77 @@ Output esperado (~ 5-10 min):
 /status
 ```
 
+O comando responde a uma pergunta: **o que falta para o próximo passo?** Por isso começa
+pelo marco e pela acção, e só depois mostra as contagens — a leitura útil está no topo.
+
 Output:
 
 ```
-Engagement: galp-adv
-Phase: discovery
-Round: R-01
+Engagement: galp-adv   Pack: pp   Fase: discovery   Ronda: R-01
+Próximo marco: critérios de saída de Discovery (phases.md) — Unknown/Conflicted Critical = 0
 
-Shared Understanding:
-  Saúde epistémica: 92% (1 expirada)
-  ## Confirmed (12)
-    C-001 — Sponsor é António Silva, Director Procurement (lens: business)
-    C-002 — Processo actual: Excel + Outlook, 47 aprovações/mês (lens: operations)
-    ...
-  A revalidar:
-    C-005 (pessoas-disponibilidade, verificado 2026-04-02) — "Ainda é verdade que só o Director aprova? Verificado pela última vez em 2026-04-02."
-      → /answer --revalidate C-005   (ou /answer C-005 "..." se o facto mudou)
-  ## Assumed (8)
-    A-001 — Tenant Galp tem E5 licensing (lens: technology) [⚠️ confirmar]
-    ...
-  ## Unknown (14, 3 Critical):
-    U-001 — Quem mais aprova além do director? (lens: business) [Critical]
-    U-002 — Há mobile na infra hoje? (lens: technology) [Critical]
-    U-003 — Tempo médio actual end-to-end de uma aprovação? (lens: operations) [Critical]
-    ...
-  ## Conflicted (1, 1 Critical):
-    X-001 — Sponsor diz "aprovação multi-nível"; nota de reunião diz "1-step" (lens: business)
-  ## Risky (2):
-    R-001 — Aprovações de pico (fim de mês) podem ser >120/dia (lens: operations)
-    ...
+Tripwires: n/a — ainda não há decisão-solução
 
-Next suggested action:
-  → Resolve 3 Critical Unknowns + 1 Critical Conflicted with sponsor antes de /frame
+O que falta para avançar
+1. Quem mais aprova além do director — U-001
+   Bloqueia: resolver antes de /frame (critério de saída de Discovery).
+   Afeta: a forma da autoridade de aprovação, e com ela o âmbito de qualquer opção.
+   Falta: resposta do sponsor.
+   Quem: António Silva (sponsor).
+   Fecha quando: decisivo — define se há um ou vários níveis de aprovação
+                 (critério formal por definir).
+   Fonte: shared-understanding.md#U-001
+2. Tempo médio end-to-end de uma aprovação — U-003
+   …
+3. "Multi-nível" vs "1-step" — X-001
+   …
+Também materiais: U-002 — condiciona o acesso fora do escritório
+
+Próxima ação
+   Levar U-001, U-003 e X-001 à reunião com o sponsor (a agenda abaixo tem as perguntas).
+   Depois: /answer U-001 "<resposta real>"   ·   /answer X-001 "<qual das versões vale>"
+
+Agenda
+   Reunião (por swing): U-001 [decisivo: define se há um ou vários níveis] — "Para uma compra
+     de €15k, quem tem de assinar antes de o pedido seguir?" → quem: sponsor → ver "o que falta" 1
+   Por outro canal: U-002 (email) · U-004 (documento)
+   Não gastes tempo com: U-011 (cosmético)
+
+Shared Understanding
+   Confirmed 12 · Assumed 8 · Unknown 14 (3 critical) · Conflicted 1 (1) · Risky 2
+   Saúde epistémica: 92% (1 expirada)      — evidência dentro da validade, não prontidão
+   A revalidar (por dependência material, depois antiguidade; top-5 de 1):
+     C-005 (pessoas-disponibilidade, verificado 2026-04-02) — "Ainda é verdade que só o
+       Director aprova? Verificado pela última vez em 2026-04-02."
+       → /answer --revalidate C-005   (ou /answer C-005 "..." se o facto mudou)
+   Riscos registados: 2 (R-001, R-002)     — com mitigação proposta, não pendências
+   Verificação incompleta: nenhuma
+
+Read to resume (discovery) — derivado, não persistido:
+   _state.json · context.json · shared-understanding.md (rows materiais: U-001, U-002, U-003, X-001, C-005)
+   _capture/evidence-index.md · _capture/process-model.md §4 + §6
 ```
+
+Três coisas que este bloco nunca faz, por regra:
+
+- **Não inventa.** Sem dono registado escreve "por atribuir"; sem critério de fecho mostra a
+  frase de `swing` e diz "critério formal por definir". `custo=spike` é um canal, não uma
+  duração.
+- **Não confunde ausência com zero.** Uma autoridade que devia existir e não se lê aparece
+  como "verificação incompleta", nunca como "sem bloqueios".
+- **Não trata saúde epistémica como prontidão.** 100% quer dizer que a evidência está dentro
+  da validade, não que se pode construir.
+
+Mais tarde, em Decision, o mesmo comando muda de marco: passa a dizer que versão do
+blueprint falta aprovar, que escolhas estruturais bloqueiam essa aprovação (`blueprint-contract.md`
+regra 5), e se a síntese está anterior à aprovação — nesse caso `/synthesize` antes de
+`/render`. E os tripwires deixam de ser `n/a`: lê-os sempre da decisão que escolheu a
+solução, com um veredicto por tripwire — disparou, em vigilância, ou **não avaliável nesta
+fase**. Sem evidência na SU nunca se lê "OK".
+
+`/resume` é o mesmo comando em modo re-entrada: mostra só o marco, os tripwires, a próxima
+acção e o `Read to resume`. Serve para retomar numa sessão nova sem depender do transcript
+anterior.
 
 ### 3.5 Passo 4 — Resolver Unknowns + Conflicted com sponsor
 
@@ -380,7 +406,7 @@ render-gaps.md                            (warnings se algum slot ficou vazio)
 
 > O render produz **markdown**; a conversão para .docx (para entrega formal ao cliente) é um passo manual via Pandoc/Word por agora. Numa decisão non-technology/do-nothing, só os deliverables `applies_to: all` são produzidos (discovery-report, executive-report, estimate) — os restantes são saltados com razão registada em `render-log.md`.
 
-**Depois do go-live**: os tripwires da decisão ficam armados — o `/status` avisa quando um dispara e o `/revisit` compara com o caminho que não escolheste (mantém/adapta/reabre). No fecho, `/retro`: as 7 personas escrevem os diários (com a tua curadoria) e o council fica mais sábio para o próximo engagement.
+**Depois do go-live**: os tripwires da decisão ficam armados. O `/status` lê-os sempre do bloco que **escolheu a solução** — nunca de uma aprovação de blueprint posterior, que não carrega tripwires — e dá um veredicto por cada um: disparou, em vigilância, ou não avaliável nesta fase. Quando um dispara, aparece primeiro e o `/revisit` compara com o caminho que não escolheste (mantém/adapta/reabre). Dois avisos que valem a pena conhecer: um tripwire cuja condição mede algo sem fonte na SU (esforço de build, volume pós-arranque) é reportado como **não avaliável**, nunca como "OK"; e um bullet registado na mesma rubrica sem um id `TW-n` não é um tripwire, é uma nota — se a decisão considerou e recusou um candidato, o `/status` não o promove a tripwire. No fecho, `/retro`: as 7 personas escrevem os diários (com a tua curadoria) e o council fica mais sábio para o próximo engagement.
 
 Se `render-gaps.md` está vazio → tudo OK. Se tem entradas → render-validate sinaliza qual slot/topic precisa de mais conteúdo; tu corres /round ou /answer adicional, depois /synthesize + /render outra vez (produz v02).
 
@@ -397,7 +423,9 @@ Se `render-gaps.md` está vazio → tudo OK. Se tem entradas → render-validate
 | Os 5 estados + rules | `library/kernel/states.md` |
 | Templates de deliverables | `library/packs/pp/deliverable-templates/*.template.md` |
 | Templates de synthesis | `library/kernel/synthesis-templates/*.template.md` |
-| Domain knowledge PP | `library/packs/pp/domain-knowledge/*.md` |
+| Domain knowledge PP — o contrato de uso | `library/packs/pp/domain-knowledge/README.md` |
+| Domain knowledge PP — unidades RESEARCH (15) | `library/packs/pp/domain-knowledge/{application,data,automation,integration,security,governance,alm,performance,economics,operations,architecture}/*.md` |
+| Domain knowledge PP — unidades CRAFT (10) | `library/packs/pp/domain-knowledge/craft/*.md` — prática de entrega, nunca alvo de pull em Options |
 | Question bank PP | `library/packs/pp/question-bank.md` |
 | Glossário PP | `library/packs/pp/glossary.md` |
 | Memória institucional (compartilhada) | `.claude/agent-memory/_universal/<agent>/*.md` |
@@ -408,6 +436,9 @@ Se `render-gaps.md` está vazio → tudo OK. Se tem entradas → render-validate
 | Outputs por lens | `projects/<slug>/lens-outputs/<lens>.md` |
 | Topic packs intermédios | `projects/<slug>/_synthesis/*.md` |
 | Deliverables finais | `projects/<slug>/_render/*.docx,*.md` |
+| Contrato de cobertura (as 3 etapas, os 13 códigos) | `library/kernel/coverage-contract.md` |
+| Motor de cobertura (`inventory` · `check` · `report` · `finalize`) | `library/kernel/tools/coverage.py` |
+| Revisões de cobertura de uma engagement (imutáveis) | `projects/<slug>/_coverage/coverage_v<NN>.{json,md}` |
 
 ---
 
@@ -429,6 +460,12 @@ Significa que o `_synthesis/` não tem conteúdo suficiente para preencher slots
 3. Corre `/synthesize` manualmente (se foi /decide --no-synthesize por engano).
 4. Depois corre `/render --all` outra vez; produz v02 sem sobrescrever v01.
 
+**Não confundir com um deliverable que não se produziu.** Uma autoridade que ainda não existe — sem arquitectura autorizada, sem versão aprovada, ou com uma escolha estrutural em aberto — é um **skip com a razão** em `render-log.md`, e nunca uma entrada em `render-gaps.md`. As três razões ficam distintas de propósito: *não há autorização nenhuma* não é o mesmo que *há e o negócio ainda não aprovou*, nem que *uma escolha estrutural bloqueia a aprovação*. O pré-render diz qual é:
+
+```bash
+python library/kernel/tools/coverage.py check --engagement <slug> --stage render --deliverable <id> --json
+```
+
 ### 5.4 Dois engagements em paralelo conflitam
 
 Não devem. Cada engagement tem `_state.json` próprio. Se há conflict (raro), verificar que o pack activo é diferente em cada (`_state.json.pack`).
@@ -437,27 +474,7 @@ Não devem. Cada engagement tem `_state.json` próprio. Se há conflict (raro), 
 
 Está a tentar escrever em `library/`. aisa impede isto por design. Se precisas mesmo de editar (raro — ex: adicionar template de pack), faz-lo via git em ambiente local + commit; o hook está em runtime, não previne edits administrativos.
 
-### 5.6 A captura de processo não correu
-
-Vê a mensagem no output do `/start` ou do `/capture`:
-
-- **"capture skipped — openpyxl missing"** → falta a biblioteca: `pip install openpyxl`, depois `/capture`. Não é erro; as lenses lêem os ficheiros pelo caminho normal, mas sem modelo de processo.
-- **"no supported inputs"** → só há `.xlsx`/`.xlsm` na captura. Outros formatos (PDF, Word, notas) são lidos directamente pelas lenses, como sempre.
-- **"status: failed"** num ficheiro → protegido por password ou corrompido. Fica registado como pergunta em aberto no modelo, nunca adivinhado. Pede uma cópia sem protecção.
-- **"replay unavailable"** → a extracção ficou desactualizada. Corre `/capture <ficheiro>` para refazer.
-
-Regra a reter: **"não correu" nunca é o mesmo que "não encontrou nada"**. O modelo diz sempre qual dos dois foi.
-
-### 5.7 Uma lens recusa correr ("lens-X: lens-Y has not run yet")
-
-A ordem das lenses é obrigatória dentro de uma ronda: uma lens a ler um retrato meio construído tira conclusões de informação que ainda não foi recolhida. Duas saídas:
-
-- Querias a ronda completa → corre `/round` sem argumento.
-- Querias mesmo só aquela lens (o caso normal depois de um `/answer`) → corre `/round <lens>`. O comando declara a intenção e a ordem é dispensada só para essa lens, nessa ronda.
-
-Se invocaste a skill da lens directamente em vez de usar o `/round`, é isso que está a dar — usa o comando.
-
-### 5.8 "Claude esquece-se de um step"
+### 5.6 "Claude esquece-se de um step"
 
 aisa não tem invariantes que o Claude tenha de lembrar simultaneamente (foi essa a razão do refactor). Se notar comportamento anómalo:
 1. Confirma que estás na fase correcta (`/status`).
@@ -465,6 +482,17 @@ aisa não tem invariantes que o Claude tenha de lembrar simultaneamente (foi ess
 3. Reporta o problema em `aisa/docs/ISSUES.md` (ou Jira/GitHub Issues).
 
 ---
+
+### 5.7 O desenho passa a verificação estrutural e mesmo assim falta-lhe qualquer coisa
+
+É exactamente o caso para que o mecanismo de cobertura existe, e são perguntas diferentes: `bp_validate` diz se o ficheiro está bem formado; `coverage.py` diz se carrega o que as fontes pediram. Um `valid: yes (0 block, 0 warn)` nunca significou desenho coberto.
+
+```bash
+python library/kernel/tools/coverage.py check --engagement <slug> --stage blueprint \
+    --target _blueprint/ux-blueprint_v<NN>.yaml --json
+```
+
+Cinco veredictos, sempre em linhas separadas: contrato do registo · actualidade da base · revisão das fontes · leitura nos dois sentidos · cobertura. Sem revisão publicada a resposta é `not_evaluated` — que **não** é aprovação nem reprovação, e não revoga aprovação nenhuma já registada. Contrato: `library/kernel/coverage-contract.md`.
 
 ## 6. Próximos passos depois do MVP
 

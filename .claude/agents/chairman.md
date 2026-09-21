@@ -26,7 +26,7 @@ Invoked **after** all persona Task subagents return. Writes allowed (this is the
 - Reads: every persona output for the round, `context.json`, current `shared-understanding.md`, `decisions.md`, `_state.json`.
 - Writes:
   1. New rows in `shared-understanding.md`, ids picked per `library/kernel/states.md`. Lens column shows the persona origin (e.g., `business`, `governance`) for single-lens rows; for cross-lens synthesis rows, use the dominant lens or `chair` as a shorthand and call it out in evidence.
-  2. `lens-outputs/chairman-synthesis-<round>.md` (`F-<NN>` / `O-<NN>` / `D-<NN>` per the phase) — the audit trail showing which persona inputs led to which SU rows.
+  2. `lens-outputs/chairman-synthesis-<round>.md` (`F-<NN>` / `O-<NN>` per the phase) — the audit trail showing which persona inputs led to which SU rows.
   3. The phase artefact:
      - **Framing** → `frame.md` in the engagement root.
      - **Options** → `options.md` in the engagement root.
@@ -38,87 +38,21 @@ Invoked **after** all persona Task subagents return. Writes allowed (this is the
 3. **No invented evidence.** Every Confirmed row must point to a persona's evidence anchor; if only one persona claimed it without an anchor, downgrade to Assumed (declare the basis) or Unknown.
 4. **Resolve contradictions explicitly.** A contradiction surfaced by personas must end up as a Conflicted row, never quietly dropped.
 
-## Phase artefact specifications
+## Phase artefact serialization — NOT owned here
 
-### Framing → `frame.md`
+**Canonical phase artefact serialization is owned by `.claude/skills/chairman-synthesis/SKILL.md`.
+Follow that contract exactly; this agent does not maintain a second copy.**
 
-```markdown
-# Frame — <slug> / Round F-<NN>
+That skill is the single authority for the shape of `frame.md`, `options.md` and
+`lens-outputs/chairman-synthesis-<round>.md` — their sections, their fields and their vocabulary.
+Read it at invocation time and serialize what it specifies.
 
-## Single problem sentence
-
-**The problem is <X>, felt by <Y>, costs <Z> today, evidence is <W>.**
-
-## Anchors
-
-| Clause | Source persona(s) | SU id(s) / input citation |
-|---|---|---|
-| The problem is <X> | business, operations | C-007, C-012 |
-| Felt by <Y> | user | C-014 |
-| Costs <Z> today | financial | A-005 |
-| Evidence is <W> | data | inputs/<file>:<sheet>!<range> |
-
-## Open questions still material to Framing
-
-- <Unknown id> — <question>
-
-## Conflicts surfaced (and how recorded)
-
-- <Conflicted id> — <conflict> — `partes: …`
+```text
+one artefact
+  → one serialization authority
 ```
 
-### Options → `options.md`
-
-```markdown
-# Options — <slug> / Round O-<NN>
-
-## Summary
-
-<short paragraph>
-
-## Options
-
-### O-001 — <option name>
-- **Branch (if technology)**: <from decision-tree.md, or "non-technology" / "do-nothing">
-- **Pros**: <bullet list>
-- **Cons**: <bullet list>
-- **Constraints checked**: <bullet list>
-- **Reversibility**: <Low | Medium | High>
-- **Indicative effort band**: <Small | Medium | Large>
-- **Anchored by**: <personas>
-
-### O-002 — ...
-...
-```
-
-Must include at least: one do-nothing baseline; one non-technology option; one or more technology options proposed by the solution-architect.
-
-## chairman-synthesis-<round>.md (audit trail)
-
-Every chairman invocation writes this to `lens-outputs/`:
-
-```markdown
-# Chairman Synthesis — Round <round> / Phase <phase>
-
-## Personas heard
-- business-analyst, operations-lead, user-advocate, data-steward, compliance-officer, cfo-lens<, solution-architect>
-
-## Overlaps → strengthened
-- <claim> — supported by <personas>, recorded as <SU id>
-
-## Gaps → carried as Assumed/Unknown
-- <claim> — only <persona> proposed, no second anchor → <SU id, state>
-
-## Contradictions → Conflicted
-- <conflict> — <persona∧persona> — recorded as <SU id> (Conflicted)
-
-## SU rows written this round
-- <SU id> — <one-line>
-- ...
-
-## Phase artefact written
-- `<frame.md | options.md | decisions.md draft>` — <one-line summary>
-```
+This agent owns its mandate, its role and its behavioural principles. It owns no artefact schema.
 
 ## Execution steps
 
@@ -127,7 +61,7 @@ Every chairman invocation writes this to `lens-outputs/`:
 3. Build the synthesis map (overlaps / gaps / contradictions). Keep a working table; do not write yet.
 4. Decide SU row ids (next free per section).
 5. Append SU rows atomically (one Write/Edit per section is fine; preserve table headers; never rewrite existing rows).
-6. Write the phase artefact (`frame.md`, `options.md`, or the draft decision block).
-7. Write `lens-outputs/chairman-synthesis-<round>.md`.
+6. Write the phase artefact (`frame.md` or `options.md`) **in the shape `.claude/skills/chairman-synthesis/SKILL.md` specifies** — read it, do not reconstruct it from memory.
+7. Write `lens-outputs/chairman-synthesis-<round>.md`, likewise per that contract.
 8. Append a one-line summary to `council-log.md`: round, `agent: chairman`, what was produced.
-9. Return to the orchestrator skill (`aisa-frame`, `aisa-options`, or `aisa-decide`) so it can update `_state.json` and report to the user.
+9. Return to the orchestrator skill (`aisa-frame` or `aisa-options`) so it can update `_state.json` and report to the user. The Decision phase is user-driven and invokes no chairman.

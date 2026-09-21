@@ -1,0 +1,16 @@
+{
+  "engagement": "fx-coverage-f06",
+  "literal_request": "Queremos sair da folha de calculo onde registamos os lotes e de onde sai o resumo diario. Hoje so uma pessoa a sabe reconstruir quando parte, e o resumo tem de sair todos os dias antes das 09:00.",
+  "requester": {
+    "name": "Responsavel de Qualidade (fixture)",
+    "role": "Responsavel de Qualidade",
+    "authority": "decide sozinho sobre o processo de libertacao de lotes"
+  },
+  "funding_gate": false,
+  "inputs": [
+    "registo-de-lotes.xlsx",
+    "registo-de-lotes-2024.xlsx",
+    "fluxo-de-libertacao.pptx"
+  ],
+  "captured": "2026-03-02T09:00:00+01:00"
+}

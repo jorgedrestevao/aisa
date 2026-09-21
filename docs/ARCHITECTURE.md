@@ -1,4 +1,7 @@
-# aisa — Plataforma de Pre-Development Discovery & Sensemaking
+# aisa — Discovery orientado a uma decisão técnica
+
+<!-- SCOPE-STATEMENT v1 -->
+> O aisa faz discovery de um processo para chegar a uma decisão técnica fundamentada: que tecnologia e que padrão, com que alternativas e a que custo. Não é uma plataforma de discovery de negócio sem destino; uma pergunta só entra quando a resposta pode mudar a decisão.
 
 **Architecture & Concept Specification**
 
@@ -12,14 +15,56 @@
 
 ## Changelog
 
+### v3.4.0 — 2026-09-16 (reconciliação e cobertura — seis fases; pack pp 1.8.3)
+
+Um caso real abriu isto: uma versão de desenho que o verificador estrutural deu por `valid: yes (0 block, 0 warn)` tinha deixado cair um requisito que a Shared Understanding já carregava. **Estrutura válida nunca quis dizer desenho coberto**, e não havia onde essa segunda pergunta fosse feita. Plano e evidência em `docs/runtime-hardening/coverage-reconciliation-implementation-plan.md` + `coverage-phase-{1..6}-report.md`.
+
+- **Contrato novo** `library/kernel/coverage-contract.md` (§7.6) — três etapas (`reconciliation` · `blueprint` · `render`), esquema v1 versionado, 13 códigos numa tabela única usada pelo motor, pela CLI e pelos hooks. As **quatro perguntas** — estrutura · cobertura · aprovação · ponta-a-ponta — passam a ser separadas por construção, e nenhuma responde pela outra.
+- **Motor novo** `library/kernel/tools/coverage.py` (stdlib-only): `inventory` (denominador derivado das fontes, nunca do registo), `check`, `report` (projecção determinística que não é autoridade) e `finalize` — a única escrita, e só em `<engagement>/_coverage/`. Registos imutáveis; revisão nova é versão nova.
+- **Ligação aos comandos**: `/blueprint` reconcilia antes de produzir (1b) e revê a versão depois (13b), e a condição de **nova** aprovação passa por aí; `/render` corre o pré-render por deliverable (2b) e a revisão de projecção depois (9b); `/answer` e `/capture` mostram o efeito na actualidade; `/status` expõe `status.coverage`; `blueprint-validate.py` e `render-validate.py` reportam cobertura **ao lado** da estrutura e da suficiência, read-only.
+- **Autoridade de versão por deliverable** (§8.3): cada template declara `blueprint_version_read` — `v<latest authorized>` · `v<approved>` · `none`. Campo ausente é defeito do contrato, não sinónimo de `none`. A cobertura *verifica* a selecção que o `render-contract.md` já definia; não a redefine.
+- **Regras que fecham falsos verdes**: um id citado em comentário é referência, não projecção; a âncora tem de estar no artefacto sob revisão; uma obrigação não desaparece entre versões sem disposição; a autoridade que não existe não se satisfaz por omissão; e os campos que o registo declara têm de concordar entre si (§4.5.1).
+- **Compatibilidade**: sem registos, tudo lê `not_evaluated` — nunca "completo", nunca "reprovado retroactivamente". **Aprovações históricas não são apagadas, superseded nem reescritas.** Nenhum booleano de verdade entra em `_state.json`: o estado é derivado dos registos e das fontes em cada leitura.
+
+Limites que ficam declarados: a compreensão semântica não é provada por código (o motor verifica a forma da ligação; a adequação é julgamento do agente, assinado); fontes sem extractor entram como limitação e nunca como cobertas; e o E2E demonstrado é o **do protocolo**, em fixture — nunca o de uma solução.
+
+### v3.3.0 — 2026-09-05 (Step 8C — reparação pós-piloto de continuidade semântica; pack pp 1.8.2)
+
+Reparação **bounded** decidida no Step 8B e no seu addendum de continuidade semântica (`docs/pp-pack-authoring/pilot/`). Nenhuma semântica dos Steps 3–7 reaberta; nenhum artefacto, fase, agente, estado, grafo de dependências, matriz de compressão, ficheiro de handoff, router ou modelo de scoring novo.
+
+- **Doutrina** (§2, princípio 10; `orchestration.md` → *Comprehension survival*): `reason deeply → persist selectively → claim conservatively → rehydrate selectively → revalidate when premises change`. O determinismo governa o que tem de sobreviver, quem é a autoridade, o que não pode ser promovido/perdido em silêncio, o que tem de ser revalidado e o que uma sessão nova recarrega — nunca a sequência interna de raciocínio.
+- **PR-1 — facto ≠ fit** (`aisa-answer` passo 4b, `aisa-blueprint` passo 11): uma afirmação técnica *architecture-significant* usada para fechar uma escolha estrutural fecha só com UMA base suficiente (RESEARCH lida contra os requisitos materiais, incl. exclusões · evidência verificável do engagement de uma fonte responsável · prova/medição). "Gateway configurado" ≠ "superfície adequada". Casos TC-1..TC-5.
+- **Contrato de sobrevivência da compreensão** (PR-2A + PR-4 + PR-5 + subconjuntos PR-8): o modelo de processo L2 passa a ler **toda** a evidência normalizada (`*.text.md` incluídos) — source-complete em cobertura, nunca source-total em contexto; `process-model.md` §4 é a **sinopse de processo** cross-source (marcadores OBSERVED/INFERRED/HYPOTHESIS/UNKNOWN, linhas materiais etiquetadas); em Discovery cada linha material e cada PM-U recebe exactamente uma disposição `MAP` / `ADOPT` / `DISMISS` (`aisa-round`); `frame.md` ganha o bloco *What must survive into Options*, ancorado em ids do SU (`chairman-synthesis`); `/frame` corre o teste de sobrevivência da compreensão (6 perguntas, sem score) como soft gate.
+- **PR-7 — revalidação semântica dirigida** (`aisa-answer` passo 7, `aisa-blueprint` passo 11b): uma premissa material que muda lista as conclusões que dela dependiam (`still valid` / `revalidate`) através das referências já existentes (`su_refs`, `forced_by`, condições, proof obligations, open choices, tripwires, blueprint log). Sem reversão automática; base da Decision movida → tripwire → `/revisit`.
+- **PR-6 — rehidratação selectiva** (`aisa-status` passo 8b, §3.5): **fase ≠ sessão**; bloco derivado *Read to resume* por fase; nenhum transcript anterior necessário; nenhum artefacto de handoff.
+- **PR-3** (derivação superfície/tarefa) deliberadamente **não** implementado — item de observação do Pilot 2 (`docs/pp-pack-authoring/pilot/pilot-2-protocol.md`).
+
+Compatibilidade: nenhuma migração. `process-model.md` gerados antes de 1.8.2 continuam válidos (sem §4 cross-source — a gate de `/frame` corre só sobre o SU e diz que o faz); `frame.md` anteriores sem bloco de sobrevivência continuam legíveis.
+
+### v3.2.0 — 2026-09-03 (runtime simplification, Fase A — contratos)
+
+Fase A de `docs/pp-pack-authoring/research/pp/authoring/runtime-simplification-plan.md` (decisões D1–D9 aprovadas). **Só contratos — nenhum ficheiro de runtime, pack, lens ou persona foi alterado.**
+
+- **Contrato de evidência partilhada** (`orchestration.md` → *Evidence contract*): **parse once, reason many**. A passagem de captura — não a lens — abre e faz parse de `inputs/`; a superfície normal de evidência é `_capture/` (entrada: `evidence-index.md`). Nenhuma lens é obrigada a abrir todos os ficheiros de `inputs/`.
+- **Verificação do raw passa a ser baseada em materialidade**: a quota obrigatória de spot-check por ronda é removida. Inspecciona-se o raw quando é material para a confiança (extracção pode ter perdido detalhe, afirmação material depende de interpretação, evidência em conflito, provenance insuficiente, contexto não preservado). Integridade preservada: **nenhuma lens pode alegar suporte probatório mais forte do que a evidência que inspeccionou sustenta**; o raw continua autoritativo em conflito.
+- **Capture-lite documentada como modelo-alvo** para `.docx`/`.pdf`/`.vtt`: extracção com perda mínima e provenance, **nunca sumarização semântica** (sem LLM no caminho de texto). Contrato apenas — implementação na Fase B.
+- **Fronteiras do orchestrator** (`orchestration.md`): *context provisioning + execution coordination, not domain reasoning*. Pode provisionar evidência, resolver o pack, injectar cues, dar acesso ao question bank e carregar bookkeeping de ronda; não pode interpretar evidência, classificar achados, escolher arquitectura nem transformar sinais em checklist.
+- **Sinais são cues de atenção, não checklist.** As 6 lenses de Discovery são **pack-agnostic** (nunca leem `pack.yaml`; os cues do pack chegam por injecção). `lens-technology` é a excepção documentada — Options-only, pack-aware, **domain knowledge pull-based**.
+- **`question-bank.md` é recurso de geração de perguntas**, nunca contexto permanente de lens; consumidor único previsto: o passo de agenda do `/status`.
+- **Fronteira das personas de council**: *Agent = perspectiva independente + mandato*. As mecânicas comuns e o schema de retorno vivem na invocação (`orchestration.md`) e no `chairman-synthesis`; nenhuma persona precisa de reler o `SKILL.md` da sua lens.
+- **Guardrails de tamanho são soft**: alvos indicativos de authoring, nunca PASS/FAIL, sem validador de caracteres/tokens/sinais.
+- Alinhamento documental: `docs/LENS_AUTHORING.md` (responsabilidades das 6 secções; hard rule 5 corrigida; checklist de auditoria), `docs/PACK_AUTHORING.md` (`extra_signals` injectados + heurística soft de 5–8 e teste de sobrevivência; papel do question bank), §3.3/§3.4/§4.1/§7.2/§7.3 deste documento.
+
+Compatibilidade: nenhuma migração. Engagements, `_state.json`, SUs existentes, `lens-outputs/` e manifestos de pack continuam válidos sem alteração.
+
 ### v3.1.0 — 2026-09-01 (process capture — a lógica as-is extraída do artefacto)
 
 Merge da linha `local/capture-line` (módulo desenvolvido em paralelo, spec `docs/PROCESS_CAPTURE_SPEC.md`) na linha v3, mais o alinhamento ao kernel v0.2.0:
 
 - **Process capture em 3 camadas**: L1 extracção determinística de `.xlsx`/`.xlsm` (estrutura, padrões de fórmula normalizados a R1C1, colunas `input`/`derived`/`manual`, células de excepção = overrides humanos, validações, formatação condicional, cor-como-dado, comentários, anomalias, flags de VBA/links externos); L3 **replay** — bateria fixa que re-executa lookups, unicidade de chaves, whitespace/casing, staleness, excepções de padrão e referências órfãs, com a regra dura *no check = no claim*; L2 **modelo de processo** (LLM) que reconstrói as regras de negócio evidenciadas (PM-NNN, sempre com citação de célula) e a lista de interrogação (PM-U-NNN) para os humanos.
-- **As lenses consomem o modelo primeiro** (`orchestration.md`), com **spot-check obrigatório de ≥1 afirmação PM contra o ficheiro cru por ronda** — o raw é sempre autoritativo; divergência gera row **Conflicted**. É a mitigação da falha correlacionada (um modelo errado a envenenar 6 lenses).
+- **As lenses consomem o modelo primeiro** (`orchestration.md`), com **spot-check obrigatório de ≥1 afirmação PM contra o ficheiro cru por ronda** *(quota substituída na v3.2.0 por verificação baseada em materialidade — ver abaixo)* — o raw é sempre autoritativo; divergência gera row **Conflicted**. É a mitigação da falha correlacionada (um modelo errado a envenenar 6 lenses).
 - **Alinhamento epistémico**: as regras PM carregam `verificado_em` = data de modificação **do ficheiro** (não da corrida de captura — um Excel de janeiro é evidência de janeiro, e nasce expirado se passou a meia-vida) + `validade`; as PM-U carregam `criticidade`, `custo` e `swing`. As lenses herdam esses carimbos na promoção, sem re-datar.
-- **Hooks migrados para Python** (cross-platform, sem dependência de `jq`), mais o novo `pre-lens-order-check.py` que impõe a ordem sequencial das lenses em Discovery. O `pre-write-guard.py` mantém-se **fail-closed**: enforce por default, `AISA_GUARD_MODE=log` é o override administrativo.
+- **Hooks migrados para Python** (cross-platform, sem dependência de `jq`), mais o novo `pre-lens-order-check.py` que impõe a ordem das lenses numa passagem completa de Discovery (`/round <lens>` corre uma lens isolada, sem ordem). O `pre-write-guard.py` mantém-se **fail-closed**: enforce por default, `AISA_GUARD_MODE=log` é o override administrativo.
 - Deliverable `estimate` reestruturado em 10 secções por fase.
 
 Validação: fixture xlsx com os 3 defeitos do critério de aceitação do spec §10 — duplicado de chave, falha de lookup por espaço à direita, aging >120 dias — **todos reencontrados mecanicamente pelo replay, com citação de célula** e sem envolvimento de lenses.
@@ -42,7 +87,7 @@ Actualizações após o build registado em `docs/NEXT_LEVEL_PLAN.md` e a auditor
 - **Enforcement ligado**: `library/` read-only é agora hard-enforced (hook em modo enforce + deny rules) — §9.1 é verdade.
 - **Comandos novos**: `/answer` (transições de estado), `/resume`, `/simulate` (comparação de opções + value-of-information), `/blueprint` (arquitectura de ecrãs com proveniência; contrato em `library/kernel/blueprint-contract.md`).
 - **Fase Decision**: modo `interactive` (user-driven) com `--consult` opcional — o council corre em Framing/Options apenas. §3.1/§4.4 actualizados.
-- **Deliverables por tipo de decisão**: `applies_to` no pack.yaml; decisões non-tech/do-nothing renderizam só os aplicáveis.
+- **Deliverables por aplicabilidade declarada**: `activation` no pack.yaml + no frontmatter de cada template (Step 6B substituiu `applies_to`); o discriminador de arquitectura é *existe autorização de arquitectura para pelo menos um âmbito?*. Um deliverable `not applicable` é um **skip** registado em `render-log.md`, nunca uma lacuna.
 - **Pack pp v1.1.0**: decision-tree R4–R6 reescritas, sinais de Discovery neutralizados, novo `delivery-conventions.md`.
 - **Editorial**: o sistema antecessor passa a ser referido como **SPEA v2 (aisa v1)** em todo o documento — o rename global de v2.0.0 tinha deixado antecessor e sucessor ambos como "aisa"; árvore §6 actualizada ao estado real do repo.
 
@@ -84,6 +129,8 @@ Documento inicial baseado em 10 decisões da sessão de brainstorm.
 ## Sumário Executivo
 
 `aisa` é uma plataforma de **discovery e sensemaking organizacional** que antecede qualquer escolha tecnológica em projectos de digitalização (Power Platform, OutSystems, Mendix, custom). Resolve o problema de raiz: a maioria dos projectos falha em **discovery**, não em implementação — desalinhamento entre stakeholders, entendimento incompleto do problema, contexto fragmentado, e selecção tecnológica prematura.
+>
+> **Errata (2026-09-11)**: esta frase é de 2026-05-28 e mantém-se como registo. O âmbito em vigor é o do cabeçalho — discovery orientado a uma decisão técnica (`SCOPE-STATEMENT v1`); o refoco foi confirmado pelo dono em 2026-09-09.
 
 O aisa v2 substitui o **SPEA v2 (aisa v1)**. O sistema anterior é estruturalmente over-engineered: força reasoning determinístico em cima de um LLM probabilístico através de um kernel com dezenas de invariantes (Ledger, claims tipadas, coherence-cells, event-order gates, YAML frontmatter mandatório). Dois runs com input idêntico produziram outputs divergentes e ambos não-conformes — o que prova que o problema é estrutural, não implementacional.
 
@@ -150,7 +197,7 @@ Da `proposta_conceptual_operational_discovery`:
 
 ## 2. Princípios Fundamentais
 
-Estes 9 princípios são vinculantes e o desenho deriva deles:
+Estes 10 princípios são vinculantes e o desenho deriva deles:
 
 1. **Discovery antes de solução, sempre.** A ferramenta resiste activamente a nomear **vendor ou produto específico** até à fase `Options`. As 6 primeiras lenses (`business`, `operations`, `user`, `data`, `governance`, `financial`) podem identificar **necessidades digitalizáveis** ("processo precisa de mobile access", "dados sensíveis em SharePoint hoje") mas não nomeiam Power Platform / OutSystems / Mendix / Dataverse / etc. A lens `technology`, e só ela, é que entra em Options para mapear opções concretas a essas necessidades.
 
@@ -164,11 +211,19 @@ Estes 9 princípios são vinculantes e o desenho deriva deles:
 
 6. **Native Claude Code architecture.** Skills, agents, hooks, commands, agent-memory. Sem reimplementar runtime em markdown.
 
-7. **Packs leves.** Um pack declara apenas: `glossary`, `question-bank`, `lenses-config`, `deliverable-templates`. Não declara cells, waves, event-orderings, schemas de claims. O pack `pp` é o único validado; `outsystems`, `mendix`, `generic` são scaffolds para a equipa preencher.
+7. **Packs leves.** Um pack declara: `glossary`, `question_bank`, `lenses_config`, `deliverables` (os seis contratos de projecção), `decision_tree`, `decision_model` (registers stage-local) e `domain_knowledge` (manifesto de unidades, **pull-based** — nunca uma ordem de carregamento). Não declara cells, waves, event-orderings nem schemas de claims, e não declara architecture-templates: o entry point é fixo. O pack `pp` é o único validado; `outsystems`, `mendix`, `generic` são scaffolds para a equipa preencher.
 
 8. **6 entregas canónicas, first-class.** Toda a engagement bem-sucedida termina com Discovery Report + Executive Report + Architecture Blueprint + Implementation Spec + Claude Design Brief + Estimate. Não são renderings opcionais — são parte do contrato.
 
 9. **Memory institucional cresce com uso.** `.claude/agent-memory/<agent>/` acumula constraints recorrentes, anti-padrões observados, padrões corporativos. Esta memória é lida pelo respectivo agente em todas as rondas subsequentes.
+
+10. **Raciocínio natural, sobrevivência determinística.** aisa não substitui o raciocínio profundo do Claude por cognição determinística. O determinismo governa **o que tem de sobreviver** à compressão (invariantes de negócio, constraints estruturais, Unknowns que mudam a decisão, famílias de output, tarefas, obrigações de transformação), **quem é a autoridade** (o SU; `process-model.md` §4 é evidência normalizada, nunca autoridade), **o que não pode ser promovido nem perdido em silêncio** (disposição `MAP`/`ADOPT`/`DISMISS`; facto ≠ fit), **o que tem de ser revalidado** quando uma premissa muda, e **o que uma sessão nova recarrega** (fase ≠ sessão). Nunca prescreve a sequência interna de raciocínio. Em forma curta:
+
+   ```text
+   reason deeply → persist selectively → claim conservatively → rehydrate selectively → revalidate when premises change
+   ```
+
+   Contrato: `library/kernel/orchestration.md` → *Comprehension survival*.
 
 ---
 
@@ -180,7 +235,7 @@ A engagement progride em 4 fases declaradas em `library/kernel/phases.md`:
 
 | Fase | Objectivo | Lenses activas | Modo | Output da fase |
 |---|---|---|---|---|
-| **Discovery** | Mapear contexto operacional, stakeholders sombra, as-is process, constraints. Não menciona tecnologia. | business → operations → user → data → governance → financial (**ordem fixa, sequencial**) | inline | SU populado em estados `Confirmed/Assumed/Unknown/Conflicted/Risky` + `lens-outputs/<lens>.md` por lens |
+| **Discovery** | Mapear contexto operacional, stakeholders sombra, as-is process, constraints. Não menciona tecnologia. | business → operations → user → data → governance → financial (**ordem obrigatória na passagem completa; `/round <lens>` corre qualquer lens isolada**) | inline | SU populado em estados `Confirmed/Assumed/Unknown/Conflicted/Risky` + `lens-outputs/<lens>.md` por lens |
 | **Framing** | Sintetizar uma frase única de problema, validada pelo sponsor. Detectar contradições críticas. | as 6 lenses de Discovery (via personas) + chairman | council-independent | `frame.md` + Conflicted rows no SU |
 | **Options** | Gerar opções (não-fazer / process change / use existing better / PP / alt). Avaliar cada uma contra constraints e critérios. | technology (entra aqui pela 1.ª vez) + chairman | council-independent | `options.md` com prós/contras matriciais |
 | **Decision** | Escolher, justificar, registar alternativas, riscos, condições de revisão. Blueprint UX (engagements com UI). Renderizar as entregas. | o utilizador decide; lens-technology consultável (`/decide --consult`) | interactive | `decisions.md` + row D-NNN no SU + `_blueprint/` + deliverables em `_render/` |
@@ -226,7 +281,7 @@ Cada lens é uma skill em `.claude/skills/lens-<name>/SKILL.md`. Independente, i
 
 **Output dual de cada lens**: ao terminar uma ronda, cada lens produz **dois artefactos**:
 1. **Rows estruturadas no `shared-understanding.md`** (com `id`, `estado`, `evidência`, `ronda`).
-2. **`projects/<slug>/lens-outputs/<lens>.md`** — prose narrativa do que a lens descobriu nessa ronda (1-3 parágrafos por ronda, append-only).
+2. **`projects/<slug>/lens-outputs/<lens>.md`** — interpretação curta da perspectiva nessa ronda (append-only, sob `## <round> — <lens>`): *what matters* · *tensions/risks* · *open evidence*. Leve por contrato — o conhecimento atómico vive no SU, não aqui.
 
 Os deliverables consomem os summaries narrativos para preencher slots de prose (`business_context`, `current_state_summary`, etc.) sem precisar de re-sintetizar a partir das rows. Isto garante: (a) determinismo do render; (b) coerência entre deliverables que partilham temas. Discovery é "qualquer coisa menos tecnologia".
 
@@ -234,16 +289,30 @@ Os deliverables consomem os summaries narrativos para preencher slots de prose (
 
 Duas formas de invocar uma lens, **declaradas pela fase**:
 
-- **`mode: inline`** — A lens corre como skill no thread actual. Vê context.json + SU acumulado + lens-outputs anteriores. Sequencial, na ordem fixa (business → operations → user → data → governance → financial). Contexto partilhado entre lenses. Usado em **Discovery**.
+- **`mode: inline`** — A lens corre como skill no thread actual. Vê context.json + SU acumulado + lens-outputs anteriores. Sequencial, na ordem habitual (business → operations → user → data → governance → financial) — obrigatória em `/round`, livre em `/round <lens>`. Contexto partilhado entre lenses. Usado em **Discovery**.
 - **`mode: council-independent`** — Os 6/7 agentes correm **em paralelo via concurrent Task subagents**. Cada um vê apenas context.json + extracto temático do SU (não vê outputs dos outros agentes). Quando todos terminam, `chairman-synthesis` lê os outputs em conjunto e sintetiza. Padrão Karpathy. Usado em **Framing, Options, Decision**.
 
 **Por que esta divisão**: em Discovery o objectivo é cobertura ampla rápida — partilhar contexto entre lenses ajuda. Em Framing/Options/Decision o objectivo é detectar **divergência genuína de perspectivas** — partilhar contexto contamina. O chairman é o único componente que vê todos os outputs de uma vez.
 
 **Por que paralelo (não sequencial isolado)**: paralelo é mais rápido e tem isolation natural (cada Task subagent tem context isolado). Sequencial isolado seria ~6× mais lento sem ganho semântico. O Claude Code Task tool suporta concorrência nativa.
 
+**Onde vivem as mecânicas do council**: na invocação, não nos ficheiros de persona. `library/kernel/orchestration.md` → *Council-independent mode* é o dono único de: tool grant read-only, ausência de peer reads in-flight, as duas hard rules que prendem uma persona read-only, o schema de retorno (dono: `chairman-synthesis`), o ponteiro para a evidência partilhada e as pack attention cues. **Agent = perspectiva independente + mandato**: o ficheiro da persona não duplica semântica de estados, orquestração, o procedimento completo da lens, schemas de output nem domain knowledge — e não precisa de reler o `SKILL.md` da sua lens. Contrato de authoring: `docs/LENS_AUTHORING.md` + §7.3.
+
 **Peer review**: omitido no MVP. O padrão Karpathy completo inclui peer review (cada agente comenta o do vizinho antes do chairman), adicionando ~50% de custo. Adicionamos em v2 só se observarmos group-think em produção (improvável dado o isolation completo).
 
 Custo: Discovery = ~6 LLM passes por ronda (uma por lens, sequencial). Framing/Options/Decision = ~7-8 LLM passes (6 agentes em paralelo + chairman + às vezes lens-technology). Pacote total por engagement: ~30-50 LLM passes (vs 100+ no aisa v1 pp-consulting). Mais barato, mais correcto.
+
+### 3.5 Fase ≠ Sessão — rehidratação selectiva
+
+```text
+PHASE ≠ SESSION
+session context      = disposable cache
+repository state     = durable memory
+```
+
+Uma fase pode atravessar várias sessões; um engagement pequeno corre várias fases numa só. Nada no runtime usa a fronteira de sessão como fronteira semântica: `_state.json.phase`/`round` são os únicos marcadores de fase, os hooks resolvem o engagement a partir do disco, e **nenhuma instrução de runtime depende do transcript anterior**. O raciocínio profundo é local e temporário; o entendimento material tem de ser durável e recarregável selectivamente — daí a sinopse de processo em `process-model.md` §4 e o bloco *What must survive into Options* em `frame.md`.
+
+Uma sessão nova recarrega **selectivamente** — o bloco *Read to resume* que `/status` (e por delegação `/resume`) deriva de `_state.json` e do sistema de ficheiros: autoridade da fase + estado material do SU + sinopse do processo quando relevante + artefacto da fase corrente + pulls dirigidos de evidência/Domain Knowledge. Nunca toda a evidência raw, todos os transcripts, todos os lens outputs ou toda a DK. O bloco é computado, não persistido: não é uma nova autoridade e não é um ficheiro de handoff — os artefactos canónicos são a memória. Teste adversarial de sessão nova: `docs/pp-pack-authoring/pilot/pilot-2-protocol.md`.
 
 ---
 
@@ -279,10 +348,10 @@ Markdown puro, sem YAML frontmatter. 5 secções por estado, cada uma uma tabela
 
 ## Unknown
 
-| id        | lens         | pergunta                                                          | quem responde       | criticidade | ronda |
-|-----------|--------------|-------------------------------------------------------------------|---------------------|-------------|-------|
-| U-007     | data         | Qual o tempo médio de resposta SAP API para validação NIF?        | IT Architecture     | Critical    | R-02  |
-| ...       | ...          | ...                                                               | ...                 | ...         | ...   |
+| id        | lens         | pergunta                                                          | quem responde       | criticidade | custo  | swing | ronda |
+|-----------|--------------|-------------------------------------------------------------------|---------------------|-------------|--------|-------|-------|
+| U-007     | data         | Qual o tempo médio de resposta SAP API para validação NIF?        | IT Architecture     | Critical    | spike  | decisivo: mata o caso mobile | R-02  |
+| ...       | ...          | ...                                                               | ...                 | ...         | ...    | ...   | ...   |
 
 ## Conflicted
 
@@ -322,7 +391,7 @@ Cada `/decide` cria **uma linha em `## Confirmed`** com `id: D-NNN` cross-refere
 
 ```markdown
 | D-001 | chair | Frame validado pelo sponsor; ver decisions.md#D-001 | decisions.md#D-001 | F-01 |
-| D-002 | chair | Escolhida a opção O-003 (branch dataverse-first); ver decisions.md#D-002 | decisions.md#D-002 | D-01 |
+| D-002 | chair | Escolhida a opção O-003 para o âmbito «pedidos internos»; ver decisions.md#D-002 | decisions.md#D-002 | D-01 |
 ```
 
 ---
@@ -335,10 +404,10 @@ Toda a engagement bem-sucedida termina com **6 deliverables** renderizados a par
 |---|---|---|---|---|---|
 | 1 | **Discovery Report** | Cliente (sponsor + stakeholders) | docx | business_context, current_state_summary, identified_processes, data_inventory, pain_points, stakeholders, sources | `library/packs/pp/deliverable-templates/discovery-report.template.md` |
 | 2 | **Executive Report** | C-suite | docx | one_page_summary, decision_options, recommended_path, financial_envelope, risk_summary | `executive-report.template.md` |
-| 3 | **Architecture Blueprint** | Technical leadership / architects | docx | executive_summary, chosen_architecture, entity_inventory, rbac_matrix, integration_inventory, alternatives_considered, open_assumptions | `solution-blueprint.template.md` |
-| 4 | **Implementation Specification** | PP maker / developer | md | solution_name, screens_to_build, tables_to_create, flows_to_implement, security_roles, integrations, test_scenarios, sequencing | `implementation-spec.template.md` |
-| 5 | **Claude Design Brief** | Pipeline Claude Design → designer | md | canvas_app_pages, page_navigation_map, persona_users, ux_requirements, brand_guidance, accessibility_notes + domain-knowledge cross-refs (powerfx-patterns, screen-patterns, security-patterns) | `claude-design-brief.template.md` |
-| 6 | **Estimate** | Sponsor + procurement | docx | effort_breakdown, timeline, team_composition, assumptions, risks, change_management | `estimate.template.md` |
+| 3 | **Architecture Blueprint** | Technical leadership / architects | docx | architecture_block (+ o include **fixo** `architecture-templates/architecture-core.md`), orientation, decision_basis, architecture_narrative, scope_ownership_projection, candidate_architectures_note, epistemic_and_validity_display | `solution-blueprint.template.md` (canonical: `architecture-blueprint`) |
+| 4 | **Implementation Specification** | PP maker / developer | md | build_scope_statement, architecture_constraints, entities_to_create, screens_to_build (condicional a `experience.mode != none`), flows_to_implement, security_implementation, integrations, environment_and_release, monitoring_and_recovery, proof_work_packages, sequencing, migration_and_cutover, open_work_items | `implementation-spec.template.md` |
+| 5 | **Claude Design Brief** | Pipeline Claude Design → designer | md | approved_blueprint_id, surface_inventory, persona_users, page_navigation_map, screen_specifications, ux_requirements, excluded_from_ui, **architecture_constraints_digest** (seleção estreita, não o core completo), brand_guidance, accessibility_notes, where_to_verify (apontações no ponto de necessidade — **sem catálogo pré-carregado**). Todos os slots de superfície são **condicionais** a `experience.mode != none` | `claude-design-brief.template.md` |
+| 6 | **Estimate** | Sponsor + procurement | docx | input_mode_statement (**2 modos, sem terceiro**), estimate_scope_statement, work_breakdown, effort_bands, phases_table, effort_summary, named_uncertainties, range_and_contingency, confidence_statement, excluded_scope, candidate_estimates (modo B). Declara `owns_calculation: true` — **dona semântica** do cálculo; executor: `aisa-render` | `estimate.template.md` |
 
 ### 5.1 Pipeline de produção (Discovery → Decision → Synthesis → Render)
 
@@ -357,7 +426,7 @@ decisions.md                       as-is.md                  executive-report
                                                              estimate
 ```
 
-**Por que a camada `_synthesis/`**: os 6 deliverables têm temas partilhados (`business_context` aparece em Discovery Report + Executive Report; `chosen_architecture` aparece em Blueprint + Implementation Spec). Sintetizar em 6 contextos independentes produz inconsistências (Executive diz X, Discovery diz Y sobre o mesmo facto). A `_synthesis/` produz **4-5 topic packs** uma única vez; os deliverables compõem-se a partir destes.
+**Por que a camada `_synthesis/`**: os 6 deliverables têm temas partilhados (`business_context` aparece em Discovery Report + Executive Report; a arquitectura registada é projectada pelo Blueprint e pela Implementation Spec). Sintetizar em 6 contextos independentes produz inconsistências (Executive diz X, Discovery diz Y sobre o mesmo facto). A `_synthesis/` produz **4-5 topic packs** uma única vez; os deliverables compõem-se a partir destes.
 
 ### 5.2 Synthesis contract
 
@@ -367,9 +436,9 @@ decisions.md                       as-is.md                  executive-report
 |---|---|---|
 | `_synthesis/business-story.md` | SU.Confirmed[lens=business] + lens-outputs/business.md | discovery-report, executive-report |
 | `_synthesis/as-is.md` | SU.Confirmed[lens=operations,user] + lens-outputs/{operations,user}.md | discovery-report, solution-blueprint |
-| `_synthesis/architecture-story.md` | decisions.md + SU.Confirmed[lens=technology,data] + lens-outputs/{technology,data}.md + chosen architecture-template | solution-blueprint, implementation-spec, claude-design-brief |
-| `_synthesis/risks-and-assumptions.md` | SU.Risky + SU.Assumed + SU.Unknown.criticality=Critical | executive-report, solution-blueprint, estimate |
-| `_synthesis/financial-story.md` | SU.Confirmed[lens=financial] + lens-outputs/financial.md + decisions.md (cost/timeline) | executive-report, estimate |
+| `_synthesis/architecture-story.md` | decisions.md + o registo `architecture:` + SU[lens=technology,data] + lens-outputs/{technology,data}.md + o entry point **fixo** `architecture-templates/architecture-core.md` | solution-blueprint (narrativa); executive-report (I-1: **portador durável** da base de arquitectabilidade — nunca autoridade) |
+| `_synthesis/risks-and-assumptions.md` | SU.Risky + SU.Assumed + SU.Unknown.criticality=Critical + SU.Conflicted (não resolvidos) + SU.Confirmed **expirados** + decisions.md (riscos aceites, condições, pré-condições, obrigações de prova) | discovery-report, executive-report, estimate |
+| `_synthesis/financial-story.md` | SU[lens=financial] + lens-outputs/financial.md + decisions.md (âncoras económicas) + options.md S8 — **economia de decisão APENAS**; a synthesis **não calcula esforço de implementação** | executive-report |
 
 Síntese é **determinística dado os inputs**: o prompt da synthesis-skill é fixo (mora em `library/kernel/synthesis-templates/<topic>.template.md`), as fontes são endereçadas explicitamente. Re-correr `/synthesize` com os mesmos inputs produz output semanticamente equivalente.
 
@@ -381,8 +450,13 @@ A skill `.claude/skills/aisa-render/SKILL.md` lê os `_synthesis/` topic packs +
 - **Render falha alto** se um topic pack obrigatório está vazio (slot required sem fonte). Não inventa — emite `_render/render-gaps.md` listando o que falta e qual lens/synthesis pack deve preencher.
 - **`/render <deliverable>`** renderiza apenas um; **`/render --all`** renderiza os 6.
 - **Versioning incremental**: `/render` produz sempre o próximo `v<NN>` (nunca sobrescreve). Se o consultor editou `v01` manualmente, fica intacto; `v02` é uma re-render limpa.
-- **Domain-knowledge cross-refs** (especialmente para Claude Design Brief): templates podem referenciar ficheiros de `library/packs/pp/domain-knowledge/` (`powerfx-patterns.md`, `screen-patterns.md`, `security-patterns.md`) por embed ou citação inline.
-- **Sub-templates por arquitectura escolhida**: o Architecture Blueprint embed `library/packs/pp/architecture-templates/<chosen>.md` (canvas-only, model-driven-only, hybrid, etc.).
+- **Cobertura na projecção** (`library/kernel/coverage-contract.md` §8.2, §8.3): `/render` corre duas verificações que não se misturam. **Antes** de produzir cada deliverable, o pré-render — as autoridades que *aquele* deliverable declara, e a versão de desenho que o *seu template* manda ler (`blueprint_version_read`: `v<latest authorized>` · `v<approved>` · `none`). **Depois**, a revisão de projecção do ficheiro escrito: cada obrigação seleccionada ligada à secção que a carrega. Uma autoridade que ainda não existe é **skip com razão** em `render-log.md`, nunca lacuna; uma obrigação perdida é lacuna com dono em `render-gaps.md`, e o render devolve-a a montante — nunca reabre o Excel, nunca reescreve a SU, nunca resolve uma pergunta em aberto. Um id citado num comentário é referência, não projecção.
+- **Domain-knowledge selectivo, no ponto de necessidade** (Step 6B): nenhum deliverable pré-carrega o catálogo. Discovery e Executive citam **zero** unidades. A Implementation Spec e o Design Brief citam **uma unidade por obrigação**, no ponto de necessidade; a Estimate cita apenas o método (`craft/estimation-model.md`) e os *drivers* económicos. Os `craft/` são prática de entrega e moldam a **forma** de um artefacto; qualquer asserção de plataforma vem da unidade `RESEARCH` que a detém.
+- **Include de arquitectura é FIXO** (Step 5B/6B): um único entry point, `library/packs/pp/architecture-templates/architecture-core.md`. **Sem branch, sem lookup dinâmico por decisão, sem `<chosen>.md`, sem router.** O core resolve **zero ou um** fragmento de experiência (`experience.mode: none` → **zero** includes) e **zero ou mais** instâncias do fragmento de fronteira (exactamente N+M, seis canais cada).
+- **Contratos de projecção** (Step 6B): cada template declara `canonical_deliverable`, `activation`, `authority_sources`, `conditional_sources`, `forbidden_sources`, `permitted_transformations` e `forbidden_transformations`. O template **declara**; `aisa-render` **executa** — e executa **apenas** as transformações declaradas. Nenhum dos dois raciocina.
+- **Transformação de projecção vs raciocínio**: uma transformação é legítima só se for **determinística**, **limitada**, **declarada** pelo contrato activo e **rastreável** a inputs já autoritativos (ex.: *obrigação de arquitectura → pacote de trabalho*, *obrigação de prova → condição de aceitação*, *inventário → unidade de trabalho → bandas de esforço*). Falhar qualquer uma das quatro torna-a raciocínio, e portanto proibida.
+- **Exactamente duas arestas deliverable→deliverable limitadas**, e nenhuma terceira: `implementation-spec → estimate` (**apenas inventário**) e `estimate → executive-report` (**apenas o headline**, um parágrafo de investimento). O Relatório Executivo não lê fases, decomposição de trabalho, mix de equipa, derivação da gama, detalhe de contingência nem inventários de candidatos — e nunca se torna uma segunda autoridade de estimativa. O grafo de leitura é **acíclico**.
+- **Quatro classes de render-gap**, inalteradas em semântica; a classe 3 passou de *architecture work item* a **`open work item`** com `owner ∈ {architecture, implementation, design, estimate, evidence}`. Skips de deliverable vão para `render-log.md` e **nunca** para `render-gaps.md`.
 
 ### 5.4 Por que 6 e não 5
 
@@ -428,29 +502,44 @@ aisa/                                              # repo 1 — partilhável den
 │   │   └── _universal/<persona>/{universal-constraints,anti-patterns}.md
 │   │       # _tenant/ é gitignored — vive no repo privado (corporate-patterns etc.)
 │   ├── output-styles/                               # (vazio; opcional)
-│   └── hooks/
-│       ├── pre-write-guard.sh                       # ENFORCE: library/ read-only (o hard guard)
-│       ├── on-su-change.sh · phase-gate-check.sh    # log-only no MVP (validadores em v0.2.0)
-│       └── synthesis-validate.sh · render-validate.sh
+│   └── hooks/                                       # todos Python 3 (ver .claude/hooks/HOOKS.md)
+│       ├── pre-write-guard.py                       # ENFORCE: library/ read-only (o hard guard)
+│       ├── pre-lens-order-check.py                  # ENFORCE: ordem das lenses na passagem completa (Discovery)
+│       ├── on-su-change.py                          # ACTIVO: regenera <slug>/dashboard.html
+│       └── phase-gate-check.py · synthesis-validate.py · render-validate.py   # log-only
 │
 ├── library/                                         # read-only em runtime (hook + deny)
 │   ├── kernel/                                      # universal, vendor-agnóstico
 │   │   ├── phases.md · states.md · orchestration.md
-│   │   ├── render-contract.md · blueprint-contract.md · glossary.md
+│   │   ├── render-contract.md · blueprint-contract.md · coverage-contract.md · glossary.md
 │   │   ├── synthesis-templates/{business-story,as-is,architecture-story,risks-and-assumptions,financial-story}.template.md
 │   │   ├── capture-templates/process-model.template.md
-│   │   └── tools/xlsx_extract.py                 # L1 extracção + L3 replay (lido e EXECUTADO, nunca editado)
+│   │   └── tools/                                   # motores determinísticos, LIDOS E EXECUTADOS
+│   │       ├── xlsx_extract.py                      # L1 extracção + L3 replay (/capture)
+│   │       ├── dashboard.py                         # gera <slug>/dashboard.html (/dashboard + hook)
+│   │       └── coverage.py                          # revisão de cobertura: inventory · check · report · finalize
+│   │                                                # executar não é escrever: a regra read-only
+│   │                                                # aplica-se a EDIÇÕES em runtime, não à execução
 │   └── packs/
-│       ├── pp/                                      # Power Platform — VALIDADO (v1.2.0)
-│       │   ├── pack.yaml                            # deliverables (c/ applies_to) + lenses_config + refs
+│       ├── pp/                                      # Power Platform — VALIDADO (v1.1.0)
+│       │   ├── pack.yaml                            # deliverables (c/ activation) + lenses_config + refs
 │       │   ├── glossary.md · question-bank.md · decision-tree.md
 │       │   ├── deliverable-templates/{discovery-report,executive-report,solution-blueprint,
 │       │   │                          implementation-spec,claude-design-brief,estimate}.template.md
-│       │   ├── architecture-templates/{sharepoint-first,dataverse-first,hybrid}.md
-│       │   └── domain-knowledge/                    # powerfx-patterns · screen-patterns · security-patterns ·
-│       │       # delegation-matrix · excel-patterns · dataverse/azure-sql/sharepoint refs ·
-│       │       # anonymization · flows-patterns · estimation-model · screen-consolidation-rules ·
-│       │       # delivery-conventions
+│       │   ├── architecture-templates/architecture-core.md      # entry point FIXO (+ 4 fragmentos)
+│       │   └── domain-knowledge/                    # pull-based, nunca preloaded (README.md = contrato de uso)
+│       │       ├── README.md                        # regra de pull · regra de depth · grades · fronteira CRAFT
+│       │       ├── application/application-surfaces.md
+│       │       ├── data/{store-boundaries,dataverse,sharepoint,azure-sql,query-and-delegation}.md
+│       │       ├── automation/automation-mechanisms.md · integration/integration-mechanisms.md
+│       │       ├── security/security-controls.md · governance/governance-and-environments.md
+│       │       ├── alm/release-and-lifecycle.md · performance/performance-and-scale.md
+│       │       ├── economics/licensing-and-cost-drivers.md · operations/operability-and-support.md
+│       │       ├── architecture/patterns.md          # 15 unidades RESEARCH acima
+│       │       └── craft/                            # 10 unidades CRAFT — nunca alvo de pull D3 em Options
+│       │           # powerfx · screen-patterns · screen-consolidation-rules · excel-translation ·
+│       │           # flow-craft · security-craft · sql-delivery-conventions · anonymization ·
+│       │           # estimation-model · delivery-conventions
 │       ├── outsystems/pack.yaml                     # scaffold, sem conteúdo validado
 │       ├── mendix/pack.yaml                         # scaffold
 │       └── generic/pack.yaml                        # scaffold platform-agnostic
@@ -460,24 +549,28 @@ aisa/                                              # repo 1 — partilhável den
 └── docs/                                            # ARCHITECTURE · PHILOSOPHY · ONBOARDING ·
                                                      # IMPLEMENTATION_PLAN · PACK/LENS/DELIVERABLE_AUTHORING ·
                                                      # MIGRATION_FROM_AISA · REFERENCES_ANALYSIS ·
-                                                     # GAP_ANALYSIS · NEXT_LEVEL_PLAN · UX_BLUEPRINT_PROPOSAL · ISSUES ·
-                                                     # V3_IMPLEMENTATION_PLAN · V3_VALIDATION_REPORT · PROCESS_CAPTURE_SPEC
+                                                     # GAP_ANALYSIS · NEXT_LEVEL_PLAN · UX_BLUEPRINT_PROPOSAL · ISSUES
 
 # Estrutura típica de UM engagement (vive em aisa-engagements-<tenant>/<slug>/):
 #   <slug>/
-#   ├── _state.json                              # phase, round, pack, round_mode (run em curso), atomic writes (tmp → mv)
+#   ├── _state.json                              # phase, round, pack, atomic writes (tmp → mv)
 #   ├── context.json                             # captura do /start
 #   ├── shared-understanding.md                  # ARTEFACTO VIVO (5 secções por estado)
+#   ├── dashboard.html                           # PÁGINA VIVA (gerada; nunca editada à mão)
+#   ├── story.md                                 # narrativa por marco, voz de sponsor
 #   ├── answers.md                               # respostas verbatim do /answer
 #   ├── council-log.md                           # narrativa cronológica por ronda
 #   ├── decisions.md                             # D-NNN (frame, decisão, aprovação do blueprint)
 #   ├── frame.md · options.md                    # artefactos de fase (chairman)
+#   ├── premortem.md                             # obituário pré-decisão (/premortem)
 #   ├── inputs/                                  # documentos do cliente (abertos e perfilados)
+#   ├── _capture/                                # extraction.json + replay.md + process-model.md
 #   ├── lens-outputs/                            # prose por lens + chairman-synthesis-<F|O>-<NN>.md
 #   │   └── _council-prep/                       # excertos temáticos por persona (audit)
-#   ├── _capture/                                # extraction.json + replay.md por input + process-model.md (/capture)
 #   ├── _simulation/                             # options-comparison_v<NN>.md (/simulate)
 #   ├── _blueprint/                              # ux-blueprint_v<NN>.yaml + blueprint-log.md (/blueprint)
+#   ├── _coverage/                               # coverage_v<NN>.json + .md — revisões de cobertura (imutáveis)
+#   ├── _retro/                                  # diary-<persona>.md (staged, curadoria humana)
 #   ├── _synthesis/                              # 5 topic packs + _synthesis-log.md (auto no /decide)
 #   └── _render/                                 # deliverables v<NN> + render-gaps.md + render-log.md
 ```
@@ -538,10 +631,12 @@ lenses_config:
   # ... user, financial mostly use kernel defaults
 
 domain_knowledge:
-  - domain-knowledge/powerfx-patterns.md
-  - domain-knowledge/screen-patterns.md
-  - domain-knowledge/security-patterns.md
-  - domain-knowledge/delegation-matrix.md
+  # Manifesto, nao load order, nao routing table, nao mapa de concerns.
+  - domain-knowledge/README.md
+  - domain-knowledge/data/query-and-delegation.md
+  - domain-knowledge/security/security-controls.md
+  - domain-knowledge/craft/screen-consolidation-rules.md
+  # ... 26 ficheiros no total (15 RESEARCH + 10 CRAFT + README)
 
 question_bank: question-bank.md
 
@@ -554,7 +649,7 @@ decision_tree:
 
 ### 7.2 Lens contract — `.claude/skills/lens-<name>/SKILL.md`
 
-Cada lens é uma skill com este formato mínimo:
+**Lens = perspectiva + contrato de runtime mínimo.** Seis secções, nesta ordem; responsabilidades por secção em `docs/LENS_AUTHORING.md` (dono do contrato de authoring).
 
 ```markdown
 ---
@@ -565,34 +660,41 @@ description: <short>
 # Lens — <Domain>
 
 ## Role
-<O que esta lens vê no mundo. Persona declarada.>
+<A perspectiva distinta: o que esta lens nota e questiona. Sem orquestração, sem domain knowledge.>
 
-## Inputs (always reads)
-- projects/<slug>/context.json
-- (if mode: inline) projects/<slug>/shared-understanding.md
-- (if mode: council-independent) extracto temático do SU passado pelo orchestrator
+## Inputs
+<Uma linha: o que esta lens privilegia na evidência partilhada. Parse once, reason many —
+a evidência normal é `_capture/` (entrada: `evidence-index.md`); inspecção do raw é selectiva,
+quando material para a confiança. Contrato: library/kernel/orchestration.md.>
 
-## Outputs (always writes)
-- Linhas no shared-understanding.md (append-only, com id, estado, evidência, ronda)
-- `projects/<slug>/lens-outputs/<lens>.md` (append-only, prose narrativa por ronda: 1-3 parágrafos do que descobri nesta ronda + sinalização de Conflicted/Risky relevantes)
-- Optional: pergunta para `## Unknown` se faltar evidência
+## Outputs
+- Rows no `shared-understanding.md` — conhecimento atómico, append-only, `lens=<name>`
+- `lens-outputs/<lens>.md` — interpretação curta sob `## <round> — <lens>`:
+  what matters · tensions/risks · open evidence
 
 ## Hard rules (kernel-enforced)
-1. Nunca menciona tecnologia específica (Power Platform, OutSystems, etc.) excepto em Options.
-2. Nunca emite Confirmed sem evidência (texto, citation, USER_ANSWER).
-3. Se houver gap, emite Unknown — não inventa Assumed silenciosamente.
-4. Identifica-se na coluna `lens` de cada linha que adiciona.
+<Só invariantes que precisam de visibilidade local: neutralidade tecnológica em Discovery;
+nunca Confirmed sem evidência; append-only com `was <id>`; integridade da evidência
+(citar o que abriu; nunca alegar suporte mais forte do que o inspeccionado sustenta).
+Semântica de `verificado_em`/`validade`/`custo`/`swing`: ponteiro para states.md.>
 
-## Signal catalog (pack-extensible)
-<Lista de sinais que esta lens procura. Pack pode adicionar via lenses_config.>
+## Signal catalog
+<Lista curta de tokens universais. Sinais são cues de atenção, nunca checklist.
+Cues específicos do pack chegam pela invocação — a lens não lê `pack.yaml`.>
 
-## Execution
-<Steps numbered. ~5-8 steps maximum. Each step idempotent.>
+## Execution steps
+<Loop mínimo: (1) entender a evidência relevante; (2) aplicar a perspectiva — o passo que
+distingue esta lens; (3) sondar gaps/assunções/contradições materiais; (4) contribuir
+achados; (5) expor incerteza em vez de fabricar certeza.>
 ```
+
+Fronteira de pack: as **6 lenses de Discovery são pack-agnostic** (nunca leem `pack.yaml`; recebem cues injectados pelo orchestrator). **`lens-technology` é a excepção documentada** — Options-only e pack-aware, consulta `decision-tree.md`, `domain-knowledge/*.md` e `constraints_to_check` de forma selectiva (**domain knowledge é pull-based, não push-based**). Ver `library/kernel/orchestration.md` → *Pack context*.
+
+Tamanho: alvo leve (indicativo), **nunca critério de PASS/FAIL** e sem validador.
 
 ### 7.3 Agent contract — `.claude/agents/<name>.md`
 
-Personas para modo council-independent:
+Personas para modo council-independent. **Agent = perspectiva independente + mandato.**
 
 ```markdown
 ---
@@ -604,22 +706,21 @@ tools: [Read, Grep, Glob]  # restrictive; council agents don't write directly to
 # <Persona Name>
 
 ## Identity
-<Quem é. Background. Estilo de raciocínio.>
-
-## Mandate
-<O que esta persona deve produzir num round council.>
+<Quem é. A voz independente e o que desafia.>
 
 ## Lens binding
-This agent embodies: lens-<name>
+Esta persona é a voz de council da `lens-<name>`. Não precisa de ler o `SKILL.md` da lens —
+a invocação carrega o que a prende.
+
+## Mandate per phase
+<O que produz em Framing / Options / Decision.>
 
 ## Memory consulted
-- .claude/agent-memory/_universal/<name>/universal-constraints.md
-- .claude/agent-memory/_universal/<name>/anti-patterns.md
-- .claude/agent-memory/_tenant/<tenant>/<name>/corporate-patterns.md (repo privado, se existir)
-
-## Output format
-<Schema do que esta persona devolve ao chairman.>
+- .claude/agent-memory/_universal/<name>/*.md (incl. diary.md)
+- .claude/agent-memory/_tenant/<tenant>/<name>/*.md (repo privado, se existir)
 ```
+
+**Não vive aqui** (dono único entre parênteses): mecânicas de execução e as hard rules que prendem uma persona read-only (invocação do council, `library/kernel/orchestration.md`) · schema de retorno (`chairman-synthesis`) · semântica de estados (`states.md`) · procedimento da lens (`lens-*/SKILL.md`) · domain knowledge (`pack.yaml` + `domain-knowledge/`, lido só pelo `solution-architect`, em Options).
 
 ### 7.4 Render contract — `library/kernel/render-contract.md`
 
@@ -664,6 +765,39 @@ synthesis_prompt: |
 
 Synthesis-skill instancia este template para cada topic, e o output vai para `_synthesis/<topic>.md`.
 
+### 7.6 Coverage contract — `library/kernel/coverage-contract.md`
+
+A pergunta que este contrato responde é uma só: **o que se produziu carrega o que as fontes pediram?** Existe porque um caso real a expôs — uma versão de desenho que o verificador estrutural deu por `valid: yes (0 block, 0 warn)` tinha deixado cair um requisito que a Shared Understanding já carregava. Estrutura válida nunca quis dizer desenho coberto.
+
+**Três etapas, e cada uma mede um par diferente:**
+
+| etapa | de → para | quando | alvo |
+|---|---|---|---|
+| `reconciliation` | fontes → o registo (SU, decisões, respostas) | antes de desenhar | nenhum |
+| `blueprint` | o registo → a versão do desenho | depois de produzir cada versão | `_blueprint/ux-blueprint_vNN.yaml` |
+| `render` | o que o contrato de projecção selecciona → o documento | antes e depois de cada deliverable | `_render/<slug>_<deliverable>_vNN.md` |
+
+**Quatro perguntas separadas, e nenhuma responde pela outra** — é a regra central, e a razão de o mecanismo existir:
+
+```text
+estrutura      o ficheiro está bem formado?          bp_validate (25 códigos)
+cobertura      carrega o que foi pedido?             coverage.py  (13 códigos)
+aprovação      o negócio validou esta versão?        decisions.md D-NNN
+ponta-a-ponta  a solução funciona?                   prova de execução — fora do framework
+```
+
+Ausência de registo lê-se **`not_evaluated`**: nunca "completo", nunca "reprovado retroactivamente", e nunca a revogação de uma aprovação já registada.
+
+**O motor** é `library/kernel/tools/coverage.py` (stdlib-only). Quatro operações: `inventory` (o denominador, derivado das fontes e nunca do registo), `check` (os cinco veredictos), `report` (projecção Markdown determinística, que **não** é autoridade) e `finalize` — a **única** que escreve, e escreve só em `<engagement>/_coverage/`. Os registos são imutáveis: uma revisão nova é uma versão nova.
+
+**O que o motor nunca faz:** contar palavras, procurar nomes, medir semelhança textual, ou tratar a existência de uma referência como prova de satisfação. Verifica a *forma* da ligação — que o destino existe, que está no artefacto sob revisão, que não é um comentário; a adequação é revista e escrita pelo agente em duas passagens (fonte → destino e destino → fonte), e fica assinada por quem a fez.
+
+**Integração nos comandos:** `/blueprint` corre a reconciliação antes de produzir (passo 1b) e a revisão da versão depois (13b), e a condição de **nova** aprovação passa por aí; `/render` corre o pré-render por deliverable (2b) e a revisão de projecção depois (9b); `/answer` e `/capture` mostram o efeito na actualidade das revisões; `/status` expõe `status.coverage`; os hooks `blueprint-validate.py` e `render-validate.py` reportam cobertura **ao lado** da estrutura e da suficiência, nunca em vez delas, e nunca finalizam nada.
+
+**Autoridade de versão por deliverable** (§8.3): cada template declara no frontmatter qual a versão de desenho que lê — `v<latest authorized>` (Architecture Blueprint), `v<approved>` (Implementation Specification, Claude Design Brief) ou `none`. Campo **ausente** é defeito do contrato de projecção, não sinónimo de `none`. A cobertura *verifica* essa selecção; não a redefine.
+
+Plano de implementação e evidência das seis fases: `docs/runtime-hardening/coverage-reconciliation-implementation-plan.md` e `docs/runtime-hardening/coverage-phase-{1..6}-report.md`.
+
 ---
 
 ## 8. Slash Commands e Fluxo do Utilizador
@@ -672,20 +806,21 @@ Synthesis-skill instancia este template para cada topic, e o output vai para `_s
 |---|---|---|
 | `/start <slug> [pack]` | Início de engagement | Captura literal do pedido, requester. Cria `projects/<slug>/{context.json, shared-understanding.md skeleton, _state.json: phase=discovery, round=R-01}`. Activa pack (default: pp). Não pergunta sobre tecnologia. |
 | `/round [lens]` | Em qualquer fase | Corre uma lens (ou orquestra a sequência completa de uma ronda). Lens determinada pelo arg ou auto-escolhida com base na fase. |
-| `/capture [file]` | Discovery (auto no `/start`, freshness check no `/round`) | Process-capture de inputs `.xlsx`/`.xlsm`: L1 extracção determinística (`library/kernel/tools/xlsx_extract.py`) → L3 replay (bateria fixa de verificações) → L2 modelo de processo (LLM). Escreve `_capture/{<f>.extraction.json, <f>.replay.md, process-model.md, _capture-log.md}`. `inputs/` fica evidência pura. Spec: `docs/PROCESS_CAPTURE_SPEC.md`. |
-| `/answer <id> "..."` | Em qualquer fase | Resolve uma row Unknown/Conflicted/Assumed/Risky: resposta verbatim em `answers.md`, nova row `was <id>`, marcador `resolved →` na original. |
-| `/status` | A qualquer momento | Mostra fase, ronda actual, contagem de items por estado (abertos vs resolvidos), contradições por resolver, gaps abertos, próxima acção sugerida. |
+| `/capture [file]` | Discovery (auto no `/start`, freshness check no `/round`) | Process-capture de inputs: L1 extracção determinística de `.xlsx`/`.xlsm` (`library/kernel/tools/xlsx_extract.py`) → L3 replay (bateria fixa de verificações) → LT capture-lite de `.docx`/`.pdf`/`.vtt` (`text_extract.py`, sem LLM) → L2 modelo de processo (LLM, **cross-source**: lê toda a evidência normalizada via `evidence-index.md`, source-complete em cobertura, e escreve a sinopse de processo em `process-model.md` §4 com marcadores OBSERVED/INFERRED/HYPOTHESIS/UNKNOWN). Escreve `_capture/{<f>.extraction.json, <f>.replay.md, <f>.text.md, process-model.md, evidence-index.md, _capture-log.md}`. `inputs/` fica evidência pura. Spec: `docs/PROCESS_CAPTURE_SPEC.md`. Declara os limites de captura (uma fonte sem extractor entra como limitação, **nunca** como coberta) e recalcula o efeito na actualidade das revisões quando uma fonte ou um extractor muda (§7.6). |
+| `/answer <id> "..."` | Em qualquer fase | Resolve uma row Unknown/Conflicted/Assumed/Risky: resposta verbatim em `answers.md`, nova row `was <id>`, marcador `resolved →` na original. Mostra o efeito calculado na actualidade das revisões de cobertura (§7.6) — uma resposta nova muda a base, e as revisões que assentavam nela ficam `stale`. Não escreve flag nenhuma: o estado é derivado em cada leitura. |
+| `/status` | A qualquer momento | Mostra fase, ronda actual, contagem de items por estado (abertos vs resolvidos), contradições por resolver, gaps abertos, próxima acção sugerida. Expõe `status.coverage` (§7.6) com as quatro perguntas em linhas separadas — estrutura, cobertura, aprovação, ponta-a-ponta — e `not_evaluated` onde não há revisão, que não é aprovação nem reprovação. |
 | `/frame` | Discovery → Framing | Transita para fase Framing. Corre lenses em modo council-independent + chairman. Produz `frame.md` (a frase única) + `contradictions.md` resolvidas. |
 | `/options` | Framing → Options | Transita para Options. Corre lens-technology + outras lenses como council. Gera 3-5 opções (incluindo `do nothing` e `non-tech`). Consulta `decision-tree.md` pela 1.ª vez. |
 | `/simulate [O-NNN ...]` | Em Options | Projecta cada opção (ecrãs/intervenção, banda de esforço, riscos, constraints) lado-a-lado em `_simulation/` + lista os Unknowns *decision-flipping* (value of information). Advisory. |
 | `/premortem [--horizon <meses>]` | Em Options/Decision, antes do `/decide` | O obituário do projecto datado a +N meses: causas de morte narradas (ids), sinais observáveis, mitigações → requisitos/tripwires. Soft-sugerido pelo `/decide`. |
 | `/decide [--consult]` | Options → Decision | Captura escolha + justificação + alternativas + riscos + condições. Regista em `decisions.md` + row D-NNN no SU. `--consult` = review opcional do solution-architect. **Auto-corre `/synthesize` no fim.** |
-| `/blueprint` | Decision (draft em Options via `--option`) | Produz `_blueprint/ux-blueprint_v<NN>.yaml` — arquitectura de ecrãs com `su_refs`, via regras do pack. Iterado com o negócio até aprovação (D-NNN). Contrato: `library/kernel/blueprint-contract.md`. |
+| `/blueprint` | Decision (draft em Options via `--option`) | Produz `_blueprint/ux-blueprint_v<NN>.yaml` — arquitectura de ecrãs com `su_refs`, via regras do pack. Iterado com o negócio até aprovação (D-NNN). Contratos: `library/kernel/blueprint-contract.md` e `library/kernel/coverage-contract.md` — reconciliação das fontes antes de produzir (passo 1b), revisão de cobertura da versão concreta depois (passo 13b), e a condição de **nova** aprovação. Estrutura, cobertura, aprovação e ponta-a-ponta são quatro perguntas separadas; nenhuma responde pela outra, e sem registo a resposta é *não avaliado* — que não revoga aprovação nenhuma. |
 | `/synthesize` | Auto após `/decide` (ou ad-hoc) | Produz `_synthesis/{business-story, as-is, architecture-story, risks-and-assumptions, financial-story}.md` a partir do SU + lens-outputs + decisions. Camada intermédia para garantir coerência entre os 6 deliverables. |
-| `/render [deliverable\|--all]` | Fim de Decision (após `/synthesize`) | Renderiza 1 ou todos os 6 deliverables em `_render/`. Lê dos topic packs em `_synthesis/`. Falha alto se faltam topic packs ou slots required. Versioning incremental (`v01`, `v02`, ...) — nunca sobrescreve. |
+| `/render [deliverable\|--all]` | Fim de Decision (após `/synthesize`) | Renderiza 1 ou todos os 6 deliverables em `_render/`. Lê dos topic packs em `_synthesis/`. Falha alto se faltam topic packs ou slots required. Versioning incremental (`v01`, `v02`, ...) — nunca sobrescreve. **Cobertura em duas verificações que não se misturam** (§7.6): o pré-render por deliverable (passo 2b) — as autoridades que *ele* declara e a versão que o *seu template* manda ler — e a revisão de projecção do ficheiro escrito (9b). Autoridade que ainda não existe é *skip com razão* em `render-log.md`, **nunca** lacuna; obrigação perdida é lacuna com dono em `render-gaps.md`, devolvida a montante — o render nunca reabre o Excel, nunca reescreve a SU, nunca resolve uma pergunta em aberto. |
 | `/revisit <TW-n\|O-NNN>` | Pós-decisão, quando um tripwire dispara | Compara o presente com o counterfactual congelado; recomenda manter/adaptar/reabrir. Nunca altera a decisão. |
 | `/retro` | Fecho do engagement | As 7 personas escrevem diários (staged → curadoria humana → agent-memory). O council fica mais sábio a cada engagement. |
-| `/resume` | Session retomada | Lê `_state.json`, mostra onde estamos, verifica tripwires e nomeia o próximo comando. |
+| `/resume` | Session retomada | Lê `_state.json`, mostra onde estamos, verifica tripwires, deriva o bloco *Read to resume* da fase (o conjunto mínimo de autoridades a recarregar — nunca o transcript anterior, nunca toda a evidência) e nomeia o próximo comando. §3.5. |
+| `/dashboard [slug] [--open]` | A qualquer momento | Regenera `projects/<slug>/dashboard.html` — a página viva self-contained, 6 tabs: **Panorama** (fase, saúde, barra dos 5 estados, a frase única do frame, as 3 coisas a fazer, último episódio da `story.md`), **Outputs** (o que cada fase produziu, por extenso: `_capture/process-model.md`, `frame.md`, `options.md`, `_simulation/`, `premortem.md`, `decisions.md`, `_synthesis/`, `_blueprint/` — renderizados com os ids do SU clicáveis, os da fase actual expandidos), **Agenda** (baldes por custo/swing + tripwires), **Registo** (as 5 secções do SU, claim clampado a 2 linhas, clique abre gaveta com o detalhe integral), **Narrativa** (timeline) e **Artefactos**. Paleta alinhada com os deliverables DOCX. Determinística (`library/kernel/tools/dashboard.py`, stdlib-only, zero requests externos, `build` hash estável). O hook `on-su-change.py` mantém-na actualizada **apenas para escritas do agente**; para edições externas (editor, script, outra sessão) usar `--serve` (poll de mtimes + servidor em `http://127.0.0.1:8787`, só localhost). Sobre HTTP a página sonda `/__build` e recarrega apenas quando o hash do build muda; sobre `file://` não pode fazer `fetch` e cai no reload cego por temporizador, que contextos sandboxed recusam. Também para bootstrap, slug não-activo e `--open`. |
 | `/export` | (backlog — não implementado) | Snapshot completo do engagement (para handoff ou archive). |
 
 **Fluxo típico end-to-end** (visto pelo consultor):
@@ -716,15 +851,15 @@ Synthesis-skill instancia este template para cada topic, e o output vai para `_s
 
 ### 9.1 Hard (não overrideable)
 
-Todos os hooks são **Python 3** (`.claude/hooks/*.py`), cross-platform e sem dependências externas. Três invariantes são hard-enforced:
+Apenas 2 invariantes são hard-enforced:
 
-1. **`library/` é read-only em runtime.** Hook `pre-write-guard.py` rejeita qualquer Write/Edit a paths sob `library/`, e **falha fechado**: enforce é o default, só um `AISA_GUARD_MODE=log` explícito o desliga (override administrativo). Backup: `.claude/settings.json` `deny: Write(./library/**)`. Executar `library/kernel/tools/*.py` não é uma escrita — o guard não se aplica a corridas do script de captura.
+1. **`library/` é read-only em runtime.** Hook `pre-write-guard.py` rejeita qualquer Write/Edit a paths sob `library/`. Backup: `.claude/settings.json` `deny: Write(./library/**)`.
 2. **`_state.json` writes são atómicos.** Hook (ou skill convention) força padrão `_state.json.tmp` → `mv _state.json`. Crash mid-write nunca corrompe estado.
-3. **Ordem das lenses em Discovery.** Hook `pre-lens-order-check.py` bloqueia a lens N se a lens N-1 ainda não escreveu output para a ronda em curso — uma lens a ler um SU meio construído tira conclusões de evidência que ainda não foi recolhida. Sem modo log. O `/round <lens>` (lens única, tipicamente re-corrida após um `/answer`) é o único escape, e é **declarado**: o `aisa-round` escreve `_state.json.round_mode = {mode, lens, round}` antes de invocar, e o hook só se afasta quando o marcador nomeia aquela lens para aquela ronda — marcador obsoleto, de outra lens, malformado ou ausente impõem a ordem.
 
 ### 9.2 Soft (advisory, overrideable com justificação)
 
-- **`on-su-change.py`** — quando `shared-understanding.md` é modificado, regista a alteração (log-only no MVP; o contradiction-scan em background é v0.2.0). Hoje a detecção de contradições é feita pela lens-governance (passo de conflict-scan) e pelo chairman na síntese.
+- **`on-su-change.py`** — **activo**. Após qualquer Write/Edit dentro de um engagement (SU, `_state.json`, `decisions.md`, `story.md`, `council-log.md`, `answers.md`, `options.md`, `frame.md`, `context.json`, `premortem.md`, ou qualquer ficheiro sob `_capture/ _synthesis/ _render/ _blueprint/ _simulation/ _retro/ lens-outputs/ _coverage/`), spawna `library/kernel/tools/dashboard.py` em background e regenera `<slug>/dashboard.html`. Debounce de 2 s (`AISA_DASHBOARD_DEBOUNCE`) para não rebuildar 7 vezes numa ronda. Nunca bloqueia: sai sempre 0. **Limite**: `PostToolUse` só vê as escritas do agente — para editores/scripts/outras sessões usar `/dashboard --serve`. A detecção de contradições continua a ser feita pela lens-governance (conflict-scan) e pelo chairman na síntese.
+- **`phase-completeness.py`** (hook `Stop`) — **activo**. No fim de cada turno verifica se a skill da fase corrente escreveu tudo o que a sua secção `Outputs (written)` promete. Framing: `frame.md` com a frase única, `chairman-synthesis-F-NN.md`, os 6 excertos `_council-prep`, rows novas no SU com a ronda, linha no `council-log` — e, em separado, o fecho por validação (`D-001` + episódio da `story.md`). Options: o mesmo com 7 personas e ≥3 opções incluindo do-nothing e non-technology. Decision: bloco `D-NNN`, os 5 topic packs, row `D-NNN` no SU, counterfactuals congelados. Reporta em stderr, **nunca bloqueia**, sai sempre 0, silencioso quando está completo. Também corre à mão: `python .claude/hooks/phase-completeness.py --engagement <slug>`.
 - **`phase-gate-check.py`** — antes de transição de fase, verifica entry/exit criteria. Emite warning se violados. User pode prosseguir com `/frame --override "razão"`.
 - **`synthesis-validate.py`** — após `/synthesize`, verifica que todos os 5 topic packs em `_synthesis/` foram produzidos sem secções vazias críticas. Se algum está vazio, lista qual lens devia ter contribuído. Bloqueia `/render --all` com warning (overrideable com `/render --skip-validate`).
 - **`render-validate.py`** — antes de produzir output `_render/`, verifica que todos os required slots têm fonte. Se algum falta, gera `render-gaps.md` e ASKS confirm.
@@ -939,7 +1074,7 @@ Pack declara `language: pt | en | es`. Templates traduzidos por pack. Kernel é 
 - [ ] `.claude/skills/aisa-start/SKILL.md` (captura + scaffold project)
 - [ ] `.claude/skills/aisa-round/SKILL.md` (orquestra ronda em modo inline)
 - [ ] `.claude/skills/aisa-status/SKILL.md`
-- [ ] `.claude/skills/contradiction-scan/SKILL.md`
+- [ ] ~~`.claude/skills/contradiction-scan/SKILL.md`~~ — **não construído, e deliberadamente.** A detecção de contradições não é uma skill própria: o chairman resolve contradições entre personas em rows `Conflicted` (`.claude/agents/chairman.md` → hard rule 4), e as lenses levantam `Unknown` para gaps. Não existe ficheiro com este caminho.
 - [ ] `library/packs/pp/{pack.yaml, glossary.md, question-bank.md, lenses-config.yaml}`
 - [ ] Validação: corre Discovery end-to-end num engagement de teste; produz SU em `_state: phase=discovery_complete`
 
@@ -963,7 +1098,7 @@ Pack declara `language: pt | en | es`. Templates traduzidos por pack. Kernel é 
 ### Fase 4 — Render (1-2 semanas)
 
 - [ ] `library/packs/pp/deliverable-templates/` (6 templates — discovery, executive, blueprint, implementation-spec, claude-design-brief, estimate)
-- [ ] `library/packs/pp/architecture-templates/` (4 sub-templates — canvas-only, model-driven, hybrid, dataverse-led)
+- [ ] `library/packs/pp/architecture-templates/` (entry point fixo `architecture-core.md` + 3 fragmentos de experiência + 1 fragmento de fronteira — as três branch shapes foram retiradas no Step 5B)
 - [ ] `library/packs/pp/domain-knowledge/` (4 ficheiros transplantados do aisa — powerfx-patterns, screen-patterns, security-patterns, delegation-matrix)
 - [ ] `.claude/skills/aisa-render/SKILL.md` — lê de `_synthesis/` + `decisions.md`; versioning incremental (v01, v02, …)
 - [ ] `.claude/hooks/render-validate.sh`
@@ -1076,13 +1211,13 @@ Confirmação que o trabalho de templates do pp-consulting (v1) transita para o 
 |---|---|---|
 | `outputs/discovery-report.md` | discovery-report (#1) | Slots equivalentes; remover Claim Ledger refs; adicionar SU-id refs |
 | `outputs/executive-report.md` | executive-report (#2) | Adicionar `decision_options` slot (vinha de wave-4 architecture-branching, agora vem de Options phase) |
-| `outputs/solution-blueprint.md` | solution-blueprint (#3) | Refactor `chosen_branch_template` para `chosen_architecture` (vem de decisions.md) |
+| `outputs/solution-blueprint.md` | solution-blueprint (#3) | Projecta o registo `architecture:` + o include **fixo** `architecture-core.md` (o modelo de branch foi retirado no Step 5B/6B) |
 | `outputs/design-spec.md` | claude-design-brief (#5) | Manter audience: claude-design; manter cross-refs a domain-knowledge; clarificar separation com implementation-spec |
 | (não existe — novo) | implementation-spec (#4) | NOVO. Extrair de solution-blueprint + design-spec o que é "build instructions" pura. Schema novo. |
 | `outputs/estimate.md` | estimate (#6) | Slots equivalentes; vem agora de Options phase (não wave-5 estimator-cell) |
-| `domain-knowledge/powerfx-patterns.md` | (mesma) | Copy-paste. Conteúdo de altíssimo valor; não tocar. |
-| `domain-knowledge/screen-patterns.md` | (mesma) | Copy-paste. |
-| `domain-knowledge/security-patterns.md` | (mesma) | Copy-paste. |
+| `domain-knowledge/powerfx-patterns.md` | `domain-knowledge/craft/powerfx.md` | Copy-paste na v2; **re-taxonomizado no Step 4B** — a matriz de delegação saiu para `data/query-and-delegation.md` (a `craft/` não afirma limites de plataforma). |
+| `domain-knowledge/screen-patterns.md` | `domain-knowledge/craft/screen-patterns.md` | Copy-paste na v2; só mudou de caminho no Step 4B. |
+| `domain-knowledge/security-patterns.md` | `domain-knowledge/craft/security-craft.md` | Copy-paste na v2; **re-taxonomizado no Step 4B** — o modelo de planos de aplicação vive em `security/security-controls.md`. |
 | `templates/architecture/*.md` | architecture-templates/* | Copy-paste; ajustar slot names ao novo blueprint template. |
 
 ---

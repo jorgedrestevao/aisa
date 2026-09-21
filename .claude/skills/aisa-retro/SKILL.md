@@ -26,7 +26,12 @@ description: Close-of-engagement retro — each council persona writes its diary
 2. **Stage** each return in `<engagement>/_retro/diary-<persona>.md`. Nothing touches agent-memory yet.
 3. **Present the set to the user** and ask for curation: aprovar tudo / editar entradas / excluir personas. List each entry's (b) — the failure paragraph — explicitly: an all-wins diary is suspect and should be pushed back on.
 4. **ONLY after explicit approval**: append each approved entry to `.claude/agent-memory/_universal/<persona>/diary.md`. Remind the user that agent-memory is tracked — the append lands in the repo via the normal git flow (a skill prepares the change; the human owns the commit). Tenant-proprietary detail belongs in `_tenant/` (private repo), never in `_universal/`.
-5. Final episode in `story.md` ("o council fecha o caderno e guarda o que aprendeu") + `council-log.md` line.
+5. Final episode in `story.md` ("o council fecha o caderno e guarda o que aprendeu") + `council-log.md` line. Output to the user, after step 2 and before the curation question (business language — `CLAUDE.md` → *Duas línguas*):
+   ```user-output
+   Lições do fim — <7> perspectivas escreveram o seu diário; as entradas estão em `_retro/`, à espera da tua curadoria.
+   Onde cada uma diz que falhou: <perspectiva — uma linha> …
+   A seguir: aprovar tudo · editar · excluir — a pergunta vem já a seguir; só depois disso as entradas entram na memória das perspectivas.
+   ```
 
 ## Hard rules
 

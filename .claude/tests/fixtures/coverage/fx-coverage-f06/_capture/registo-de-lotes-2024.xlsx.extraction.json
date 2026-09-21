@@ -1,0 +1,316 @@
+{
+ "artefact": "aisa.capture.extraction",
+ "tool": {
+  "name": "xlsx_extract.py",
+  "version": "1.2.0",
+  "openpyxl": "3.1.5",
+  "python": "3.11.9"
+ },
+ "extracted_at": "2026-09-14T23:15:53",
+ "identity": {
+  "filename": "registo-de-lotes-2024.xlsx",
+  "source_path": "C:\\Users\\jorge.estevao\\Documents\\Galp\\Claude Code Projects\\aisa-rt-fix\\.claude\\tests\\fixtures\\coverage\\fx-coverage-f06\\inputs\\registo-de-lotes-2024.xlsx",
+  "size_bytes": 5628,
+  "sha256": "363b5e713a4730c298c34919a9a35b438db0665b24bdfacb4d3b81c5b7be9949",
+  "modified": "2026-09-14T23:15:50"
+ },
+ "status": "ok",
+ "workbook": {
+  "named_ranges": [],
+  "flags": {
+   "vba_present": false,
+   "vba_modules": [],
+   "external_links": [],
+   "pivot_tables": [],
+   "protected_sheets": []
+  }
+ },
+ "sheets": [
+  {
+   "name": "Entradas",
+   "state": "visible",
+   "dimensions": "A1:C6",
+   "max_row": 6,
+   "max_col": 3,
+   "frozen_panes": null,
+   "header_row": 1,
+   "data_start_row": 2,
+   "data_end_row": 6,
+   "header_basis": "string-density",
+   "anomalies": {
+    "whitespace": [],
+    "mixed_types": [],
+    "duplicate_keys": []
+   },
+   "validations": [],
+   "conditional_formatting": [],
+   "fills": [],
+   "comments": [],
+   "columns": [
+    {
+     "column": "A",
+     "header": "Data",
+     "inferred_type": "str",
+     "rows_nonempty": 5,
+     "nulls": 0,
+     "distinct": 5,
+     "top_values": [
+      {
+       "value": "2024-06-01",
+       "count": 1
+      },
+      {
+       "value": "2024-06-02",
+       "count": 1
+      },
+      {
+       "value": "2024-06-03",
+       "count": 1
+      },
+      {
+       "value": "2024-06-04",
+       "count": 1
+      },
+      {
+       "value": "2024-06-05",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 5,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "B",
+     "header": "Lote",
+     "inferred_type": "str",
+     "rows_nonempty": 5,
+     "nulls": 0,
+     "distinct": 5,
+     "top_values": [
+      {
+       "value": "H001",
+       "count": 1
+      },
+      {
+       "value": "H002",
+       "count": 1
+      },
+      {
+       "value": "H003",
+       "count": 1
+      },
+      {
+       "value": "H004",
+       "count": 1
+      },
+      {
+       "value": "H005",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 5,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "C",
+     "header": "ValorMedido",
+     "inferred_type": "number",
+     "rows_nonempty": 5,
+     "nulls": 0,
+     "distinct": 5,
+     "top_values": [
+      {
+       "value": "10",
+       "count": 1
+      },
+      {
+       "value": "11",
+       "count": 1
+      },
+      {
+       "value": "12",
+       "count": 1
+      },
+      {
+       "value": "13",
+       "count": 1
+      },
+      {
+       "value": "14",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 5,
+     "min": 10,
+     "max": 14,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    }
+   ]
+  },
+  {
+   "name": "Resumo Aditivos",
+   "state": "visible",
+   "dimensions": "A1:D6",
+   "max_row": 6,
+   "max_col": 4,
+   "frozen_panes": null,
+   "header_row": 1,
+   "data_start_row": 2,
+   "data_end_row": 6,
+   "header_basis": "string-density",
+   "anomalies": {
+    "whitespace": [],
+    "mixed_types": [],
+    "duplicate_keys": []
+   },
+   "validations": [],
+   "conditional_formatting": [],
+   "fills": [],
+   "comments": [],
+   "columns": [
+    {
+     "column": "A",
+     "header": "Data",
+     "inferred_type": "str",
+     "rows_nonempty": 5,
+     "nulls": 0,
+     "distinct": 5,
+     "top_values": [
+      {
+       "value": "2024-06-01",
+       "count": 1
+      },
+      {
+       "value": "2024-06-02",
+       "count": 1
+      },
+      {
+       "value": "2024-06-03",
+       "count": 1
+      },
+      {
+       "value": "2024-06-04",
+       "count": 1
+      },
+      {
+       "value": "2024-06-05",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 5,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "B",
+     "header": "Lote",
+     "inferred_type": "str",
+     "rows_nonempty": 5,
+     "nulls": 0,
+     "distinct": 5,
+     "top_values": [
+      {
+       "value": "H001",
+       "count": 1
+      },
+      {
+       "value": "H002",
+       "count": 1
+      },
+      {
+       "value": "H003",
+       "count": 1
+      },
+      {
+       "value": "H004",
+       "count": 1
+      },
+      {
+       "value": "H005",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 5,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "C",
+     "header": "Aditivo",
+     "inferred_type": "str",
+     "rows_nonempty": 5,
+     "nulls": 0,
+     "distinct": 1,
+     "top_values": [
+      {
+       "value": "AD-0",
+       "count": 5
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 5,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    },
+    {
+     "column": "D",
+     "header": "Percentagem",
+     "inferred_type": "number",
+     "rows_nonempty": 5,
+     "nulls": 0,
+     "distinct": 5,
+     "top_values": [
+      {
+       "value": "0.1",
+       "count": 1
+      },
+      {
+       "value": "0.2",
+       "count": 1
+      },
+      {
+       "value": "0.3",
+       "count": 1
+      },
+      {
+       "value": "0.4",
+       "count": 1
+      },
+      {
+       "value": "0.5",
+       "count": 1
+      }
+     ],
+     "formula_count": 0,
+     "typed_count": 5,
+     "min": 0.1,
+     "max": 0.5,
+     "formula": null,
+     "class": "input",
+     "class_basis": "typed values on a formula-free sheet = raw input/extract",
+     "key_like": false
+    }
+   ]
+  }
+ ]
+}

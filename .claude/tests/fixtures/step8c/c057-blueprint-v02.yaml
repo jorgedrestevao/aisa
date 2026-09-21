@@ -1,0 +1,73 @@
+# Fixture — the C-057 regression shape, version AFTER the new fact, as the 1.8.2 contract expects it:
+# record authority moves to an external system of record; the surface rationale that depended on the
+# store is NOT silently carried and NOT automatically reversed — it is listed for revalidation and the
+# structural choice stays open with a would_be_settled_by that names mechanism + fit, not connectivity.
+blueprint_id: bp-v02
+architecture:
+  scope: whole solution
+  authorization: authorized
+  experience:
+    mode: owned-internal
+    primary_surface: "Record-centric app (model-driven)"
+    su_refs: [C-013, C-002, C-056]
+    rationale: >
+      Internal audience; data-dense, record-centric work with automatic relational navigation,
+      row/column security and audit inherited from the governed store.
+      REVALIDATE — the store assumption behind "row/column security and audit inherited from the
+      governed store" no longer holds after C-057 (record authority is external); see blueprint-log v02.
+  record_authority:
+    - domain: "Pricing master data"
+      authority: "external system of record (shared pricing database)"
+      access_mode: keep-in-place   # provisional — the ACCESS MECHANISM is the open structural choice U-040; never inferred from connectivity
+      su_refs: [C-017, C-057]
+    - domain: "Target margins and daily logistics costs"
+      authority: "external system of record (shared pricing database)"
+      access_mode: keep-in-place   # provisional — the ACCESS MECHANISM is the open structural choice U-040; never inferred from connectivity
+      su_refs: [C-006, C-016, C-057]
+    - domain: "Daily price history"
+      authority: "external system of record (shared pricing database)"
+      access_mode: keep-in-place   # provisional — the ACCESS MECHANISM is the open structural choice U-040; never inferred from connectivity
+      su_refs: [C-018, R-004, C-057, C-060]
+    - domain: "Term-contract client terms"
+      authority: external system of record (SAP)
+      access_mode: virtualized
+      su_refs: [C-052, C-003]
+  compositions:
+    - component: shared-pricing-database
+      pattern: direct   # provisional — the pattern is settled by U-040 together with the mechanism per domain
+      forced_by: "All pricing data lives in a shared relational database already operated for other pricing processes (C-057)."
+      boundary: outside-platform
+      owner: "team operating the shared pricing database"
+      su_refs: [C-057]
+    - component: sap-term-pricing-reference
+      pattern: direct
+      forced_by: "The app references term-contract prices already computed by SAP (C-003)."
+      boundary: outside-platform
+      owner: UNKNOWN
+  proof_obligations:
+    - claim: "Production-grade proof (whole solution)"
+      level: V4
+      method: not specified further
+      owner: not named
+      funded: no
+    - claim: "Measured spike of the chosen access mechanism at the history volume and the dashboard query shapes"
+      level: V2
+      method: spike against the shared database
+      owner: architecture
+      funded: no
+  open_architecture_choices:
+    - choice: "Surface compatible with an externally-authoritative store — record-centric, task-focused, or hybrid"
+      structural: true
+      would_be_settled_by: >
+        The access mechanism per data domain, established by the database owner / IT (basis B) or measured
+        (basis C), AND its fit against the material requirements — audit trail, authorization enforcement
+        point, query volume and shape, write semantics, schema constraints. Connectivity alone does not settle it.
+      su_ref: U-040
+    - choice: "Audit-trail mechanism now that the store no longer provides it natively"
+      structural: true
+      would_be_settled_by: "Audit mechanism per domain chosen and accepted by the database owner"
+      su_ref: U-041
+    - choice: "Server-side authorization enforcement point over the external store"
+      structural: true
+      would_be_settled_by: "Identity that reaches the store and where row/column authorization is enforced"
+      su_ref: U-042

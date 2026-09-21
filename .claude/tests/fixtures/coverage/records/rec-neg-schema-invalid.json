@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "version": "v16",
+  "engagement": "fx-coverage-f06",
+  "stage": "blueprint",
+  "generated_at": "2026-03-10T10:00:00+01:00",
+  "based_on": [
+    "coverage_v01.json"
+  ],
+  "target": {
+    "file": "_blueprint/ux-blueprint_v01.yaml",
+    "kind": "blueprint",
+    "identity": "v01"
+  },
+  "source_review": [
+    {
+      "id": "sr-001",
+      "unit_refs": [
+        "answers.md#U-004"
+      ]
+    }
+  ],
+  "coverage": [
+    {
+      "id": "item-001",
+      "requirement_refs": [
+        "C-007"
+      ],
+      "disposition": "preserve"
+    }
+  ],
+  "semantic_review": {
+    "status": "completed"
+  }
+}
