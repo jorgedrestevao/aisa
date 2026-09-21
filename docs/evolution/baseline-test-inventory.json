@@ -804,7 +804,8 @@
         "detail": "docs/CONSOLIDATED_PLAN.md does not exist (accept_phase2.py:172). Same class."
       }
     ],
-    "note": "The 'suite verde' and 'fase N continua verde' criteria failed on the 3 POSIX tests, now fixed. Re-measured separately."
+    "note": "The 'suite verde' and 'fase N continua verde' criteria failed on the 3 POSIX tests, now fixed. Re-measured separately.",
+    "resolved": true
   },
   "pilot_scope_decision": {
     "decided_by": "operator",
@@ -843,5 +844,21 @@
     ],
     "commit_at_ruling": "d68459d6a3c460864db001eeab2ad9769cfbf41b",
     "does_not_resolve": "The TOOL_VERSION divergence. accept_phase1.py:387 asserts '1.13.0' and dashboard.py:44 ships '1.14.0'. Both files are current and supplied by the operator, so this is an inconsistency INSIDE the current baseline, not version skew from an old checkout. It stays open."
+  },
+  "acceptance_final": {
+    "commit": "676857f90a2000dad385abe9419d2b5e4bf49942",
+    "accept_phase1": {
+      "exit": 0,
+      "criteria": "all pass"
+    },
+    "accept_phase2": {
+      "exit": 0,
+      "criteria": "all pass"
+    },
+    "accept_phase3": {
+      "exit": 0,
+      "criteria": "all pass"
+    },
+    "note": "Clean run against the corrected tree: boundary fix f04792e, the two documents in d68459d, and the orphan pin in 86221ba. All three runner modes are now green: per-file unittest 48/48, pytest, and the acceptance scripts."
   }
 }

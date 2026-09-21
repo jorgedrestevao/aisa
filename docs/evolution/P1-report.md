@@ -80,22 +80,28 @@ Nenhum destes dá atomicidade **entre** artefactos relacionados. Um lock de dash
 exclui escritas à SU nem a `_state.json`. É a lacuna que P2 tem de fechar, e agora está
 medida em vez de suposta.
 
-## Divergências por adjudicar — herdadas de P0, ainda abertas
+## Divergências herdadas de P0 — todas fechadas
 
-1. **`TOOL_VERSION`** — `accept_phase1.py:387` afirma `"1.13.0"`;
-   `library/kernel/tools/dashboard.py:44` define `"1.14.0"`. O script está atrasado face ao
-   motor. Qual corrigir **NÃO ESTÁ DETERMINADO**.
-2. ~~**`docs/FRAMEWORK-NEGOCIO.md`**~~ — **fornecido** e commitado; carrega o marcador
-   `SCOPE-STATEMENT v1`. Os 8 ficheiros de `SCOPE_FILES` passam agora.
-3. ~~**`docs/CONSOLIDATED_PLAN.md`**~~ — **fornecido** e commitado; abre com errata datada
-   2026-09-11, como o critério exige (histórico com errata, não reescrito).
-4. ~~**Identidade dos inputs** face ao `SOURCE_MANIFEST.json`~~ — **fechado**. O operador
-   decidiu (2026-09-21) que o conteúdo deste repositório é a versão actual e serve de
-   baseline; o manifesto fica superado enquanto descrição das entradas. P1 deixa de dever
-   o diff.
+| # | Item | Como fechou |
+|---|---|---|
+| 1 | Identidade dos inputs vs `SOURCE_MANIFEST.json` | Decisão do operador (2026-09-21): o conteúdo deste repositório **é** a versão actual e serve de baseline; o manifesto fica superado enquanto descrição das entradas. |
+| 2 | `docs/FRAMEWORK-NEGOCIO.md` ausente | Fornecido e commitado (`d68459d`). Carrega `SCOPE-STATEMENT v1`; os 8 ficheiros de `SCOPE_FILES` passam. |
+| 3 | `docs/CONSOLIDATED_PLAN.md` ausente | Fornecido e commitado (`d68459d`). Abre com errata datada 2026-09-11 — histórico com errata, não reescrito, como o critério exige. |
+| 4 | `TOOL_VERSION` 1.13.0 vs 1.14.0 | Pino órfão, corrigido em `86221ba`. `coverage-phase-4-report.md` regista o bump `1.13.0 → 1.14.0` como deliberado da fase 4 e diz que o pino irmão em `test_blueprint_yaml.py` foi movido junto (está em `1.14.0`, L713). O `accept_phase1.py`, sendo da fase 1, ficou para trás. |
 
-Depois da correcção de fronteira (`f04792e`), `accept_phase1.py` passou de 2 critérios em
-falha para **1**: só a divergência de versão. `suite verde` passa.
+### Estado da aceitação
+
+Corrida limpa das três fases contra a árvore corrigida, com os dois documentos no sítio e o
+pino actualizado:
+
+| Fase | Antes do fix de fronteira | Depois | Agora |
+|---|---:|---:|---|
+| `accept_phase1` | 2 critérios em falha | 1 | **exit 0 — todos passam** |
+| `accept_phase2` | 5 | 4 | **exit 0 — todos passam** |
+| `accept_phase3` | 2 | — | **exit 0 — todos passam** |
+
+Terceiro modo de runner verde de ponta a ponta. Somado ao conjunto principal
+(48/48 ficheiros, 2009 testes, 0 falhas), **os três modos de runner passam**.
 
 ## Contradição registada, por resolver
 
