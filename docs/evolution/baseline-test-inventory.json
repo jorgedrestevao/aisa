@@ -830,5 +830,18 @@
       "kam-onboarding-pilot-4"
     ],
     "note": "The two selected are exactly the two types P8 names. The other two stay on disk as engagement data (test_state_scaffold scans projects/) but get no oracle and are not P8 evidence. Nothing is deleted."
+  },
+  "input_identity_decision": {
+    "decided_by": "operator",
+    "date": "2026-09-21",
+    "question": "None of the three ZIPs in SOURCE_MANIFEST.json matches what this repository received.",
+    "ruling": "The content this repository holds IS the current version. It is adopted as the baseline; SOURCE_MANIFEST.json is superseded as a description of the inputs.",
+    "consequence": [
+      "Identity of the target is now defined by this repository's own commit and the per-file sha256 recorded in docs/evolution/source-inventory.json, not by the manifest's hashes.",
+      "Conclusions the package draws about the target may be reused without first computing a diff against the manifest ZIPs. P1 no longer owes that diff.",
+      "The manifest stays in the package as a record of what the plan was written against."
+    ],
+    "commit_at_ruling": "d68459d6a3c460864db001eeab2ad9769cfbf41b",
+    "does_not_resolve": "The TOOL_VERSION divergence. accept_phase1.py:387 asserts '1.13.0' and dashboard.py:44 ships '1.14.0'. Both files are current and supplied by the operator, so this is an inconsistency INSIDE the current baseline, not version skew from an old checkout. It stays open."
   }
 }

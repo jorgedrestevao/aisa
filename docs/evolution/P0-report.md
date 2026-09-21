@@ -36,8 +36,14 @@ Nenhum dos três ZIPs do manifesto corresponde byte-a-byte ao que este repositó
 | donor | `ai-solution-architect-main 2(2).zip`, 669 489 B | `ai-solution-architect-main.zip`, 2 548 035 B, 877 ficheiros |
 | previous_plan | `AISA_Evolution_Plan(1).zip`, 19 198 B | não fornecido |
 
-**NÃO VERIFICADO** — sem os ZIPs originais não se calcula o diff. P1 fixa a identidade
-antes de reutilizar qualquer conclusão do pacote sobre o alvo.
+**RESOLVIDO por decisão do operador (2026-09-21).** O conteúdo que este repositório tem
+**é** a versão actual, e é adoptado como baseline; o `SOURCE_MANIFEST.json` fica
+superado enquanto descrição das entradas. A identidade do alvo passa a ser o commit
+deste repositório e os sha256 por ficheiro em `source-inventory.json`. P1 deixa de dever
+o diff contra os ZIPs do manifesto.
+
+Não resolve a divergência de `TOOL_VERSION`: os dois ficheiros em causa são ambos
+actuais, logo é uma inconsistência **dentro** do baseline, não desfasamento de checkout.
 
 ## Nota pré-alteração
 

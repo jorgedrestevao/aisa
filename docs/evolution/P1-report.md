@@ -85,10 +85,14 @@ medida em vez de suposta.
 1. **`TOOL_VERSION`** — `accept_phase1.py:387` afirma `"1.13.0"`;
    `library/kernel/tools/dashboard.py:44` define `"1.14.0"`. O script está atrasado face ao
    motor. Qual corrigir **NÃO ESTÁ DETERMINADO**.
-2. **`docs/FRAMEWORK-NEGOCIO.md`** não existe (`accept_phase2.py:59`).
-3. **`docs/CONSOLIDATED_PLAN.md`** não existe (`accept_phase2.py:172`).
-4. **Identidade dos inputs** face ao `SOURCE_MANIFEST.json` — nenhum dos três ZIPs
-   corresponde ao que o repositório recebeu.
+2. ~~**`docs/FRAMEWORK-NEGOCIO.md`**~~ — **fornecido** e commitado; carrega o marcador
+   `SCOPE-STATEMENT v1`. Os 8 ficheiros de `SCOPE_FILES` passam agora.
+3. ~~**`docs/CONSOLIDATED_PLAN.md`**~~ — **fornecido** e commitado; abre com errata datada
+   2026-09-11, como o critério exige (histórico com errata, não reescrito).
+4. ~~**Identidade dos inputs** face ao `SOURCE_MANIFEST.json`~~ — **fechado**. O operador
+   decidiu (2026-09-21) que o conteúdo deste repositório é a versão actual e serve de
+   baseline; o manifesto fica superado enquanto descrição das entradas. P1 deixa de dever
+   o diff.
 
 Depois da correcção de fronteira (`f04792e`), `accept_phase1.py` passou de 2 critérios em
 falha para **1**: só a divergência de versão. `suite verde` passa.
