@@ -36,7 +36,7 @@ evidência de P8. Nada foi apagado.
 | `authority-map.md` | **feito** — 24 skills lidas; autoridades por artefacto e por modo |
 | `integration-adr.md` | **parcial** — ADR-001 (linguagem de runtime) aceite; falta o mapeamento módulo a módulo do doador |
 | `test-map.json` | **feito** — 61 casos ligados a fase, família e gate de saída; 0 implementados, e porquê |
-| Oráculos dos 2 pilotos | por fazer |
+| Oráculos dos 2 pilotos | **extraídos** — 22 itens, 13 críticos **por validar pelo responsável** |
 
 ## Progresso — o que está verificado
 
@@ -143,32 +143,56 @@ resolve com mais um hook de `Write|Edit`:
 3. **Observação de escritas por subprocesso** — `PostToolUse` nunca dispara sobre elas,
    como o próprio código regista em `on-su-change.py:38-40`.
 
+## Oráculos — extraídos, por validar
+
+`docs/evolution/oracles/` · 22 itens · 13 críticos · método: leitura **directa** das fontes
+(`openpyxl` com `data_only=False` para ler fórmulas, não valores em cache; `.vtt` em texto).
+Nenhum artefacto de `_capture/` foi lido — o oráculo não pode derivar das conclusões do
+candidato (`ACCEPTANCE.md` §5).
+
+### `dpt-galp-jp-pilot-4` — tickets · 11 itens, 6 críticos
+
+O mecanismo: reconciliação de **duas** fontes por `Ticket ID` — uma extracção diária volátil
+(73 linhas) e um registo de prioridade manual durável (89 linhas). A vista de trabalho é
+inteiramente derivada (103×10, tudo fórmula).
+
+Factos que mais custam se se perderem:
+- a prioridade é **juízo humano persistido**, não derivada da Severidade;
+- o registo detecta tickets seus que desapareceram do export (`Live Status`), e o export
+  mostra tickets sem prioridade em branco — **detecção de órfãos nos dois sentidos**;
+- `Aging = TODAY() - INT(data)` é **volátil**, recalculado a cada abertura.
+
+E o que a fonte não diz: dono e cadência do registo ficam `Unknown` — inferi-los seria
+facto inventado.
+
+### `pricing-bunkers-pilot-4` — Excel com regras · 11 itens, 7 críticos
+
+18 folhas, **13 262 fórmulas**, 134 named ranges, VBA presente.
+
+- As quatro folhas `usd_ton`/`eur_ton`/`usd_m3`/`eur_m3` partilham **249 de 249** padrões:
+  são o mesmo cálculo em quatro apresentações. Tratá-las como quatro regras multiplica a
+  estimativa por quatro.
+- O preço decompõe-se em componentes nomeados por cliente × produto (Margem, Prémio,
+  Transporte Barge/CT, Desconto, ISP, SLI…). Um preço escalar não representa isto.
+- A origem é um **feed de mercado externo**: `UlyssesQuotes` traz `model://ECB_FX/`,
+  `model://PLATTS_RI/`, `model://PLATTS_EB/`, `model://ICE_GASOIL/`.
+- `Inputs` é série temporal de 1461 linhas — o histórico é mecanismo, não arquivo.
+
+**A lacuna está declarada, não escondida.** `P-10` é `Unknown` **crítico**: a cadeia
+aritmética através das 13 262 fórmulas não foi traçada. Traçada está a estrutura — named
+ranges, simetrias, dimensões. A aritmética não. E o VBA existe e não foi descompilado
+(`P-06`). Preferi declarar as duas lacunas a preencher com plausibilidade.
+
 ## Próxima acção concreta
 
-Quatro dos cinco entregáveis estão fechados. Falta um: **os oráculos dos dois pilotos**.
+**P1 fecha quando os 13 itens críticos forem validados.** Não marco GO antes disso: o
+template proíbe GO com evidência por preencher, e a evidência que falta aqui não é minha
+para produzir.
 
-### Sobre o `test-map.json`: 61 casos, 0 cobertos, e isso está certo
+O que peço, por piloto, é confirmação ou correcção de cada item crítico. O mais valioso é
+`P-10`: se o responsável explicar a ordem dos componentes no preço, fecha-se a maior lacuna
+do piloto pesado sem traçar 13 mil fórmulas à mão.
 
-Os 2009 testes do baseline protegem o sistema **actual**. Os 61 casos são sobre um grafo,
-uma recuperação e uma migração que ainda não existem. Não há sobreposição a reclamar, e
-reclamá-la seria o falso verde que a `ACCEPTANCE.md` proíbe.
-
-Uma primeira versão do ficheiro propunha, por caso, os testes existentes mais próximos por
-palavra-chave. Saía ruído — `K01 «Store vazio»` ligado a `test_a5_dictionary_contract.py` —
-e ruído que se lê como cobertura é pior do que campo nenhum. Removido. É o mesmo erro de
-método que o varrimento por verbos cometeu: proximidade não é relação.
-
-Distribuição: P2 leva 16 casos (o maior bloco: storage, escrita e recuperação), P6 leva 13,
-P3 sete, P5 seis, P4/P7/P8 cinco cada, P9 quatro. Os 61 são obrigatórios.
-
-### Os oráculos, e o que preciso de ti
-
-Dois pilotos: `dpt-galp-jp-pilot-4` (tickets) e `pricing-bunkers-pilot-4` (Excel com regras).
-
-Posso abrir as fontes e extrair as regras — é leitura directa, satisfaz a letra da
-`ACCEPTANCE.md`, que só proíbe gerar o oráculo a partir das conclusões do candidato.
-
-O que não posso resolver sozinho continua a ser o mesmo: construtor do oráculo e operador do
-candidato seriam o mesmo agente. Os **itens críticos** precisam de validação do responsável
-do processo antes de contarem como referência de P8. Sem isso, P8 mede o candidato contra
-uma referência que o mesmo modelo escreveu.
+Depois disso, **P2** — e o seu âmbito já está delimitado por `authority-map.md`: falta
+atomicidade entre artefactos, exclusão para além do dashboard, e observação de escritas por
+subprocesso. P2 leva 16 dos 61 casos.

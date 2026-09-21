@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "status": "FILLED_PENDING_OWNER_VALIDATION",
+  "pilot_id": "dpt-galp-jp-pilot-4",
+  "p8_type": "operacional / tickets",
+  "source_files": [
+    {
+      "path": "projects/dpt-galp-jp-pilot-4/inputs/Dayly_pending_tickets_Anonimo.xlsx",
+      "sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "sheets": {
+        "Priority_Store": "91 linhas, entrada manual + 1 coluna de fórmula",
+        "Prioritized_View": "204 linhas, 1031 fórmulas, inteiramente derivada",
+        "Dayly_extraction": "73 linhas, 19 colunas, sem fórmulas — o export do dia",
+        "Dayly_extraction_closed": "158 linhas — inerte na lógica"
+      }
+    }
+  ],
+  "baseline_identity": "6066c999e85389d6e9efe7a3e0d3f55a9b10c4fa",
+  "reviewed_by": "Claude (extracção) — validação do responsável do processo PENDENTE nos itens críticos",
+  "review_method": "Leitura directa do .xlsx com openpyxl, data_only=False, para ler FÓRMULAS e não valores em cache. Nenhum artefacto de `_capture/` foi lido: o oráculo não pode derivar das conclusões do candidato (ACCEPTANCE.md secção 5).",
+  "reviewed_at": "2026-09-21",
+  "items": [
+    {
+      "id": "T-01",
+      "proposition_or_relation": "O processo reconcilia DUAS fontes por `Ticket ID`: uma extracção diária volátil (`Dayly_extraction`, 73 linhas neste snapshot) e um registo de prioridade manual durável (`Priority_Store`, 89 linhas). A vista de trabalho é derivada, não editada.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Prioritized_View!A5:J204 — todas as 103 linhas × 10 colunas são fórmula; A5/B5 fazem VLOOKUP a Priority_Store, C5..J5 lêem Dayly_extraction",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado por leitura das fórmulas na fonte.",
+      "gate_expectation": "Se o candidato descrever uma só fonte, ou a vista como editável, é omissão material.",
+      "review_notes": "É o mecanismo central do processo. Sem isto, tudo o resto é detalhe.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "T-02",
+      "proposition_or_relation": "A prioridade é **juízo humano persistido**, não derivada de nenhum campo da extracção. `Priority_Store!E` é entrada manual.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Priority_Store!E3:E91 — valores literais, sem fórmula",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado: a coluna não tem fórmula em nenhuma das 89 linhas.",
+      "gate_expectation": "Afirmar que a prioridade é calculada a partir de Severidade é facto falso e deve bloquear.",
+      "review_notes": "A extracção traz `Severidade` (SEV 2/SEV 3); é campo distinto e não alimenta a prioridade.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "T-03",
+      "proposition_or_relation": "O registo detecta tickets que guardou mas que **desapareceram** da extracção do dia, e marca-os visivelmente.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Priority_Store!H3:H91 — `=IF(A3=\"\",\"\",IF(COUNTIF(Dayly_extraction!$A:$A,A3)>0,\"✅ Active\",\"⚠️ Not in source\"))`",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado: padrão único em 89 células.",
+      "gate_expectation": "É a metade 'registo → hoje' da reconciliação. Perdê-la é perder a detecção de órfãos.",
+      "review_notes": "O aviso é visual (emoji), não bloqueia nada no ficheiro.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "T-04",
+      "proposition_or_relation": "`Aging` é **calculado e volátil**: `TODAY() - INT(Data de Criação)`. Recalcula a cada abertura; não é guardado.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Prioritized_View!I5:I204 — `=IF(Dayly_extraction!A2=\"\",\"\",IF(Dayly_extraction!C2=\"\",\"\",TODAY()-INT(Dayly_extraction!C2)))`",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado: padrão único em 103 células.",
+      "gate_expectation": "Tratar Aging como valor armazenado é erro de estado epistémico, não de detalhe.",
+      "review_notes": "Única métrica calculada do ficheiro. `TODAY()` torna o resultado dependente da data de abertura.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "T-05",
+      "proposition_or_relation": "A vista é **conduzida pela extracção**: um ticket sem prioridade guardada aparece com Prioridade e Exec. Order em branco (`IFERROR → \"\"`), não é excluído.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Prioritized_View!A5:B204 — `=IFERROR(VLOOKUP(...),\"\")`",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado pelo IFERROR nas duas colunas de lookup.",
+      "gate_expectation": "É a metade 'hoje → registo': tickets novos por priorizar ficam visíveis e vazios.",
+      "review_notes": "Junto com T-03 fecha a detecção de órfãos nos dois sentidos.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "T-06",
+      "proposition_or_relation": "Dos 89 tickets com prioridade guardada, só **37** têm `Exec. Order` preenchida.",
+      "epistemic_state": "Confirmed",
+      "criticality": "noncritical",
+      "source_locator": "Priority_Store!F3:F91 — contagem directa",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado por contagem.",
+      "gate_expectation": "Sugere que a ordenação fina é aplicada a um subconjunto, não a tudo.",
+      "review_notes": "Facto de estado do ficheiro; pode variar entre snapshots.",
+      "validation": "not_required"
+    },
+    {
+      "id": "T-07",
+      "proposition_or_relation": "O cabeçalho declara o vocabulário `High/Medium/Low`, mas **`Low` não ocorre**: 60 High, 29 Medium, 0 Low.",
+      "epistemic_state": "Confirmed",
+      "criticality": "noncritical",
+      "source_locator": "Priority_Store!E2 (cabeçalho) vs E3:E91 (valores)",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado por contagem.",
+      "gate_expectation": "Vocabulário declarado maior do que o usado. Não inferir que Low está proibido.",
+      "review_notes": "Pode ser convenção a cair em desuso, ou snapshot sem casos. A fonte não diz qual.",
+      "validation": "not_required"
+    },
+    {
+      "id": "T-08",
+      "proposition_or_relation": "A folha `Dayly_extraction_closed` (158 linhas) **não é referenciada por nenhuma fórmula** do livro.",
+      "epistemic_state": "Confirmed",
+      "criticality": "noncritical",
+      "source_locator": "Varrimento de todas as fórmulas das 4 folhas: zero ocorrências de `Dayly_extraction_closed`",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado por varrimento exaustivo.",
+      "gate_expectation": "Afirmar que tickets fechados alimentam a priorização é facto falso.",
+      "review_notes": "Está no ficheiro e é carregada, mas é inerte na lógica. Pode servir consulta humana.",
+      "validation": "not_required"
+    },
+    {
+      "id": "T-09",
+      "proposition_or_relation": "Existe **um único contador** por prioridade: `🔴 HIGH`. Não há contador de Medium nem de Low.",
+      "epistemic_state": "Confirmed",
+      "criticality": "noncritical",
+      "source_locator": "Prioritized_View!D1 — `=COUNTIF(B5:B204,\"High\")`; B1 é fórmula de matriz para o Total",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Confirmado por leitura da linha 1.",
+      "gate_expectation": "A atenção do processo está em High.",
+      "review_notes": "",
+      "validation": "not_required"
+    },
+    {
+      "id": "T-10",
+      "proposition_or_relation": "Quem mantém o `Priority_Store`, com que cadência e sob que critério de decisão.",
+      "epistemic_state": "Unknown",
+      "criticality": "critical",
+      "source_locator": "Não determinável do ficheiro",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Só o responsável do processo pode responder.",
+      "gate_expectation": "O candidato NÃO deve confirmar dono nem cadência a partir do ficheiro. Inferir isto é facto inventado.",
+      "review_notes": "A fonte mostra o mecanismo, não a governação. É `Unknown` por ausência de evidência, não por descuido.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "T-11",
+      "proposition_or_relation": "O que `Exec. Order` significa na operação — posição em fila, lote, sprint, ou outra coisa.",
+      "epistemic_state": "Unknown",
+      "criticality": "noncritical",
+      "source_locator": "Priority_Store!F — coluna numérica sem legenda nem fórmula",
+      "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
+      "expected_resolution": "Só o responsável do processo pode responder.",
+      "gate_expectation": "Não inferir semântica a partir do nome da coluna.",
+      "review_notes": "",
+      "validation": "not_required"
+    }
+  ],
+  "forbidden_claims": [
+    "Que a prioridade é calculada a partir da Severidade, ou de qualquer campo da extracção (T-02).",
+    "Que os tickets fechados alimentam a priorização (T-08).",
+    "Que `Low` está em uso (T-07).",
+    "Que `Aging` é um valor armazenado (T-04).",
+    "Qualquer afirmação sobre dono ou cadência do Priority_Store (T-10).",
+    "Qualquer semântica atribuída a `Exec. Order` sem fonte (T-11)."
+  ],
+  "extraction_limits": [
+    "Os dados estão anonimizados por embaralhamento de texto ('Imcidemtes', 'muvubemcu.pt'). Descrições e nomes NÃO são legíveis como conteúdo de negócio; só a ESTRUTURA é avaliável.",
+    "Um único snapshot (2026-03). Cadência não observada.",
+    "Valores em cache não avaliados: a referência é a fórmula, não o resultado.",
+    "`Prioritized_View!B1` é fórmula de matriz e não foi expandida."
+  ],
+  "acceptance": {
+    "critical_recall": 1.0,
+    "critical_false_confirmed": 0,
+    "improper_gate_advances": 0
+  },
+  "owner_validation": {
+    "required_for": [
+      "T-01",
+      "T-02",
+      "T-03",
+      "T-04",
+      "T-05",
+      "T-10"
+    ],
+    "status": "PENDING",
+    "why": "O autor do oráculo e o operador do candidato são o mesmo agente. Ler a fonte directamente cumpre a letra da ACCEPTANCE.md, mas não dá independência real. Os itens críticos só contam como referência de P8 depois de o responsável do processo os confirmar ou corrigir."
+  },
+  "warning": "Itens críticos por validar. Até lá, esta referência é fraca e P8 herda a fraqueza."
+}

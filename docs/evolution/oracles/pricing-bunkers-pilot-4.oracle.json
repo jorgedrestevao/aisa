@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "status": "FILLED_PENDING_OWNER_VALIDATION",
+  "pilot_id": "pricing-bunkers-pilot-4",
+  "p8_type": "Excel com regras, cálculos e dependências",
+  "source_files": [
+    {
+      "path": "projects/pricing-bunkers-pilot-4/inputs/PRE#U00c7O BANCAS_03_08_26.xlsm",
+      "sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "note": "18 folhas, 13 262 fórmulas, 134 named ranges de negócio, VBA presente",
+      "filename_warning": "O nome no disco é literalmente `PRE#U00c7O BANCAS_03_08_26.xlsm`. O `Ç` foi mangled na importação. Locators devem usar o nome literal, não o corrigido."
+    },
+    {
+      "path": "projects/pricing-bunkers-pilot-4/inputs/Processos Pricing - Marinha-20260126_150836-Grava#U00e7#U00e3o da Reuni#U00e3o-pt-BR.vtt",
+      "sha256": "19a82a5adc8de65b396f35ea60c8709d6360a5edca00c71ba7e770daf6dce8c5",
+      "note": "1808 falas, 62 399 caracteres, sem marcação de orador"
+    }
+  ],
+  "baseline_identity": "6066c999e85389d6e9efe7a3e0d3f55a9b10c4fa",
+  "reviewed_by": "Claude (extracção) — validação do responsável do processo PENDENTE nos itens críticos",
+  "review_method": "Leitura directa do .xlsm com openpyxl (data_only=False, keep_vba=True) e do .vtt em texto. Nenhum artefacto de `_capture/` foi lido. Traçado exaustivo dos named ranges e da simetria entre folhas; a cadeia aritmética NÃO foi traçada (ver P-10).",
+  "reviewed_at": "2026-09-21",
+  "items": [
+    {
+      "id": "P-01",
+      "proposition_or_relation": "As quatro folhas `usd_ton`, `eur_ton`, `usd_m3`, `eur_m3` são o **mesmo cálculo em quatro apresentações**, não quatro cálculos. Todas 80×104, e partilham 249 de 249 padrões de fórmula.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Comparação exaustiva dos padrões de fórmula das 4 folhas (normalizando literais numéricos)",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por comparação de conjuntos: interseção = união.",
+      "gate_expectation": "Tratá-las como quatro regras distintas multiplica por 4 o esforço estimado. É erro material de dimensionamento.",
+      "review_notes": "Moeda (USD/EUR) × unidade (tonelada/m³). A conversão é apresentação.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-02",
+      "proposition_or_relation": "O preço decompõe-se em **componentes nomeados por cliente × produto**, não num valor único. O vocabulário é: Margem, Prémio, TransporteBarge, TransporteCT, Desconto, DescontoAdicional, ISP, SLI, PrémioRef, PrémioCli, PrémioPub, PreçoDinheiro.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "134 named ranges de negócio, padrão `<Cliente>_<Produto>_<Componente>`",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por parsing dos 134 nomes.",
+      "gate_expectation": "Perder a decomposição é perder o modelo de dados. Um preço escalar não representa isto.",
+      "review_notes": "A transcrição corrobora: «o prémio de cedência do supply», «está relacionado à margem».",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-03",
+      "proposition_or_relation": "A origem do cálculo é um **feed de mercado externo**: `UlyssesQuotes` traz cotações identificadas por `model://ECB_FX/`, `model://PLATTS_RI/`, `model://PLATTS_EB/` e `model://ICE_GASOIL/`. 525 linhas desde 2023-01-02, **zero fórmulas** — dados importados.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "UlyssesQuotes!A1:J525 — cabeçalhos literais `model://…`",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por leitura dos cabeçalhos e ausência de fórmulas.",
+      "gate_expectation": "Qualquer solução tem de resolver a ingestão destas cotações. Omiti-la é omitir a dependência externa central.",
+      "review_notes": "ECB para câmbio, Platts e ICE para produto. São fornecedores de dados de mercado, não ficheiros internos.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-04",
+      "proposition_or_relation": "`Inputs` é uma **série temporal de 1461 linhas** (B9:B1469 datas; R9:R1469 taxa de câmbio), com 7906 fórmulas — a maior folha do livro.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Named ranges `Data_Lista` → `Inputs!$B$9:$B$1469`; `Index_TaxaCâmbio` → `Inputs!$R$9:$R$1469`",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por resolução dos named ranges.",
+      "gate_expectation": "O histórico é parte do mecanismo, não arquivo. Uma solução que só guarde o presente perde-o.",
+      "review_notes": "1461 linhas ≈ 4 anos de dias.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-05",
+      "proposition_or_relation": "Existem **duas datas distintas** no Outputs: `Data_Output` (C6) e `Data_Manual` (C7). Há uma superfície de intervenção manual a par da data calculada.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Named ranges `Data_Output` → `Outputs!$C$6`; `Data_Manual` → `Outputs!$C$7`",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por resolução dos named ranges.",
+      "gate_expectation": "Afirmar que o processo é totalmente automático contradiz a existência de `Data_Manual`.",
+      "review_notes": "A transcrição diz «não exige intervenção manual» sobre ALGO — não foi determinado sobre o quê. Não usar essa frase para negar este facto.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-06",
+      "proposition_or_relation": "O livro contém **macros VBA** (`xl/vbaProject.bin`). Há automatismo que as fórmulas não mostram.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "Entrada `xl/vbaProject.bin` no zip do .xlsm",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por listagem do arquivo. **Não descompilado.**",
+      "gate_expectation": "Estimar o processo só pelas fórmulas subestima-o. O VBA é âmbito não medido.",
+      "review_notes": "É a maior incógnita conhecida deste piloto: existe, é material, e não foi lido.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-07",
+      "proposition_or_relation": "Taxonomia: **11 clientes**, **22 produtos**, **47 componentes**, dos quais ~25 são portos portugueses (Aveiro, Leixões, Lisboa, Sines, Setúbal, Portimão, Viana, Figueira da Foz, Matosinhos, Nazaré, Olhão, Peniche, Póvoa de Varzim, Sesimbra, V.N.Gaia, Vila do Conde, Cascais, Lagos, Quarteira, Tavira, Sagres, Fuzeta, Régua-Lamego, Vila Real de S. António).",
+      "epistemic_state": "Confirmed",
+      "criticality": "noncritical",
+      "source_locator": "Parsing dos 134 named ranges de negócio",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por contagem.",
+      "gate_expectation": "A dimensão portuária é logística, não comercial: transporte por porto.",
+      "review_notes": "Clientes incluem Marinha, SACOR, SEACARRIER, AçoreanaMutualista, ClientesNacionais.",
+      "validation": "not_required"
+    },
+    {
+      "id": "P-08",
+      "proposition_or_relation": "`Simulador` (606 fórmulas, 80×104) espelha a estrutura das folhas de output — é superfície de *what-if*.",
+      "epistemic_state": "Confirmed",
+      "criticality": "noncritical",
+      "source_locator": "Simulador!A1:CZ80 comparado com eur_ton",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Confirmado por dimensão e padrões partilhados.",
+      "gate_expectation": "Capacidade de simulação já existe no as-is e deve constar do enquadramento.",
+      "review_notes": "",
+      "validation": "not_required"
+    },
+    {
+      "id": "P-09",
+      "proposition_or_relation": "Os preços correm em **cadência semanal**.",
+      "epistemic_state": "Assumed",
+      "criticality": "noncritical",
+      "source_locator": "Transcrição, fala: «os preços são semanais e se corre o…»",
+      "source_sha256": "19a82a5adc8de65b396f35ea60c8709d6360a5edca00c71ba7e770daf6dce8c5",
+      "expected_resolution": "Uma só afirmação, sem corroboração no ficheiro. Confirmar com o responsável.",
+      "gate_expectation": "Não promover a Confirmed sem segunda fonte.",
+      "review_notes": "O ficheiro tem série diária; semanal pode referir-se ao ciclo de publicação, não à granularidade dos dados.",
+      "validation": "not_required"
+    },
+    {
+      "id": "P-10",
+      "proposition_or_relation": "A cadeia de cálculo completa através das 13 262 fórmulas — que componente entra em que preço, com que sinal e em que ordem.",
+      "epistemic_state": "Unknown",
+      "criticality": "critical",
+      "source_locator": "Não traçada. Foram traçados: named ranges (134), simetria das folhas de moeda, dimensões e contagens por folha.",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Exige traçado célula a célula das folhas `Inputs` (7906) e `Outputs` (676), ou explicação do responsável.",
+      "gate_expectation": "O candidato NÃO deve afirmar regras numéricas concretas que não tenham sido traçadas. Inventar a ordem dos componentes é facto inventado.",
+      "review_notes": "É a lacuna maior deste oráculo e está declarada como tal. A estrutura é conhecida; a aritmética não.",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-11",
+      "proposition_or_relation": "Quais das 11×22 combinações cliente×produto estão activas e quais são históricas.",
+      "epistemic_state": "Unknown",
+      "criticality": "noncritical",
+      "source_locator": "Não determinável dos named ranges, que não distinguem activo de legado",
+      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "expected_resolution": "Só o responsável do processo pode responder.",
+      "gate_expectation": "Não inferir actividade a partir da existência do nome.",
+      "review_notes": "",
+      "validation": "not_required"
+    }
+  ],
+  "forbidden_claims": [
+    "Que as quatro folhas de moeda×unidade são quatro cálculos distintos (P-01).",
+    "Que o processo é totalmente automático — `Data_Manual` e o VBA dizem o contrário (P-05, P-06).",
+    "Qualquer regra numérica ou ordem de componentes não traçada (P-10).",
+    "Que a cadência semanal está confirmada (P-09 é Assumed).",
+    "Que um par cliente×produto está activo só porque o named range existe (P-11)."
+  ],
+  "extraction_limits": [
+    "13 262 fórmulas. Traçados exaustivamente: named ranges, dimensões, contagens e simetria entre folhas. A cadeia aritmética completa NÃO foi traçada — declarado em P-10 como Unknown crítico.",
+    "VBA presente e NÃO descompilado (P-06).",
+    "O nome do ficheiro está mangled no disco (`#U00c7` em vez de `Ç`).",
+    "A transcrição não tem marcação de orador: não é possível atribuir afirmações a papéis.",
+    "Valores em cache não avaliados: a referência é a fórmula.",
+    "Aviso do openpyxl: 'Data Validation extension is not supported and will be removed' — há validação de dados no livro que esta leitura não vê."
+  ],
+  "acceptance": {
+    "critical_recall": 1.0,
+    "critical_false_confirmed": 0,
+    "improper_gate_advances": 0
+  },
+  "owner_validation": {
+    "required_for": [
+      "P-01",
+      "P-02",
+      "P-03",
+      "P-04",
+      "P-05",
+      "P-06",
+      "P-10"
+    ],
+    "status": "PENDING",
+    "why": "Autor do oráculo e operador do candidato são o mesmo agente. Além disso P-10 é uma lacuna conhecida: a estrutura está traçada, a aritmética não. Sem validação, P8 mede o candidato contra uma referência incompleta escrita pelo próprio modelo."
+  },
+  "warning": "Itens críticos por validar, e P-10 é lacuna declarada. Referência fraca até o responsável a fechar."
+}
