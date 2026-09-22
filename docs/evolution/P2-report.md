@@ -64,10 +64,18 @@ O contrato manda reutilizar atomicidade e locks existentes «quando suficiente»
 
 | Runner | Collected | Passed | Failed | Skipped | Xfail | Errors |
 |---|---:|---:|---:|---:|---:|---:|
-| `python3 <ficheiro>` × 50 (per-file unittest) | **2064** | 2047 | **0** | 14 | 3 | **0** |
+| `python3 <ficheiro>` × 50 (per-file unittest) | **2067** | 2050 | **0** | 14 | 3 | **0** |
 
-Antes de P2: 48 ficheiros / 2009 testes. Depois: 50 / 2064. A diferença são exactamente os
-55 testes novos (+3 da costura = 58 no total dos dois ficheiros). Zero regressões.
+Antes de P2: 48 ficheiros / 2009 testes. Depois: 50 / **2067** — os 58 testes novos
+(33 em `test_graph_store.py`, 25 em `test_operation_recovery.py`). Zero regressões.
+
+> **Correcção.** A execução que fechou esta fase imprimiu **2064**, e esta tabela dizia 2064
+> enquanto o texto ao lado descrevia 58 testes novos — 2009 + 58 = 2067, e a conta não fechava.
+> A causa é o terceiro falso verde listado abaixo: a medição foi feita **antes** de mover a
+> classe `Costura_GrafoEcoordenador` para cima do bloco `main`, com os seus 3 testes ainda
+> parados. O número certo é 2067, e foi confirmado na regressão de P3, onde
+> `test_graph_store.py` passa de 30 para 33 sem que o ficheiro mude de conteúdo.
+> Fica registado em vez de corrigido em silêncio: a discrepância foi o que denunciou o defeito.
 
 Verificado antes de committar que nenhum teste existente enumera os motores por glob — são
 agora sete onde eram cinco. Referenciam-nos por nome. `test_motor_identity`,
