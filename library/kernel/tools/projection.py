@@ -70,6 +70,27 @@ def projection_freshness(eng):
                        else "a projeccao esta a par das autoridades")}
 
 
+def authority_from_rows(rows) -> dict:
+    """`{"SU:<id>": {campo: valor}}` a partir das linhas da SU — quem manda, em forma de mapa.
+
+    As chaves sao as que a migracao e o `resolve` projectam para `props`, e a chave do mapa
+    e o `mirror_of` que cada no carrega. Um campo que a SU nao tenha sai vazio em vez de
+    ausente, porque ausente e indistinguivel de «ainda nao comparado».
+    """
+    fora = {}
+    for r in rows or []:
+        rid = str(r.get("id") or "").strip()
+        if not rid:
+            continue
+        fora["SU:" + rid] = {
+            "state": r.get("state") or "",
+            "criticidade": r.get("criticidade") or "",
+            "resolved": str(r.get("resolved")) == "True",
+            "text": r.get("claim") or "",
+        }
+    return fora
+
+
 def operational_state(eng, today=None):
     """Fase, bloqueios, incerteza visivel e proxima accao — de autoridades verificadas."""
     eng = Path(eng)
@@ -129,8 +150,14 @@ def operational_state(eng, today=None):
     # 4. o gate avalia o SNAPSHOT COMPLETO, nao um excerto
     gates = status_block.get("gates") or {}
     g = gates if isinstance(gates, dict) else {}
-    drift = _G["drift"](_G["read"](eng).get("nodes", []), {})
-    blocking_drift = [d for d in drift if d["code"] == "MIRROR_DRIFT"]
+    # A autoridade e a SU. Passar `{}` aqui nao era so nao detectar desvio: com o mapa
+    # vazio, TODOS os nos espelhados saiam como `MIRROR_SOURCE_MISSING` — 225 nos dois
+    # pilotos — e a linha seguinte filtrava-os fora. Um falso positivo sobre a populacao
+    # inteira, calculado e deitado ao lixo.
+    drift = _G["drift"](_G["read"](eng).get("nodes", []), authority_from_rows(rows))
+    blocking_drift = [d for d in drift
+                      if d["code"] in ("MIRROR_DRIFT", "MIRROR_SOURCE_MISSING")]
+    out["drift"] = drift
     out["gate"] = {
         "transition": g.get("transition", ""),
         "criteria": g.get("criteria", []),
@@ -139,11 +166,22 @@ def operational_state(eng, today=None):
         "consulted": ["criterios de fase", "operacao pendente", "espelho do grafo"],
     }
     if blocking_drift:
+        primeiro = blocking_drift[0]
+        campos = sorted({d.get("field") for d in blocking_drift if d.get("field")})
+        faltam = [d for d in blocking_drift if d["code"] == "MIRROR_SOURCE_MISSING"]
         out["blockers"].append(_blocker(
-            what="espelho do grafo divergente da autoridade",
+            what="espelho do grafo divergente da autoridade — {} linha(s){}{}".format(
+                len(blocking_drift),
+                ", campos: " + ", ".join(campos) if campos else "",
+                ", {} sem linha na SU".format(len(faltam)) if faltam else ""),
             why="o grafo nao prevalece sobre a SU; avancar assim decide sobre duas verdades",
-            evidence="reconciliar o espelho com a linha da SU que ele reflecte",
-            action="/status", kind="MIRROR_DRIFT"))
+            evidence="{} ({}): grafo={!r} autoridade={!r}".format(
+                primeiro.get("id"), primeiro.get("field") or primeiro["code"],
+                primeiro.get("graph"), primeiro.get("authority"))
+            if primeiro.get("field") else
+            "{}: o grafo espelha `{}`, que a SU ja nao tem".format(
+                primeiro.get("id"), primeiro.get("mirror_of")),
+            action="/status", kind=primeiro["code"]))
 
     out["next_action"] = (status_block.get("milestone") or {}).get("next") or {
         "text": "Sem accao pendente identificada.", "command": "/status"}

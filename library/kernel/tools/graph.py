@@ -170,25 +170,58 @@ def validate(nodes: list[dict], edges: list[dict]) -> list[dict]:
     return problems
 
 
-def drift(nodes: list[dict], authority: dict) -> list[dict]:
+# Campos espelhados que MOVEM O GATE. `gate_open` consome-os por `omitted_critical`:
+# `state` e `resolved` decidem se a linha continua aberta, `criticidade` decide se ela
+# bloqueia. Desvio em qualquer um muda o que o sistema acha que o impede de avançar.
+GATE_FIELDS = ("state", "criticidade", "resolved")
+
+# Espelhados que NÃO movem o gate. Reportam-se — o desvio existe e diz-se — mas não fecham
+# nada: uma correcção de redacção na SU não muda decisão nenhuma.
+INFO_FIELDS = ("text",)
+
+
+def drift(nodes: list[dict], authority: dict, fields=None) -> list[dict]:
     """Campos espelhados que já não batem com a sua autoridade (K05).
 
-    `authority` mapeia `<id do SU>` → valor actual. Um nó com `mirror_of` aponta para lá.
-    Divergência é REPORTADA; o grafo não prevalece nem se auto-corrige."""
+    `authority` mapeia `<id do SU>` → `{campo: valor actual}`. A forma antiga — o valor
+    escalar, que era o `state` — continua a ser aceite e lida como `{"state": valor}`, para
+    que um chamador anterior signifique exactamente o mesmo.
+
+    Divergência é REPORTADA; o grafo não prevalece nem se auto-corrige. O que muda com o
+    código do achado é quem decide o gate, e essa decisão é de quem consome:
+
+      `MIRROR_DRIFT`          campo que move o gate — bloqueia
+      `MIRROR_DRIFT_INFO`     campo que não o move — diz-se, não bloqueia
+      `MIRROR_SOURCE_MISSING` o grafo afirma o que a autoridade já não diz — bloqueia
+    """
+    alvo = tuple(fields) if fields else GATE_FIELDS
     out = []
     for n in nodes:
         ref = (n.get("provenance") or {}).get("mirror_of")
         if not ref:
             continue
         if ref not in authority:
-            out.append({"code": "MIRROR_SOURCE_MISSING", "id": n.get("id"), "mirror_of": ref})
+            out.append({"code": "MIRROR_SOURCE_MISSING", "id": n.get("id"), "mirror_of": ref,
+                        "detail": "o grafo espelha uma linha que a autoridade já não tem"})
             continue
-        mirrored = (n.get("props") or {}).get("state")
-        current = authority[ref]
-        if mirrored is not None and mirrored != current:
-            out.append({"code": "MIRROR_DRIFT", "id": n.get("id"), "mirror_of": ref,
-                        "graph": mirrored, "authority": current,
-                        "detail": "a autoridade manda; o grafo não avança um gate sobre isto"})
+        valores = authority[ref]
+        if not isinstance(valores, dict):
+            valores = {"state": valores}          # forma antiga: o escalar era o `state`
+        props = n.get("props") or {}
+        for campo in alvo + INFO_FIELDS:
+            if campo not in props or campo not in valores:
+                continue
+            espelhado, actual = props.get(campo), valores.get(campo)
+            if espelhado == actual:
+                continue
+            bloqueia = campo in alvo
+            out.append({
+                "code": "MIRROR_DRIFT" if bloqueia else "MIRROR_DRIFT_INFO",
+                "id": n.get("id"), "mirror_of": ref, "field": campo,
+                "graph": espelhado, "authority": actual,
+                "detail": ("a autoridade manda; o grafo não avança um gate sobre isto"
+                           if bloqueia else
+                           "a autoridade manda; este campo não move o gate, mas diverge")})
     return out
 
 
