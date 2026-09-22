@@ -113,6 +113,38 @@ def authority_match(row, answered_by):
             "reason": "quem respondeu nao corresponde a autoridade declarada"}
 
 
+# Forca do estado, do mais forte ao mais fraco. Serve para UMA coisa: decidir se um
+# `--to` pedido pelo operador desce (legitimo) ou sobe (proibido).
+FORCA = {"Confirmed": 3, "Assumed": 2, "Risky": 1}
+
+
+def force_state(verdict: dict, pedido: str) -> dict:
+    """Aplica um `--to`. Desce sempre; sobe nunca.
+
+    `states.md` proibe promover em silencio, e a regra dura 3 do `/answer` diz o mesmo:
+    uma resposta de terceiro ou sem locator nao vira `Confirmed` porque quem a escreveu
+    estava confiante. Descer e o contrario disso — e quem responde declarar que as provas
+    dao mais do que ele quer afirmar."""
+    if not pedido:
+        return verdict
+    alvo = pedido.strip().capitalize()
+    if alvo not in FORCA:
+        raise ResolveError("estado desconhecido: {!r}".format(pedido), "UNKNOWN_STATE",
+                           {"aceites": sorted(FORCA)})
+    actual = verdict["state"]
+    if FORCA[alvo] > FORCA[actual]:
+        raise ResolveError(
+            "`--to {}` promovia sobre {} — states.md proibe promocao silenciosa".format(
+                alvo, actual),
+            "SILENT_UPGRADE",
+            {"decidido": actual, "pedido": alvo, "porque": verdict["reason"]})
+    if alvo == actual:
+        return verdict
+    return dict(verdict, state=alvo, forced_from=actual,
+                reason="{} — descido para {} por declaracao do operador".format(
+                    verdict["reason"], alvo))
+
+
 def decide_state(row, answered_by, locator="", inference=False):
     """O estado de destino, por `states.md`. NUNCA promove em silencio."""
     if inference:
@@ -202,22 +234,29 @@ def operation_id(row_id, answer_text):
 
 
 def plan(eng, row_id, answer_text, answered_by, locator="", inference=False,
-         settles=SETTLES_FACT, claim="", today=""):
+         settles=SETTLES_FACT, claim="", today="", to=""):
     """Calcula TUDO sem publicar (contrato B2.4)."""
     eng = Path(eng)
     when = today or date.today().isoformat()
     md, rows = read_su(eng)
     row = find_row(rows, row_id)
 
-    verdict = decide_state(row, answered_by, locator, inference)
+    verdict = force_state(decide_state(row, answered_by, locator, inference), to)
     struct = structural_verdict(row, settles)
     state = verdict["state"]
     new_id = next_id(rows, state)
 
     who = answered_by.get("role") or answered_by.get("source") or answered_by.get("other") or "—"
-    basis = "USER_ANSWER {w} — {who}{loc} (was {old}), {af}#{old}".format(
-        w=when, who=who, loc=", {}".format(locator) if locator else "",
-        old=row_id, af=ANSWERS_FILE)
+    # A ancora `answers.md#<id>` entra sempre. Se o chamador passou exactamente essa como
+    # `--locator` — e e o locator que o limiar de `Confirmed` pede — escreve-la outra vez
+    # dava `…, answers.md#U-001 (was U-001), answers.md#U-001` na mesma celula.
+    ancora = "{}#{}".format(ANSWERS_FILE, row_id)
+    loc_extra = (locator or "").strip()
+    if loc_extra in ("", ancora):
+        loc_extra = ""
+    basis = "USER_ANSWER {w} — {who}{loc} (was {old}), {anc}".format(
+        w=when, who=who, loc=", {}".format(loc_extra) if loc_extra else "",
+        old=row_id, anc=ancora)
     lens, ronda = row.get("lens") or "", row.get("ronda") or ""
     claim_text = claim or (answer_text.strip().splitlines() or [""])[0]
     cells = [new_id, lens, claim_text, basis, when, "organizacional", ronda]
@@ -298,6 +337,10 @@ def main(argv=None):
     ap.add_argument("--locator", default="")
     ap.add_argument("--inference", action="store_true")
     ap.add_argument("--settles", choices=[SETTLES_FACT, SETTLES_FIT], default=SETTLES_FACT)
+    ap.add_argument("--claim", default="",
+                    help="o facto extraido para a linha da SU; sem isto usa a 1a linha da resposta")
+    ap.add_argument("--to", default="", choices=["", "confirmed", "assumed", "risky"],
+                    help="forcar o estado — so DESCE; subir e recusado (promocao silenciosa)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
@@ -315,7 +358,8 @@ def main(argv=None):
     try:
         fn = plan if a.dry_run else apply
         out = fn(eng, row_id=a.row, answer_text=a.answer, answered_by=by,
-                 locator=a.locator, inference=a.inference, settles=a.settles)
+                 locator=a.locator, inference=a.inference, settles=a.settles,
+                 claim=a.claim, to=a.to)
     except (ResolveError, _O["OperationError"], _G["GraphError"]) as exc:
         print(json.dumps(exc.as_dict(), ensure_ascii=False, indent=2), file=sys.stderr)
         return 1

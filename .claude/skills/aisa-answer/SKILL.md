@@ -32,22 +32,87 @@ description: Record an answer or resolution for a Shared Understanding row (Unkn
 
 1. Resolve the engagement root (`$AISA_ENGAGEMENTS_ROOT/<slug>` or `projects/<slug>`) and read `shared-understanding.md` + `_state.json` (current round).
 2. Locate the row `<id>` in its section. If not found → stop and list the open ids of that prefix. If already marked `resolved → …` → stop and say so.
-3. **Record the answer verbatim** in `<engagement>/answers.md` (create with header `# Answers — <slug>` if missing). The section heading is the row's **anchor**: `answers.md#<id>` — first segment of the heading before ` — `, spaces as hyphens (a batch section `## BLOCO H — <date> — <tema>` anchors as `answers.md#BLOCO-H`):
-   ```markdown
-   ## <id> — <date ISO>
-   - **Pergunta/conflito**: <original row text>
-   - **Resposta**: <verbatim answer>
-   - **Fonte**: <source>
-   - **Transição**: <id> → <new-id(s)> (<target state>)
+3. **Decide the fact, then let the motor write it.** The judgement is this skill's; the
+   writing is not. Extract the fact the answer supports — see the *verbatim boundary* below
+   — and hand it to the engine:
+
    ```
-4. **Append the new row(s)** to the target section of the SU: next free id, `lens` = the original row's lens, claim = the answered fact (specifics preserved), `evidência` = `USER_ANSWER <date> — <source> (was <id>)` **followed by the anchor** (`answers.md#<id>`) — the anchor is the locator the *Confirmed threshold* requires; a `Confirmed` row without it is a defect the hook and the round arbiter will report. `ronda` = current round. For Conflicted, create one row per resolved side. **Resolution by internal evidence** (no owner answer — the analyst adjudicates from rows already in the SU) → the new row is `Assumed was <id>`, basis = the rows and locators used, and `answers.md` says so in **Fonte** (`evidência interna do engagement; sem resposta do dono`).
-   **Verbatim boundary.** The Confirmed claim may not exceed what the answer/evidence actually supports: no interpretive clause the respondent did not say ("…so connectivity is not an obstacle"), no conclusion the answer only suggests. Runtime inference that the answer makes reasonable becomes a **separate** `Assumed` row with its basis declared, or — **only where the missing input is technical** — an `Unknown` / verification obligation (`custo: documento|spike`, `swing` stated). That obligation is an `Unknown` like any other and passes the same admission rule (`library/kernel/states.md` → *Admission of a question*, P-26): it cites the `M-n` it serves — or carries the marker `TO-BE DIVERGENCE` with what the target must decide — names ≥ 2 possible answers, **and** names which of the eight technical axes moves with each — `tecnologia` · `padrão arquitetural` · `componentes` · `modelo de dados` · `plano de imposição de permissões` · `esforço de alto nível` · `custo` · `risco técnico`. A verification obligation that names no axis is `cosmético` with `criticidade: Low`; one that names no second answer is not opened at all. Unless independently supported by a cited source. A second-hand statement about another team's systems or configuration is `Assumed` with the basis, not `Confirmed`, and it **opens nothing**: no `Unknown` is written to chase an email, minutes, a written acceptance or a signature, because the gap already lives in the row's basis (`library/kernel/states.md` → *a third-party report closes; it does not open*). Nor does such a gap block a decision — only the seven technical axes do (`library/packs/<pack>/decision-tree.md` §6.1).
+   python library/kernel/tools/resolve.py \
+     --engagement <slug> --row <id> \
+     --answer "<verbatim answer>" \
+     --claim "<the extracted fact, specifics preserved>" \
+     --by "role: <who> | fonte: <what>" \
+     --locator "answers.md#<id>" \
+     [--inference] [--to confirmed|assumed|risky] [--settles fact|fit] \
+     --json
+   ```
+
+   Run it with `--dry-run --json` first when the transition is not obvious: it computes the
+   target state, the new id and the structural verdict **without publishing**, so the
+   decision can be read before it is taken.
+
+   What the engine does, and this skill therefore no longer does by hand:
+   `answers.md` section (created with its header when missing, anchored `answers.md#<id>`) ·
+   next free id · the new row with `USER_ANSWER <date> — <who>, <locator> (was <id>)` ·
+   the ` — resolved → <new-id>` marker on the original · the graph mirror · **one atomic
+   publication through the coordinator, with a receipt in `_ops/receipts/`**.
+
+   Never write these files directly. A hand-written transition skips the state rules, the
+   mirror and the receipt, and the guard on `Write`/`Edit` refuses it over an engagement
+   that is not reconstructed.
+
+   **The target state is the engine's**, from `library/kernel/states.md`: a locator plus an
+   answer from the declared authority → `Confirmed`; no locator, or an answer from someone
+   else, or `--inference` → `Assumed` with the reason recorded. `--to` may only **lower**
+   the state — forcing it upwards is refused as `SILENT_UPGRADE`, which is hard rule 3
+   enforced instead of asked for.
+
+   `--by` must carry the `role:` / `fonte:` prefix: it is matched against the row's declared
+   authority, and an unprefixed name matches nothing.
+
+4. **The claim the engine writes is the one this skill extracts** — and its boundary is the
+   judgement that stays here. The `Confirmed` claim may not exceed what the answer or
+   evidence actually supports: no interpretive clause the respondent did not say ("…so
+   connectivity is not an obstacle"), no conclusion the answer only suggests. Runtime
+   inference that the answer makes reasonable becomes a **separate** `Assumed` row with its
+   basis declared, or — **only where the missing input is technical** — an `Unknown` /
+   verification obligation (`custo: documento|spike`, `swing` stated). That obligation is an
+   `Unknown` like any other and passes the same admission rule (`library/kernel/states.md` →
+   *Admission of a question*, P-26): it cites the `M-n` it serves — or carries the marker
+   `TO-BE DIVERGENCE` with what the target must decide — names ≥ 2 possible answers, **and**
+   names which of the eight technical axes moves with each — `tecnologia` · `padrão
+   arquitetural` · `componentes` · `modelo de dados` · `plano de imposição de permissões` ·
+   `esforço de alto nível` · `custo` · `risco técnico`. A verification obligation that names
+   no axis is `cosmético` with `criticidade: Low`; one that names no second answer is not
+   opened at all. Unless independently supported by a cited source. A second-hand statement
+   about another team's systems or configuration is `Assumed` with the basis, not
+   `Confirmed`, and it **opens nothing**: no `Unknown` is written to chase an email, minutes,
+   a written acceptance or a signature, because the gap already lives in the row's basis
+   (`library/kernel/states.md` → *a third-party report closes; it does not open*). Nor does
+   such a gap block a decision — only the seven technical axes do
+   (`library/packs/<pack>/decision-tree.md` §6.1).
+
+   For a **Conflicted** row the owner resolves into N sides: run the engine once per side,
+   each with its own `--claim`. Resolution by internal evidence — the analyst adjudicating
+   from rows already in the SU, with no owner answer — is `--inference`, which the engine
+   turns into `Assumed was <id>`, and `answers.md` says so in **Fonte** (`evidência interna
+   do engagement; sem resposta do dono`).
+
 4b. **Architecture-significant technical claims — fact ≠ fit.** Applies when the resolved row is the `su_ref` of a `structural: true` `open_architecture_choices` entry in the latest `_blueprint/ux-blueprint_v<NN>.yaml`, **or** when the new claim would settle or materially support a structural architecture conclusion (experience mode/surface, record authority, access mechanism, composition pattern, security/control boundary, integration mechanism, hard feasibility). It does **not** apply merely because a row carries `validade: plataforma-tecnica` on an unrelated engagement fact.
    - **Settle the fact that was named.** Compare the verbatim answer with the choice's `would_be_settled_by`. If the choice requires *mechanism + requirement fit* and the answer establishes only *a connection / gateway / capability exists* → record the engagement fact (per step 4) and say explicitly: `structural choice <…> remains open — the answer settles connectivity, not the mechanism or its fit`. Never mark the choice resolved from here.
    - **Closure basis.** A structural architecture conclusion may close on ONE sufficient basis: **A** authoritative RESEARCH / Domain Knowledge (file + section) read against the engagement's material requirements, exclusions and limitations included; **B** engagement-verifiable technical evidence from an accountable source (a named mechanism, configuration or artefact IT can show — not a business sponsor's yes/no about connectivity); **C** a proof / measurement / spike result. None present → the proposition stays `Unknown` (verification obligation) or `Assumed` with basis, and the structural choice stays open. No automatic web lookup, no three-source rule, no Domain Knowledge preload.
    - **Capability ≠ fit.** A capability may be `Confirmed` (with basis A/B/C) while a documented limitation may still defeat a material requirement (audit, row security, query shape, identity) — then the capability row is Confirmed and the fit stays open, per requirement, per data domain. The output names both.
-5. **Mark the original row resolved**: append ` — resolved → <new-id(s)>` to the original row's last column. Never delete the row — it stays for audit (append-only rule; explicit state transitions are the one sanctioned edit).
-6. Update the SU header `Última actualização`. Append one line to `council-log.md`: `<round> — /answer <id> → <new-id(s)> (<state>)`.
+5. **Check the receipt, do not re-do the write.** The engine publishes atomically and
+   returns `operation_id`; `_ops/receipts/<operation_id>.json` is the proof the transition
+   happened as one operation. A run that produced no receipt did not transition — say so
+   and stop rather than patching the files by hand. The original row keeps its
+   ` — resolved → <new-id(s)>` marker and is never deleted: append-only, and this marker
+   plus the revalidation renewal are the only two sanctioned edits to an existing row.
+6. Update the SU header `Última actualização` and append one line to `council-log.md`:
+   `<round> — /answer <id> → <new-id(s)> (<state>)`. These two are outside the engine's
+   write set on purpose — the log is the skill's narration of what it did, not part of the
+   transition, and folding it in would make a narration failure look like a failed
+   transition.
 7. **Targeted revalidation** (only when the new fact **contradicts or materially changes** a premise downstream reasoning used — an unrelated answer produces `(none)` and no broad list). Find the dependents through the references that already exist: grep the resolved id and the new fact's subject across `frame.md` (anchors, survival block), `options.md`, `decisions.md` (justification, conditions, tripwires), `_blueprint/ux-blueprint_v<NN>.yaml` (`su_refs`, `forced_by`, `would_be_settled_by`, rationale text naming the changed field), `_synthesis/*.md`. For each dependent write one line — `still valid — <why>` or `revalidate — <what the conclusion assumed>` — in the output and in `council-log.md`. No dependency graph, no registry, no rerun of all phases. Dependents in `decisions.md` (a justification clause, a condition, a cited option strength) → run the tripwire check (`aisa-status` step 7) and name `/revisit` as the next command; the Decision is never rewritten here. Architecture dependents → name them for `/blueprint --refresh`, which records them (step 11b).
 7b. **What the new fact did to the coverage reviews — computed, never declared.** A recorded coverage review says *these sources, in this state, were read*. A new answer changes `answers.md` and the SU, so a review written before it may no longer describe the sources it claims to have read. Ask the motor; do not write a flag:
 

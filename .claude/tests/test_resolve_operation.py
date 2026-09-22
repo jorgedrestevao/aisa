@@ -355,5 +355,191 @@ class SequenciaEntreSessoes(unittest.TestCase):
         self.assertEqual(ctx.exception.code, "NOT_READY")
 
 
+class L11_OQueOAnswerPrecisaDaCLI(unittest.TestCase):
+    """W3 — as duas lacunas que impediam o `/answer` de usar o motor sem escrever a SU a mao.
+
+    `--claim`: a regra dura 1 do `/answer` e «Verbatim in, structured out» — `answers.md`
+    guarda a resposta tal como foi dada, a linha da SU carrega o facto extraido. Sem passar
+    a claim, a linha ficava com a primeira linha da resposta e a regra morria.
+
+    `--to`: o `/answer` deixa forcar o estado. Descer e legitimo — quem responde pode querer
+    afirmar menos do que as provas dao. Subir e a «promocao silenciosa» que `states.md`
+    proibe e que a regra dura 3 repete."""
+
+    RESP = "Sao cinco. O Joao acha que as vezes sao seis, mas nunca editam ao mesmo tempo."
+    FACTO = "Cinco utilizadores em simultaneo; sem edicao concorrente"
+
+    def test_the_claim_is_the_extracted_fact_not_the_first_line(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            p = R["plan"](eng, row_id="U-001", answer_text=self.RESP,
+                          answered_by={"role": "dono dos dados"}, locator="L",
+                          claim=self.FACTO)
+            su = p["write_set"]["shared-understanding.md"]
+            ans = p["write_set"]["answers.md"]
+        self.assertIn(self.FACTO, su, "a linha da SU carrega o facto extraido")
+        self.assertNotIn("O Joao acha", su, "a SU nao leva a conversa toda")
+        self.assertIn("O Joao acha", ans, "`answers.md` guarda o verbatim, inteiro")
+
+    def test_without_a_claim_the_first_line_is_the_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            p = R["plan"](eng, row_id="U-001", answer_text="Linha um\nLinha dois",
+                          answered_by={"role": "dono dos dados"}, locator="L")
+            su = p["write_set"]["shared-understanding.md"]
+        self.assertIn("Linha um", su)
+        self.assertNotIn("Linha dois", su)
+
+    def test_forcing_a_weaker_state_is_allowed_and_recorded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            p = R["plan"](eng, row_id="U-001", answer_text="x",
+                          answered_by={"role": "dono dos dados"}, locator="L", to="assumed")
+        self.assertEqual(p["state"], "Assumed")
+        self.assertEqual(p["verdict"]["forced_from"], "Confirmed")
+        self.assertIn("declaracao do operador", p["verdict"]["reason"])
+
+    def test_forcing_a_stronger_state_is_refused(self):
+        """O caso que a regra dura 3 existe para impedir."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            with self.assertRaises(R["ResolveError"]) as ctx:
+                R["plan"](eng, row_id="U-001", answer_text="x",
+                          answered_by={"role": "dono dos dados"},
+                          locator="", to="confirmed")       # sem locator -> Assumed
+        self.assertEqual(ctx.exception.code, "SILENT_UPGRADE")
+        self.assertIn("promocao silenciosa", str(ctx.exception))
+
+    def test_forcing_the_state_it_already_is_changes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            a = R["plan"](eng, row_id="U-001", answer_text="x",
+                          answered_by={"role": "dono dos dados"}, locator="L")
+            b = R["plan"](eng, row_id="U-001", answer_text="x",
+                          answered_by={"role": "dono dos dados"}, locator="L", to="confirmed")
+        self.assertEqual(a["verdict"], b["verdict"])
+        self.assertNotIn("forced_from", b["verdict"])
+
+    def test_an_unknown_state_is_named_not_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            with self.assertRaises(R["ResolveError"]) as ctx:
+                R["plan"](eng, row_id="U-001", answer_text="x",
+                          answered_by={"role": "dono dos dados"}, locator="L", to="confirmado")
+        self.assertEqual(ctx.exception.code, "UNKNOWN_STATE")
+
+    def test_the_cli_exposes_both_and_a_real_process_honours_them(self):
+        """A skill invoca a CLI, nao a funcao. O que a CLI nao expoe, nao existe para ela."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            p = subprocess.run(
+                [sys.executable, str(TOOLS / "resolve.py"),
+                 "--engagement", str(eng), "--row", "U-001",
+                 "--answer", self.RESP, "--claim", self.FACTO,
+                 "--by", "role: dono dos dados", "--locator", "L",
+                 "--to", "assumed", "--dry-run", "--json"],
+                capture_output=True, text=True)
+            self.assertEqual(p.returncode, 0, p.stderr)
+            out = json.loads(p.stdout)
+        self.assertEqual(out["state"], "Assumed")
+        self.assertEqual(out["verdict"]["forced_from"], "Confirmed")
+
+    def test_the_cli_exits_nonzero_on_a_refused_upgrade(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            p = subprocess.run(
+                [sys.executable, str(TOOLS / "resolve.py"),
+                 "--engagement", str(eng), "--row", "U-001", "--answer", "x",
+                 "--by", "role: dono dos dados", "--to", "confirmed", "--dry-run", "--json"],
+                capture_output=True, text=True)
+        self.assertEqual(p.returncode, 1, "a recusa tem de sair diferente de zero")
+        self.assertIn("SILENT_UPGRADE", p.stderr)
+
+
+class L12_OAnswerPassaPeloMotor(unittest.TestCase):
+    """O criterio de fecho do W3: «uma execucao real de `/answer` deixa recibo».
+
+    Corrido pela CLI, em processo real — que e como a skill a invoca. Nao se afirma aqui
+    que a skill a chamou; afirma-se que o caminho que ela passou a mandar chamar produz
+    uma transicao completa e auditavel, e que produzi-la a mao produziria menos."""
+
+    def corre_cli(self, eng, *extra):
+        return subprocess.run(
+            [sys.executable, str(TOOLS / "resolve.py"),
+             "--engagement", str(eng), "--row", "U-001",
+             "--answer", "Cinco pessoas, sem edicao concorrente.",
+             "--claim", "Cinco utilizadores em simultaneo",
+             "--by", "role: dono dos dados", "--locator", "answers.md#U-001",
+             "--json", *extra],
+            capture_output=True, text=True)
+
+    def test_a_real_run_leaves_a_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            p = self.corre_cli(eng)
+            self.assertEqual(p.returncode, 0, p.stderr)
+            out = json.loads(p.stdout)
+            recibo = O["receipt_path"](eng, out["operation_id"])
+            self.assertTrue(recibo.is_file(), "sem recibo, nao houve operacao")
+            dados = json.loads(recibo.read_text(encoding="utf-8"))
+        self.assertEqual(dados["result"], "committed")
+        self.assertIn("shared-understanding.md", dados["published"])
+        self.assertIn("answers.md", dados["published"],
+                      "a SU e o `answers.md` saem na MESMA operacao, nao em duas")
+
+    def test_the_transition_is_complete_on_disk(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            out = json.loads(self.corre_cli(eng).stdout)
+            su = (eng / "shared-understanding.md").read_text(encoding="utf-8")
+            ans = (eng / "answers.md").read_text(encoding="utf-8")
+            nodes = {n["id"] for n in G["read"](eng)["nodes"]}
+        # o motor escreve a seta em ASCII; `RESOLVED_RE` aceita as duas, o ficheiro usa uma
+        self.assertIn("resolved -> " + out["new_id"], su, "a original fica marcada")
+        self.assertIn("Cinco utilizadores em simultaneo", su, "a linha nova carrega o facto")
+        self.assertIn("answers.md#U-001", su, "o locator que `Confirmed` exige")
+        self.assertEqual(su.count("answers.md#U-001"), 1,
+                         "a ancora e o locator sao a mesma coisa; escrever duas vezes e ruido")
+        self.assertIn("Cinco pessoas, sem edicao concorrente.", ans, "o verbatim fica inteiro")
+        self.assertIn(out["new_id"], nodes, "o espelho no grafo sai da mesma operacao")
+
+    def test_a_dry_run_publishes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            antes = (eng / "shared-understanding.md").read_text(encoding="utf-8")
+            p = self.corre_cli(eng, "--dry-run")
+            depois = (eng / "shared-understanding.md").read_text(encoding="utf-8")
+            recibos = list((eng / "_ops" / "receipts").glob("*.json")) \
+                if (eng / "_ops" / "receipts").is_dir() else []
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertEqual(antes, depois, "o ensaio escreveu na SU")
+        self.assertEqual(recibos, [], "o ensaio deixou recibo")
+
+    def test_repeating_the_same_answer_does_not_transition_twice(self):
+        """Idempotencia pelo coordenador: o mesmo pedido nao cria uma segunda linha."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = new_eng(tmp)
+            a = json.loads(self.corre_cli(eng).stdout)
+            su1 = (eng / "shared-understanding.md").read_text(encoding="utf-8")
+            segunda = self.corre_cli(eng)
+            su2 = (eng / "shared-understanding.md").read_text(encoding="utf-8")
+        self.assertEqual(su1, su2, "a repeticao escreveu outra vez")
+        self.assertEqual(su1.count(a["new_id"]), su2.count(a["new_id"]))
+
+    def test_the_skill_tells_the_agent_to_use_the_engine(self):
+        """Guarda de fio, nao prova de runtime.
+
+        `ACCEPTANCE.md` §1 diz que estrutura de prompt nao prova comportamento — e nao
+        prova. O que este caso guarda e o oposto: que o fio nao seja desfeito sem se dar por
+        isso. A prova de comportamento sao os tres casos acima."""
+        skill = (ROOT / ".claude" / "skills" / "aisa-answer" / "SKILL.md").read_text(
+            encoding="utf-8")
+        self.assertIn("library/kernel/tools/resolve.py", skill,
+                      "a skill deixou de mandar chamar o motor")
+        self.assertIn("Never write these files directly", skill,
+                      "sem esta frase, o caminho a mao volta por omissao")
+        self.assertIn("_ops/receipts", skill, "o recibo e o criterio de fecho; tem de constar")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
