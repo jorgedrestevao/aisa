@@ -76,15 +76,15 @@
     },
     {
       "id": "P-05",
-      "proposition_or_relation": "Existem **duas datas distintas** no Outputs: `Data_Output` (C6) e `Data_Manual` (C7). Há uma superfície de intervenção manual a par da data calculada.",
+      "proposition_or_relation": "Existem **duas datas distintas**, uma calculada e uma superficie de intervencao manual: `Data_Output` e `Data_Manual`. No ficheiro autoritativo o par de nivel-livro resolve em `'Relatorio Precos'!$B$5` e `$C$5`; alem disso cada folha de apresentacao (`Simulador`, `usd_ton`, `eur_ton`, `usd_m3`, `eur_m3`) tem o seu proprio par em `$C$6`/`$C$7`. `Data_Output` e mecanismo vivo: o `Motor` le-o directamente (`XLOOKUP(Data_Output, Data_Lista, ...)` e `WEEKDAY(Data_Output,2)`).",
       "epistemic_state": "Confirmed",
       "criticality": "critical",
-      "source_locator": "Named ranges `Data_Output` → `Outputs!$C$6`; `Data_Manual` → `Outputs!$C$7`",
-      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
-      "expected_resolution": "Confirmado por resolução dos named ranges.",
+      "source_locator": "Named ranges `Data_Output`/`Data_Manual`: scope de livro -> `'Relatorio Precos'!$B$5`/`$C$5`; scope por folha -> `<folha>!$C$6`/`$C$7` em Simulador, usd_ton, eur_ton, usd_m3, eur_m3. Uso em Motor!B19, Motor!C25:C26, Motor!C42.",
+      "source_sha256": "cf40be3ed65983d51e689d9d34ba1714fdb204794d34e89352be667be1692b52",
+      "expected_resolution": "Re-medido sobre o ficheiro autoritativo (2026-09-22).",
       "gate_expectation": "Afirmar que o processo é totalmente automático contradiz a existência de `Data_Manual`.",
-      "review_notes": "A transcrição diz «não exige intervenção manual» sobre ALGO — não foi determinado sobre o quê. Não usar essa frase para negar este facto. | A spec CORRIGE os meus locators: os nomes globais apontam para `Relatorio Precos!C5/B5`, e as 5 folhas ocultas redefinem-nos localmente (C7/C6). Eu li os locais como se fossem globais. O facto — ha override manual — mantem-se, e ganha profundidade: ha seletores independentes no modelo.",
-      "validation": "CLOSED_BY_SPEC"
+      "review_notes": "A transcrição diz «não exige intervenção manual» sobre ALGO — não foi determinado sobre o quê. Não usar essa frase para negar este facto. | A spec CORRIGE os meus locators: os nomes globais apontam para `Relatorio Precos!C5/B5`, e as 5 folhas ocultas redefinem-nos localmente (C7/C6). Eu li os locais como se fossem globais. O facto — ha override manual — mantem-se, e ganha profundidade: ha seletores independentes no modelo. || RE-ANCORADO 2026-09-22: a correccao acima ja estava na nota, mas o campo `source_locator` ficou com as coordenadas do `.xlsm` substituido (`Outputs!$C$6`/`$C$7`). Medicao directa das duas versoes confirma-a de forma independente: o `.xlsx` renomeia `Outputs` -> `Relatorio Precos` e `Outputs BIOS` -> `Relatorio Precos Bios`; o par de nivel-livro passa a `$B$5`/`$C$5`; os pares por folha sao IDENTICOS nas duas versoes (`$C$6`/`$C$7`), tal como o conjunto dos 127 named ranges de padrao `<Cliente>_<Produto>_<Componente>`, cujos alvos nao mudaram — so o nome da folha do scope. A substancia mantem-se; so as coordenadas do locator foram corrigidas. Medido da fonte, nunca de saida de candidato.",
+      "validation": "CLOSED_BY_REMEASURE"
     },
     {
       "id": "P-06",
@@ -238,5 +238,17 @@
       "Os locators da spec (`Motor!C24:H24`, `Relatorio!B5`) resolvem no .xlsx e NAO no .xlsm — as folhas `Motor`, `Relatorio Precos` e `Relatorio Precos Bios` nao existem no .xlsm, que tem `Outputs` e `Outputs BIOS` em vez.",
       "O ficheiro autoritativo NAO existe neste ambiente. Ate chegar, P8 nao pode correr sobre a fonte certa."
     ]
-  }
+  },
+  "remeasurements": [
+    {
+      "item": "P-05",
+      "date": "2026-09-22",
+      "reason": "locator apontava a folha `Outputs`, que nao existe no ficheiro autoritativo",
+      "from_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
+      "to_sha256": "cf40be3ed65983d51e689d9d34ba1714fdb204794d34e89352be667be1692b52",
+      "method": "leitura directa dos named ranges das duas versoes com xlsx_extract.py; comparacao de alvos por (nome, scope)",
+      "substance_changed": false,
+      "note": "A nota de revisao ja registava a correccao vinda da spec; o que estava por corrigir era o campo `source_locator`."
+    }
+  ]
 }

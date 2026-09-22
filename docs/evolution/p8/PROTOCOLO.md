@@ -182,17 +182,36 @@ reais não é um P8 verde; é um P8 por fazer.
 
 ---
 
-## 7. Bloqueio conhecido, por resolver
+## 7. O input de pricing — resolvido, com um passo por fazer
 
-O piloto de pricing corre contra o ficheiro **errado**. O autoritativo é o `.xlsx`
-(sha `cf40be3e…`, 19 folhas, com `Motor` e `Relatório Preços`); o que está em
-`projects/pricing-bunkers-pilot-4/inputs/` é o `.xlsm` (sha `677e7963…`, 18 folhas, com
-VBA). O oráculo `pricing-bunkers-pilot-4.oracle.json` foi extraído do `.xlsx`.
+**Resolvido a 2026-09-22.** O ficheiro autoritativo entrou e está verificado:
 
-Enquanto o `.xlsx` não entrar, o braço de pricing de **E02 não fecha** — e o que se medir
-contra o `.xlsm` mede outra coisa. O `.xlsm` continua a servir E05, que é sobre limites de
-extração e não sobre correcção.
+```
+projects/pricing-bunkers-pilot-4/inputs/PREÇO BANCAS_03_08_26.xlsx
+sha256 cf40be3ed65983d51e689d9d34ba1714fdb204794d34e89352be667be1692b52
+19 folhas · com Motor, Relatório Preços, Relatório Preços Bios · sem VBA
+```
 
-Substituir o input e recapturar (`/capture`) antes de correr E02 em pricing. A captura
-guardada é anterior ao bloco `capability_boundary` e não declara as 176 chamadas
-`_xll.Storm` que o motor de preço faz.
+Bate campo a campo com `authoritative_source` do oráculo (sha, contagem de folhas,
+`has_vba: false`). Os locators da especificação (`Motor!C24:H24`, `Relatorio!B5`) resolvem
+aqui — não resolviam no `.xlsm`.
+
+O `.xlsm` substituído (sha `677e7963…`, 18 folhas, com VBA) foi para
+`inputs/_superseded/`, com um `README.md` a dizer porquê. Não foi apagado: é a única fonte
+**real** com `vbaProject.bin` e é sobre ela que E05 afirma que o motor declara macros sem
+as inventar. Está fora de `inputs/` para que `/capture` não processe as duas versões.
+
+> **Facto que sobreviveu à troca:** os dois livros fazem as **mesmas 176 chamadas
+> `_xll.Storm`**. O motor de preço depende de código de add-in que não está em nenhum dos
+> ficheiros. Isto é fronteira declarada, não omissão, e limita o que se pode afirmar sobre
+> o cálculo a partir do livro — em qualquer das versões.
+
+### O passo que falta
+
+**`/capture` ainda não correu sobre o `.xlsx`.** Por decisão do operador, corre como **cp1
+do protocolo**, dentro de uma sessão real — Capture/Discovery é o primeiro ponto de
+reinício de E01, e pré-correr punha parte do ciclo medido fora de uma sessão.
+
+Os artefactos em `_capture/` são do `.xlsm` e são anteriores ao bloco
+`capability_boundary`: nunca declararam as 176 chamadas `_xll.Storm`. Serão substituídos
+pelo `/capture` de cp1.

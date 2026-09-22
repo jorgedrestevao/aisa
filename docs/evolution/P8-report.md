@@ -9,8 +9,8 @@ por razões que não são de engenharia e que estão nomeadas abaixo.
 
 | Caso | Estado | Evidência |
 |---|---|---|
-| **E01** Sessões reais | **NÃO EXECUTADO** | Exige sessões Claude Code independentes. Ver §4. |
-| **E02** Dois pilotos vs oráculos | **NÃO EXECUTADO** | Exige as sessões de E01 **e** o ficheiro autoritativo de pricing. Ver §4. |
+| **E01** Sessões reais | **NÃO EXECUTADO** | Exige sessões Claude Code independentes. Ver §4.1. |
+| **E02** Dois pilotos vs oráculos | **NÃO EXECUTADO** | Depende das sessões de E01. O ficheiro autoritativo de pricing entrou e verifica (§4.2); falta correr. |
 | **E03** Referência independente | **CUMPRIDO** | Oráculos extraídos da fonte em P1 e validados pelo dono **antes** de existir candidato (`docs/evolution/oracles/`). A referência precede o candidato, como `ACCEPTANCE.md` §5 exige. |
 | **E04** Inspeção completa | **CUMPRIDO** | `graph.py` ganhou `traverse`/`components`/`provenance`/`export`/`inspect` + CLI `inspect\|export`. 22 testes em `.claude/tests/test_graph_inspection.py`. |
 | **E05** Limites de extração | **CUMPRIDO** | 14 testes em `.claude/tests/test_extraction_limits.py`, sobre fonte construída **e** sobre o livro real do piloto. |
@@ -112,17 +112,78 @@ independentes, mas clonam o repositório do GitHub, e `projects/` está fora do 
 decisão do dono — os dados dos pilotos não chegariam lá. Só funcionaria commitando dados de
 cliente.
 
-### 4.2 O ficheiro autoritativo de pricing (E02)
+### 4.2 O ficheiro autoritativo de pricing — **resolvido**
 
-O oráculo `pricing-bunkers-pilot-4.oracle.json` foi extraído do `.xlsx`
-(sha `cf40be3e…`, 19 folhas, com `Motor` e `Relatório Preços`). O que está em
-`projects/pricing-bunkers-pilot-4/inputs/` é o `.xlsm` (sha `677e7963…`, 18 folhas, com
-VBA) — declarado pelo dono como o ficheiro errado.
+Era o segundo bloqueio. Deixou de ser a 2026-09-22: o dono enviou o `.xlsx` e ele verifica.
 
-Medir o `.xlsm` contra este oráculo mede outra coisa. O braço de pricing de E02 fica por
-executar até o `.xlsx` entrar.
+| campo | oráculo (`authoritative_source`) | ficheiro recebido |
+|---|---|---|
+| sha256 | `cf40be3ed6…1692b52` | `cf40be3ed6…1692b52` ✓ |
+| folhas | 19 | 19 ✓ |
+| `has_vba` | `false` | sem `vbaProject.bin` ✓ |
+| folhas-chave | `Motor`, `Relatório Preços` | presentes ✓ |
 
-O `.xlsm` continua a servir E05, que é sobre limites de extração e não sobre correcção.
+Instalado em `projects/pricing-bunkers-pilot-4/inputs/PREÇO BANCAS_03_08_26.xlsx`. O
+`.xlsm` substituído foi para `inputs/_superseded/` — não apagado, porque é a única fonte
+real com macros e é sobre ela que E05 afirma que o motor as declara sem as inventar; e fora
+de `inputs/` para que `/capture` não leia as duas versões.
+
+**Facto que sobreviveu à troca:** ambos os livros fazem as **mesmas 176 chamadas
+`_xll.Storm`**. A dependência de add-in não é um artefacto da versão desactualizada — é
+propriedade do motor de preço.
+
+**O que isto ainda não destrava sozinho.** `/capture` não correu sobre o `.xlsx`. Por
+decisão do operador corre como **cp1 do protocolo**, dentro de uma sessão real: Capture é o
+primeiro ponto de reinício de E01, e pré-correr punha parte do ciclo medido fora de uma
+sessão. Portanto E02 continua **NÃO EXECUTADO** — mas agora por falta de execução, não por
+falta de ficheiro.
+
+### 4.3 A troca destapou um defeito na referência — corrigido antes de custar 18 sessões
+
+O `.xlsx` não é outro livro: é o mesmo com `Outputs` → `Relatório Preços`,
+`Outputs BIOS` → `Relatório Preços Bios`, e uma folha nova, `Motor`.
+
+O rename partiu um item **crítico** do oráculo. `P-05` ancorava em `Outputs!$C$6`/`$C$7`,
+coordenadas que não resolvem no ficheiro autoritativo. Se o protocolo tivesse corrido
+assim, a sessão não encontraria o item, `critical_recall` caía abaixo de `1.0` e o
+resultado era **NO-GO por defeito da referência, não do candidato** — descoberto ao fim de
+~18 reinícios.
+
+Os dez itens críticos foram verificados um a um contra o ficheiro autoritativo antes de
+qualquer sessão correr. Só `P-05` estava partido; está **re-ancorado**, medido da fonte e
+registado em `remeasurements` no oráculo, com a substância intacta (a proposição não
+mudou — só as coordenadas). `P-02`, `P-03` e `P-06` verificam: os 127 named ranges de
+negócio são idênticos nas duas versões, `UlyssesQuotes` é idêntica, e a proposição de `P-06`
+já cobria os dois ficheiros. Detalhe em `docs/evolution/p8/MOTOR-inventario.md`.
+
+Nota de método: a nota de revisão de `P-05` **já registava** a correcção, vinda da
+especificação. O que estava por corrigir era o campo `source_locator`. A medição directa
+confirmou-a de forma independente, em vez de a repetir de ouvido.
+
+### 4.4 A folha `Motor` verifica o P-10 contra o ficheiro
+
+`Motor` é o motor de preço explícito e legível, e não existe no `.xlsm`. Cinco regras do
+`P-10` — que estava `CLOSED_BY_OPERATOR_SPEC`, fechado pela especificação e não pelo
+ficheiro — passam a ser verificáveis na fonte:
+
+| regra | célula | fórmula |
+|---|---|---|
+| `encargo = prémio + SLI` | `Motor!C27` | `=+C26+C25` |
+| `cedência = média(Platts) + encargo` | `Motor!C41` | `=+D24+D27` |
+| `IFO180 = 0,9×VLSFO + 0,1×DMA` | `Motor!G41` | `=+D41*0.9+E41*0.1` |
+| `margem USD = margem EUR × FX` | `Motor!C43` | `=C42*$D$37` |
+| `PREÇO USD = cedência USD + margem USD` | `Motor!C45` | `=+C41+C43` |
+
+E confirma a resposta do operador sobre o SLI: `Motor!C26` multiplica por `$H$24` (média
+FX) nas colunas CIF MED, e **não** multiplica nas colunas `0.5% FOB Rdam barge` e
+`Diesel 10ppm NWE` — exactamente como o `P-10` já registava.
+
+O que o `Motor` **não** contém: a regra de porto (`mínimo + logística − 10`, MGO `−5 −10`).
+As constantes `10` e `5` estão lá (`C9`, `C10`); a aplicação delas vive noutro lado, por
+localizar. Fica por afirmar.
+
+**Não promovi `P-10`** de `CLOSED_BY_OPERATOR_SPEC` a re-medido: mexer na validação de um
+item que não está partido é decisão do operador, não minha.
 
 ---
 
@@ -210,9 +271,16 @@ tocado. Fica registado.
 | Fase | Ficheiros | Testes | Falhas | Erros | Skips | xfail |
 |---|---|---|---|---|---|---|
 | P7 | 56 | 2232 | 0 | 0 | 14 | 3 |
-| **P8** | **59** | **2298** | **0** | **0** | **14** | **3** |
+| **P8** | **59** | **2300** | **0** | **0** | **14** | **3** |
 
-Três ficheiros novos, 66 testes novos (22 + 14 + 30), zero regressões.
+Três ficheiros novos, 68 testes novos (22 + 16 + 30), zero regressões. Duas corridas
+independentes deram o mesmo número.
+
+Os testes de E05 sobre o ficheiro real desdobraram-se de dois para três quando o `.xlsx`
+entrou: o autoritativo **não tem macros**, logo afirmar VBA sobre ele seria afirmar o que lá
+não está. Agora o add-in afirma-se sobre o livro activo, as macros sobre o livro que as tem
+(arquivado em `_superseded/`), e um terceiro teste afirma que a **ausência** de VBA no
+autoritativo é facto sobre ele, não falha a corrigir.
 
 ---
 
@@ -224,8 +292,12 @@ novos/antigos. GO obrigatório antes de simplificar.»* E §7: cada remoção de
 
 Por ordem:
 
-1. O dono envia o `.xlsx` autoritativo (sha `cf40be3e…`).
-2. Substituir o input do piloto de pricing e recapturar.
-3. Executar `docs/evolution/p8/PROTOCOLO.md` nos dois engagements.
+1. ~~O dono envia o `.xlsx` autoritativo (sha `cf40be3e…`).~~ **Feito a 2026-09-22, verificado.**
+2. ~~Substituir o input do piloto de pricing.~~ **Feito**; `.xlsm` arquivado em `_superseded/`.
+3. Executar `docs/evolution/p8/PROTOCOLO.md` nos dois engagements. O `/capture` sobre o
+   `.xlsx` é o cp1 do braço de pricing — corre dentro da sessão real, não antes dela.
 4. `compare.py summary --runs docs/evolution/p8/runs/` → GO ou NO-GO por código.
 5. Só então P9.
+
+Resta **um** bloqueio, e é o mesmo desde o início: sessões Claude Code independentes exigem
+uma pessoa a abri-las e fechá-las.

@@ -225,35 +225,80 @@ class E05c_AFronteiraChegaAQuemLe(unittest.TestCase):
 
 
 class E05d_OFicheiroRealDoPiloto(unittest.TestCase):
-    """O piloto de pricing É uma fonte com conteúdo não suportado material."""
+    """O piloto de pricing É uma fonte com conteúdo não suportado material.
+
+    Há dois livros reais e não dizem o mesmo. O autoritativo (`.xlsx`, sha `cf40be3e…`, 19
+    folhas) **não tem macros**; a versão substituída (`.xlsm`, sha `677e7963…`, 18 folhas)
+    tem. Ambos fazem as mesmas 176 chamadas `_xll.Storm`.
+
+    Por isso as asserções separam-se: o add-in afirma-se sobre o livro que o engagement
+    carrega; as macros afirmam-se sobre o livro que as tem, onde quer que ele esteja
+    arquivado. Afirmar macros sobre o autoritativo seria afirmar o que lá não está."""
 
     FONTE = ROOT / "projects" / "pricing-bunkers-pilot-4" / "inputs"
 
-    def livro(self):
+    def livro_activo(self):
+        """O que o engagement carrega — o que `/capture` vai ler."""
         if not self.FONTE.is_dir():
             return None
         livros = sorted(self.FONTE.glob("*.xls[mx]"))
         return livros[0] if livros else None
 
-    @unittest.skipUnless(HAVE_OPENPYXL, "openpyxl not installed")
-    def test_the_real_workbook_declares_macros_and_an_addin(self):
-        livro = self.livro()
-        if livro is None:
-            self.skipTest("input do piloto ausente neste ambiente (dados de cliente)")
+    def livro_com_macros(self):
+        """Qualquer livro real com `vbaProject.bin`, activo ou arquivado."""
+        if not self.FONTE.is_dir():
+            return None
+        for p in sorted(self.FONTE.rglob("*.xls[mx]")):
+            try:
+                with zipfile.ZipFile(p) as zf:
+                    if any(n.lower().endswith("vbaproject.bin") for n in zf.namelist()):
+                        return p
+            except (zipfile.BadZipFile, OSError):
+                continue
+        return None
+
+    def fronteira(self, livro):
         tmp = Path(tempfile.mkdtemp(prefix="e05-real-"))
         try:
             copia = tmp / livro.name
             shutil.copy2(livro, copia)
             doc = extrai(copia)
-            cb = doc.get("capability_boundary") or {}
-            self.assertTrue(cb.get("vba", {}).get("present"),
-                            "o livro real tem macros e tem de o dizer")
-            self.assertTrue(cb.get("addin_functions", {}).get("present"),
-                            "o motor de preço chama uma função de add-in: é fronteira, não omissão")
-            self.assertEqual((doc.get("workbook") or {}).get("flags", {}).get("vba_modules"), [],
-                             "nem no ficheiro real se inventa o conteúdo das macros")
+            return doc, (doc.get("capability_boundary") or {})
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+    @unittest.skipUnless(HAVE_OPENPYXL, "openpyxl not installed")
+    def test_the_active_workbook_declares_the_addin_call(self):
+        livro = self.livro_activo()
+        if livro is None:
+            self.skipTest("input do piloto ausente neste ambiente (dados de cliente)")
+        _doc, cb = self.fronteira(livro)
+        self.assertTrue(cb.get("addin_functions", {}).get("present"),
+                        "o motor de preço chama uma função de add-in: é fronteira, não omissão")
+        self.assertIn("_xll.Storm", cb["addin_functions"]["detail"])
+
+    @unittest.skipUnless(HAVE_OPENPYXL, "openpyxl not installed")
+    def test_the_workbook_that_has_macros_declares_them_without_inventing(self):
+        livro = self.livro_com_macros()
+        if livro is None:
+            self.skipTest("nenhum livro real com vbaProject.bin neste ambiente")
+        doc, cb = self.fronteira(livro)
+        self.assertTrue(cb.get("vba", {}).get("present"),
+                        "este livro tem macros e tem de o dizer")
+        self.assertIn("not decompiled", cb["vba"]["detail"])
+        self.assertEqual((doc.get("workbook") or {}).get("flags", {}).get("vba_modules"), [],
+                         "nem no ficheiro real se inventa o conteúdo das macros")
+
+    @unittest.skipUnless(HAVE_OPENPYXL, "openpyxl not installed")
+    def test_the_authoritative_workbook_is_not_claimed_to_have_macros(self):
+        """A ausência de VBA no autoritativo é um facto sobre ele, não uma falha a corrigir."""
+        livro = self.livro_activo()
+        if livro is None or livro.suffix.lower() != ".xlsx":
+            self.skipTest("o input activo não é o `.xlsx` autoritativo")
+        _doc, cb = self.fronteira(livro)
+        self.assertFalse(cb.get("vba", {}).get("present"),
+                         "o `.xlsx` não tem vbaProject.bin: declarar presença seria inferir")
+        self.assertEqual(cb["vba"]["detail"], "", "mecanismo ausente não ganha detalhe")
 
     def test_the_stored_capture_is_compared_not_trusted(self):
         """A extracção guardada do piloto é anterior ao bloco de fronteira.
