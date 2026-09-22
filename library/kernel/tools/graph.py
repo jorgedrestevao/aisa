@@ -267,6 +267,43 @@ def empty_store() -> dict:
             "nodes": 0, "edges": 0}
 
 
+# ------------------------------------------------- dependencia consumida (C04/C05)
+
+CONSUMED_PATH = "_graph#consumed"
+
+
+def dependency_fingerprint(nodes: list[dict], edges: list[dict], consumed) -> str:
+    """Digest canonico do subconjunto do grafo que uma revisao REALMENTE consumiu.
+
+    Contrato C4: «Relacoes novas no grafo podem servir navegacao sem mudar a base Coverage.
+    Se uma relacao exclusivamente no grafo passar a sustentar a avaliacao, acrescentar ao
+    contrato uma dependencia explicita e fingerprint canonico do subconjunto efectivamente
+    consumido.»
+
+    `consumed` e o conjunto de ids de no e de chaves de aresta (`src|rel|dst`) que a revisao
+    declarou consumir. O que nao esta la NAO entra — e por isso que acrescentar uma aresta
+    so de navegacao nao torna nada stale (C04), e mudar uma aresta consumida torna (C05).
+
+    Reordenar entrada nao muda o digest: `canonical_lines` ja ordena (C02)."""
+    want = set(consumed or ())
+    n = [x for x in nodes if x.get("id") in want]
+    e = [x for x in edges
+         if "{}|{}|{}".format(x.get("src"), x.get("rel"), x.get("dst")) in want]
+    body = "\n".join(canonical_lines(n, e))
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
+def as_coverage_source(nodes: list[dict], edges: list[dict], consumed) -> dict:
+    """A dependencia do grafo como FONTE do `basis` do coverage.
+
+    Entra pelo mesmo caminho que qualquer outra fonte `use: freshness`, por isso
+    `coverage.check_freshness` compara-a sem saber que e um grafo — e sem segunda definicao
+    de «a base mudou». Uma revisao que nao consome grafo nenhum nao leva esta entrada."""
+    return {"path": CONSUMED_PATH, "use": "freshness",
+            "sha256": dependency_fingerprint(nodes, edges, consumed),
+            "consumed": sorted(set(consumed or ()))}
+
+
 # -------------------------------------------------------------- escrita (staging)
 
 def serialize(nodes: list[dict], edges: list[dict]) -> tuple[str, str]:

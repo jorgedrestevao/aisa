@@ -332,3 +332,143 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ============================================================================
+# Ciclo do conhecimento (L06-L10) — as transicoes que nao partem de `Unknown`.
+# Todas por `library/kernel/states.md` -> *Transitions*.
+# ============================================================================
+
+RETIRADA_MARK = "— retirada P-21"
+
+
+def revalidate(row, still_holds, note="", today=""):
+    """Confirmed/Assumed expirado (L09).
+
+    `states.md` distingue DOIS caminhos, e a diferenca importa:
+      still_holds=True  -> **edicao sancionada**: renova `verificado_em` NA PROPRIA LINHA,
+                           sem linha nova. Nao ha claim nova porque nao ha facto novo.
+      still_holds=False -> o facto mudou -> cai no fluxo NORMAL (`was <id>`), e a correccao
+                           exige transicao. «Never renew a changed fact.»"""
+    when = today or date.today().isoformat()
+    rid = (row.get("id") or "").strip()
+    if still_holds:
+        return {"mode": "sanctioned_edit", "row": rid, "new_id": "",
+                "verificado_em": when, "creates_row": False,
+                "reason": "o facto mantem-se — `states.md`: renovar `verificado_em` na "
+                          "propria linha, sem linha nova",
+                "note": note}
+    return {"mode": "transition", "row": rid, "creates_row": True,
+            "reason": "o facto mudou — `states.md`: «Never renew a changed fact»; aplica-se "
+                      "o fluxo normal com `was {}`".format(rid),
+            "note": note}
+
+
+def withdraw(row, reason):
+    """Retirada por ambito (P-21, a quarta edicao sancionada) (L08).
+
+    Sai «por um marcador na ultima coluna e por mais nada». Nao vira facto, nao apaga
+    historia, nao cria linha nova."""
+    if not (reason or "").strip():
+        raise ResolveError("retirada exige razao — a base fica registada", "NO_BASIS",
+                           {"row": row.get("id")})
+    return {"mode": "withdrawal", "row": (row.get("id") or "").strip(),
+            "marker": "{} ({})".format(RETIRADA_MARK, reason.strip()),
+            "creates_row": False, "becomes_fact": False,
+            "reason": "retirada por ambito — marcador na ultima coluna, e mais nada"}
+
+
+def resolve_conflict(row, sides, by_owner, today=""):
+    """Conflicted -> Confirmed (xN) ou Assumed (L07).
+
+    Os DOIS lados sobrevivem. `states.md`: com decisao do dono, N linhas Confirmed; sem ela,
+    uma Assumed com `was X-nnn`. Nunca se escolhe por recencia — nao ha ordenacao temporal
+    nesta funcao, de proposito."""
+    rid = (row.get("id") or "").strip()
+    if len(sides) < 2:
+        raise ResolveError("um conflito tem pelo menos dois lados", "TOO_FEW_SIDES",
+                           {"row": rid, "sides": len(sides)})
+    if by_owner:
+        return {"mode": "owner_decision", "row": rid, "state": "Confirmed",
+                "successors": len(sides), "sides_preserved": list(sides),
+                "reason": "o dono decidiu — `states.md`: Conflicted -> Confirmed (xN)",
+                "chose_by_recency": False}
+    return {"mode": "internal_evidence", "row": rid, "state": "Assumed",
+            "successors": 1, "sides_preserved": list(sides),
+            "reason": "sem resposta do dono — `states.md`: Conflicted -> Assumed, base = as "
+                      "linhas e locators usados",
+            "chose_by_recency": False}
+
+
+def accept_risk(row, basis):
+    """Risky com risco aceite (L08). A base EXIGIDA fica registada; nao vira facto."""
+    if not (basis or "").strip():
+        raise ResolveError("aceitar risco exige base registada", "NO_BASIS",
+                           {"row": row.get("id")})
+    return {"mode": "risk_accepted", "row": (row.get("id") or "").strip(),
+            "basis": basis.strip(), "becomes_fact": False, "creates_row": False,
+            "reason": "risco aceite com base registada — continua Risky, nao vira Confirmed"}
+
+
+def finding(fid, behaviour, evidence, criticality, action):
+    """Um finding de comportamento manual (L06).
+
+    Distincao, evidencia, criticidade e accao sao os quatro campos que tem de sobreviver
+    ao reinicio — por isso viajam como props do no, nao como prosa."""
+    missing = [k for k, v in (("behaviour", behaviour), ("evidence", evidence),
+                              ("criticality", criticality), ("action", action)) if not v]
+    if missing:
+        raise ResolveError("finding incompleto: {}".format(", ".join(missing)),
+                           "INCOMPLETE_FINDING", {"missing": missing})
+    return {"id": fid, "type": "finding",
+            "props": {"behaviour": behaviour, "evidence": evidence,
+                      "criticality": criticality, "action": action, "disposed": False},
+            "provenance": {"kind": "manual-behaviour"}}
+
+
+def dispose_finding(node, disposition, basis):
+    """Dispor ou reabrir um finding (L06). A historia fica; o estado muda."""
+    if disposition not in ("disposed", "reopened"):
+        raise ResolveError("disposicao invalida: {}".format(disposition), "BAD_DISPOSITION",
+                           {"got": disposition})
+    if not (basis or "").strip():
+        raise ResolveError("dispor/reabrir exige base", "NO_BASIS", {"id": node.get("id")})
+    props = dict(node.get("props") or {})
+    props["disposed"] = disposition == "disposed"
+    props.setdefault("history", [])
+    props["history"] = list(props["history"]) + [{"disposition": disposition,
+                                                  "basis": basis.strip()}]
+    return dict(node, props=props)
+
+
+def dependents_of(nodes, edges, changed_ids):
+    """Quem depende do que mudou — revalidacao DIRECCIONADA (L10).
+
+    Segue `depends_on` e `was` a partir dos ids alterados. Quem nao esta na cadeia nao e
+    tocado: revalidar tudo seria o mesmo que nao revalidar nada."""
+    changed = set(changed_ids or ())
+    by_src = {}
+    for e in edges:
+        if e.get("rel") in ("depends_on", "was"):
+            by_src.setdefault(e.get("dst"), set()).add(e.get("src"))
+    out, frontier = set(), set(changed)
+    while frontier:
+        nxt = set()
+        for cid in frontier:
+            for dep in by_src.get(cid, ()):
+                if dep not in out and dep not in changed:
+                    out.add(dep)
+                    nxt.add(dep)
+        frontier = nxt
+    return sorted(out)
+
+
+def decision_rewritten_by(answer_targets, decision_ids):
+    """Uma resposta NUNCA reescreve uma decisao (L10).
+
+    `states.md` da a `/answer` transicoes de linhas da SU. Uma decisao muda por `/decide`,
+    nao por resposta. Esta funcao existe para que a regra seja verificavel."""
+    hit = sorted(set(answer_targets or ()) & set(decision_ids or ()))
+    return {"would_rewrite": bool(hit), "decisions": hit,
+            "reason": ("uma resposta nao reescreve uma decisao — isso e `/decide`"
+                       if hit else "")}
