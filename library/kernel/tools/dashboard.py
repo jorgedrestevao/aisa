@@ -27,6 +27,7 @@ import html as _html
 import http.server
 import socketserver
 import json
+import runpy
 import os
 import re
 import sys
@@ -5464,6 +5465,62 @@ def gate_state(eng: Path, transition: str) -> dict:
     return g
 
 
+# P-13: o detalhe que o kernel escreve e vocabulario de kernel — correcto no ficheiro e no
+# log, errado na pagina que o sponsor le. «mutacao», «gate» e «bootstrap» nao sao palavras
+# dele. A traducao vive aqui, o codigo vai entre parentesis a seguir a frase, e um codigo
+# sem traducao cai no detalhe original em vez de desaparecer.
+KERNEL_PT = {
+    "PENDING_OPERATION": "ficou uma alteração a meio — nada se escreve até estar resolvida",
+    "PENDING_UNREADABLE": "ficou o registo de uma alteração a meio que não se consegue ler",
+    "CONCURRENT_WRITE": "alguém estava a escrever enquanto isto foi lido",
+    "AUTHORITY_DRIFT": "o registo do projecto e a memória dele discordam sobre linhas que "
+                       "contam",
+    "AUTHORITY_UNMIRRORED": "há linhas no registo que a memória do projecto não tem",
+    "LEGACY_MODE": "este projecto ainda não tem memória construída",
+    "GRAPH_INTEGRITY": "a memória do projecto está inconsistente",
+    "CONTEXT_TRUNCATED": "o resumo do que se sabe ficou incompleto",
+    "KERNEL_UNAVAILABLE": "não foi possível verificar o estado do projecto",
+}
+
+
+_KERNEL_MODULE = {}
+
+
+def kernel_state(eng: Path) -> dict:
+    """O que o kernel diz sobre este engagement: pronto, ou o que o impede.
+
+    Carregado a pedido, e nao no topo do modulo, porque `bootstrap.py` importa ESTE
+    ficheiro — ao nivel do modulo seria um ciclo. Lazy, a copia fica em cache, e o ciclo
+    nao se fecha porque o corpo do bootstrap nao volta a chamar isto.
+
+    **Falha FECHADA.** Nao conseguir consultar o kernel nao e o mesmo que ter consultado e
+    estar tudo bem: um dashboard que tratasse a excecao como «pronto» era pior do que nao
+    consultar, porque passava a afirmar o que nao sabe.
+
+    O que isto NAO faz: bloquear. A pagina gera-se na mesma e o comando sai 0. Um leitor
+    que se recusasse a desenhar era um bloqueio de integridade, e isso e do guarda de
+    escrita.
+    """
+    caminho = Path(__file__).resolve().parent / "bootstrap.py"
+    try:
+        if "mod" not in _KERNEL_MODULE:
+            _KERNEL_MODULE["mod"] = runpy.run_path(str(caminho))
+        boot = _KERNEL_MODULE["mod"]["bootstrap"](Path(eng))
+    except Exception as exc:                                    # noqa: BLE001
+        return {"ready": False, "consulted": False,
+                "limitations": [{"code": "KERNEL_UNAVAILABLE",
+                                 "detail": "o estado do projecto nao pode ser verificado "
+                                           "({}: {})".format(type(exc).__name__, exc),
+                                 "recovery": ""}],
+                "detail": "nao consultado"}
+    return {"ready": bool(boot.get("ready")), "consulted": True,
+            "limitations": [
+                {"code": l.get("code", ""), "detail": l.get("detail", ""),
+                 "recovery": l.get("recovery", "")}
+                for l in (boot.get("limitations") or [])],
+            "graph": boot.get("graph", {})}
+
+
 def build_model(eng: Path, today: date) -> dict:
     state = _read_json(eng / "_state.json")
     context = _read_json(eng / "context.json")
@@ -5589,6 +5646,7 @@ def build_model(eng: Path, today: date) -> dict:
             "sections": su_meta["sections"],
             "rows": rows,
         },
+        "kernel": kernel_state(eng),
         "health": health,
         "revalidate": revalidation_list(rows),
         "agenda": agenda,
@@ -6098,6 +6156,14 @@ pre{background:var(--line-soft);padding:12px;border-radius:8px;overflow-x:auto;
   .hero .v{color:#000}
   a[href]::after{content:""}
 }
+
+.kstate{margin:0 0 14px;padding:12px 14px;border-radius:8px;
+  border:1px solid #c2410c;background:#fff7ed;color:#7c2d12;font-size:13px;line-height:1.5}
+.kstate b{color:#9a3412}
+.kstate ul{margin:8px 0 0;padding-left:18px}
+.kstate code{background:#ffedd5;padding:1px 5px;border-radius:4px;font-size:12px}
+@media(prefers-color-scheme:dark){.kstate{background:#2a1408;border-color:#9a3412;color:#fed7aa}
+  .kstate b{color:#fdba74}.kstate code{background:#431407}}
 """
 
 JS = """
@@ -7059,6 +7125,29 @@ def render_html(model: dict, reload_secs: int) -> str:
     a("<style>" + CSS + "</style></head><body>")
     a("<!-- aisa-dashboard v{} build {} {} -->".format(TOOL_VERSION, model["build"], model["generated"]))
     a('<div class="app">')
+
+    # ---------------- estado do projecto, ANTES de qualquer numero
+    #
+    # Enterrar isto a meio da pagina nao servia: quem le o topo concluia na mesma sobre
+    # estado misto. As contagens continuam todas la, e continuam certas — o que muda e que
+    # deixam de aparecer sozinhas.
+    k = model.get("kernel") or {}
+    if not k.get("ready", True):
+        motivos = []
+        for lim in k.get("limitations", []):
+            codigo = lim.get("code") or ""
+            frase = KERNEL_PT.get(codigo) or lim.get("detail") or ""
+            if codigo:
+                frase = "{} ({})".format(frase, codigo) if frase else "({})".format(codigo)
+            recup = lim.get("recovery") or ""
+            motivos.append("{}{}".format(
+                esc(frase), " &rarr; <code>{}</code>".format(esc(recup)) if recup else ""))
+        a('<div class="kstate" role="alert">'
+          '<b>Este projecto está por reconstruir.</b> '
+          'Os números abaixo estão certos e a conclusão pode não estar: '
+          'ficou trabalho a meio, ou o registo e a memória do projecto discordam. '
+          'Resolver isto primeiro.<ul>{}</ul></div>'.format(
+              "".join("<li>{}</li>".format(m) for m in motivos)))
 
     # ---------------- header
     a('<header class="top">')
