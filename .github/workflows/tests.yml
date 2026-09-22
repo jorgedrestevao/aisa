@@ -1,0 +1,35 @@
+name: tests
+
+# Porque isto existe: até agora, cada "2480 testes, 0 falhas" era uma afirmação numa
+# mensagem de commit, sem execução pública que a confirmasse. Uma auditoria externa notou-o
+# — e tinha razão. Só passou a ser possível depois de a suite deixar de depender de
+# `projects/`, que é gitignored (F11): antes disto, um clone limpo não passava, e um CI
+# teria sido vermelho por falta de material privado em vez de por um defeito.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Sem `pip install`: ADR-001 diz stdlib apenas, e um CI que instalasse
+      # dependências deixava de provar isso.
+      - name: A suite inteira, num clone limpo
+        run: python .github/run_tests.py
+
+      - name: O que falhou
+        if: failure()
+        run: |
+          echo "A suite é determinística e corre em qualquer clone:"
+          echo "  python .github/run_tests.py            (paralelo)"
+          echo "  python .github/run_tests.py --sequential"

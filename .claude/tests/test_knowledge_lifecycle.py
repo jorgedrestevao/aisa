@@ -235,12 +235,19 @@ SU_CICLO = """> Fase actual: Discovery
 """
 
 
+_MIG = runpy.run_path(str(TOOLS / "migrate.py"))
+
+
 def eng_ciclo(tmp, nome="eng"):
     eng = Path(tmp) / nome
     eng.mkdir(parents=True, exist_ok=True)
     (eng / "shared-understanding.md").write_text(SU_CICLO, encoding="utf-8", newline="\n")
     (eng / "_state.json").write_text('{"phase":"discovery","round":"R-01"}\n',
                                      encoding="utf-8", newline="\n")
+    # Migrado, como qualquer engagement real desde que o grafo e obrigatorio. Sem isto a
+    # fixture modelava um engagement que nao pode existir — e que as operacoes de ciclo de
+    # vida passaram a recusar, com razao.
+    _MIG["apply"](eng)
     return eng
 
 

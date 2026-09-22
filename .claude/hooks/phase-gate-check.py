@@ -126,21 +126,56 @@ def _kernel_limitations(eng: Path) -> list[str]:
     return fora or ["o kernel não está pronto e não nomeou a limitação"]
 
 
+def _kernel_codes(eng: Path) -> list:
+    """Só os códigos. Serve para distinguir «não se lê» de «lê-se e diverge»."""
+    caminho = (Path(__file__).resolve().parents[2]
+               / "library" / "kernel" / "tools" / "bootstrap.py")
+    if not caminho.is_file():
+        return []
+    try:
+        B = runpy.run_path(str(caminho))
+        boot = B["bootstrap"](eng)
+    except Exception:                                           # noqa: BLE001
+        return ["KERNEL_UNAVAILABLE"]
+    return [] if boot.get("ready") else [l.get("code", "") for l in
+                                         (boot.get("limitations") or [])]
+
+
 def run(eng: Path, skill: str, args_text: str, how: str) -> int:
     D = load_dashboard()
     transition = D["GATE_TRANSITIONS"].get(skill, "")
     if not transition:
         return 0
 
-    # A limitação do kernel acompanha o veredicto; NÃO o substitui.
+    # Três coisas, não duas.
     #
-    # A primeira versão disto fazia o gate deixar de avaliar quando o kernel não estava
-    # pronto — e isso é converter um gate METODOLÓGICO soft num bloqueio de integridade,
-    # que é coisa diferente e que a própria auditoria avisou para não fazer. Os critérios
-    # de fase continuam a ser calculados e escritos; o que se acrescenta é a limitação, à
-    # frente da conclusão, para quem lê o `gate-log.md` saber sobre que estado ela foi
-    # emitida.
+    # A primeira versão fazia o gate deixar de avaliar sobre qualquer limitação do kernel —
+    # e isso é converter um gate METODOLÓGICO soft num bloqueio de integridade, que é outra
+    # coisa. A segunda passou a calcular o veredicto sempre, com a limitação ao lado. Mas um
+    # veredicto calculado sobre estado que NÃO SE CONSEGUE LER não é um veredicto mau: não é
+    # um veredicto. E `não avaliável` já existia no vocabulário deste gate — é o que um
+    # critério sem nada mecânico para ler recebe.
+    #
+    #   estado ilegível (pendência, grafo partido)  -> NAO AVALIAVEL, sem veredicto
+    #   estado legível com limitação (desvio, etc.) -> veredicto + limitação ao lado
+    #   estado limpo                                -> veredicto
+    #
+    # Nenhuma das três bloqueia: sai sempre 0. Quem bloqueia sobre integridade é o
+    # `pre-authority-guard.py`, e é suposto ser só ele.
     impedimentos = _kernel_limitations(eng)
+    ilegivel = [c for c in _kernel_codes(eng)
+                if c in ("PENDING_OPERATION", "PENDING_UNREADABLE", "CONCURRENT_WRITE",
+                         "UNREADABLE", "INVALID_FORMAT", "UNSUPPORTED_SCHEMA",
+                         "INCOHERENT_PAIR", "GRAPH_INTEGRITY")]
+    if ilegivel:
+        razao = " · ".join(impedimentos)
+        print("[phase-gate-check] gate: nao avaliavel — o estado nao se consegue ler "
+              "({}). Nenhum veredicto foi emitido. {}".format(", ".join(ilegivel), razao),
+              file=sys.stderr)
+        _append(eng, "{} · {} · {} · gate: nao avaliavel — estado ilegivel ({}) · {}\n".format(
+            dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            eng.name, transition, ", ".join(ilegivel), razao))
+        return 0
     try:
         g = D["gate_state"](eng, transition)
     except Exception as exc:                                        # noqa: BLE001

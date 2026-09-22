@@ -66,6 +66,32 @@ def read_su(eng: Path):
     return md, rows
 
 
+def read_base(eng: Path, rels=()):
+    """O conteudo E o digest de cada ficheiro, da MESMA leitura.
+
+    O plano lia os ficheiros no principio e tirava os digests no fim, e entre as duas coisas
+    cabia uma escrita: ela ficava registada como a base — `expected` batia certo com o disco
+    — enquanto o conteudo preparado era o de antes dela. O coordenador publicava, e a
+    alteracao desaparecia com recibo `committed` e sem uma unica recusa.
+
+    `BASE_CHANGED` existia e nunca disparava, porque o que lhe era declarado ja era o estado
+    novo. Nao e um problema de que ficheiros se declaram (isso foi o F04) — e de QUANDO se
+    tira o digest: do texto que se leu, nao do ficheiro que la esta quando o plano acaba.
+    """
+    eng = Path(eng)
+    fora = {}
+    for rel in rels:
+        caminho = eng / rel
+        try:
+            bruto = caminho.read_bytes()
+        except OSError:
+            fora[rel] = {"text": "", "digest": ""}
+            continue
+        fora[rel] = {"text": bruto.decode("utf-8"),
+                     "digest": hashlib.sha256(bruto).hexdigest()}
+    return fora
+
+
 def find_row(rows, row_id):
     for r in rows:
         if (r.get("id") or "").strip() == row_id:
@@ -238,7 +264,11 @@ def plan(eng, row_id, answer_text, answered_by, locator="", inference=False,
     """Calcula TUDO sem publicar (contrato B2.4)."""
     eng = Path(eng)
     when = today or date.today().isoformat()
-    md, rows = read_su(eng)
+    # UMA leitura: o texto que se usa e o digest que se declara saem daqui, do mesmo
+    # instante. Ver `read_base`.
+    lido = read_base(eng, (SU_FILE, ANSWERS_FILE))
+    md = lido[SU_FILE]["text"]
+    _h, rows, _s, _d = _D["parse_su"](md)
     row = find_row(rows, row_id)
 
     verdict = force_state(decide_state(row, answered_by, locator, inference), to)
@@ -263,55 +293,30 @@ def plan(eng, row_id, answer_text, answered_by, locator="", inference=False,
 
     su_new = append_row(mark_resolved(md, row_id, [new_id]), state, cells)
 
-    ap = eng / ANSWERS_FILE
-    ans_old = ap.read_text(encoding="utf-8") if ap.exists() else "# Respostas\n"
+    ans_old = lido[ANSWERS_FILE]["text"] or "# Respostas\n"
     ans_new = ans_old.rstrip("\n") + "\n" + answers_section(row_id, answer_text, answered_by, when)
 
-    st = _G["read"](eng)
-    nodes, edges = list(st.get("nodes", [])), list(st.get("edges", []))
-    have = {n.get("id") for n in nodes}
-    if row_id not in have:
-        nodes.append({"id": row_id, "type": "question",
-                      "props": {"state": "Unknown", "text": row.get("claim", "")},
-                      "provenance": {"lens": lens, "ronda": ronda, "mirror_of": "SU:" + row_id}})
-    if new_id not in have:
-        nodes.append({"id": new_id, "type": "claim",
-                      "props": {"state": state, "text": claim_text,
-                                "structural_choice_open": struct["choice_open"]},
-                      "provenance": {"lens": lens, "ronda": ronda, "answered_by": who,
-                                     "locator": locator, "mirror_of": "SU:" + new_id}})
-    if not any(e.get("src") == new_id and e.get("rel") == "was" for e in edges):
-        edges.append({"src": new_id, "rel": "was", "dst": row_id, "props": {},
-                      "provenance": {"ronda": ronda}})
-
-    # --- O espelho fecha com a linha, na MESMA transaccao.
-    #
-    # Antes disto, a SU saia com `resolved ->` e o no do grafo ficava `resolved=false`: a
-    # pergunta voltava a aparecer aberta no contexto, e a projeccao — que compara — via uma
-    # divergencia criada pela propria operacao bem sucedida. O no da linha original so era
-    # tocado quando NAO existia; num engagement migrado existia sempre, e ninguem lhe mexia.
-    #
-    # A correccao nao remenda os dois nos: reconstroi os campos espelhados de TODOS os nos a
-    # partir da autoridade que esta operacao vai publicar. Quem escreve a autoridade escreve
-    # o espelho dela — nao uma versao sua. Historia, `was` e proveniencia ficam onde estao,
-    # porque so os campos do contrato do espelho sao tocados.
-    _h_novo, linhas_novas, _s, _d = _D["parse_su"](su_new)
-    autoridade = _G["authority_from_rows"](linhas_novas)
-    nodes = [
-        dict(n, props=_G["mirror_props"](n.get("props"),
-                                         autoridade.get((n.get("provenance") or {}).get(
-                                             "mirror_of") or "", {})))
-        if (n.get("provenance") or {}).get("mirror_of") in autoridade else n
-        for n in nodes
+    # O que o escritor sabe e a SU nao diz: a linha original como pergunta, o sucessor com
+    # a proveniencia de quem respondeu, e a ligacao `was` entre os dois. Os campos
+    # espelhados vem todos da SU publicada — `mirror_write_set` trata disso.
+    extra_nodes = [
+        {"id": row_id, "type": "question", "props": {},
+         "provenance": {"lens": lens, "ronda": ronda, "mirror_of": "SU:" + row_id}},
+        {"id": new_id, "type": "claim",
+         "props": {"structural_choice_open": struct["choice_open"]},
+         "provenance": {"lens": lens, "ronda": ronda, "answered_by": who,
+                        "locator": locator, "mirror_of": "SU:" + new_id}},
     ]
+    extra_edges = [{"src": new_id, "rel": "was", "dst": row_id, "props": {},
+                    "provenance": {"ronda": ronda}}]
 
     write_set = {SU_FILE: su_new, ANSWERS_FILE: ans_new}
-    write_set.update(_G["write_set"](nodes, edges))
+    write_set.update(mirror_write_set(eng, su_new, extra_nodes, extra_edges))
 
     return {"operation_id": operation_id(row_id, answer_text), "row": row_id,
             "new_id": new_id, "state": state, "verdict": verdict, "structural": struct,
             "write_set": write_set,
-            "expected": _expected_for(eng, write_set),
+            "expected": _expected_for(eng, write_set, lido),
             "summary": {
                 "o que mudou": "{} -> {} {}".format(row_id, state, new_id),
                 "estado": ("escolha estrutural em aberto" if struct["choice_open"]
@@ -664,7 +669,71 @@ def _expected(eng, *rels):
     return {rel: _O["digest"](eng / rel) for rel in rels}
 
 
-def _expected_for(eng, write_set):
+def mirror_write_set(eng, su_new, extra_nodes=(), extra_edges=()):
+    """O grafo que acompanha uma SU nova — os campos espelhados postos ao que ela diz.
+
+    **Quem escreve a autoridade escreve o espelho dela.** Nao uma versao sua, e nao noutra
+    transaccao: desde que o bootstrap BLOQUEIA sobre desvio, um escritor que deixe o grafo
+    para tras nao produz uma inconsistencia tolerada — inutiliza o engagement. Medido antes
+    de existir esta funcao: `apply_resolve_conflict` levava `ready` de True a False.
+
+    Isto e a CLASSE, nao o caso. A primeira correccao (F06) fechou o `/answer` e deixou os
+    outros escritores a depender de sorte: `withdraw` e `accept_risk` passaram porque tocam
+    colunas que nao sao espelhadas, e `resolve_conflict` nao passou. Um escritor novo nao
+    pode depender disso.
+
+    `extra_nodes`/`extra_edges` sao o que o escritor sabe e a SU nao diz — a ligacao `was`
+    de um sucessor, a proveniencia de quem respondeu. Os campos do contrato do espelho
+    (`state`, `criticidade`, `resolved`, `text`) vem SEMPRE da SU publicada, nunca do que o
+    chamador achar.
+    """
+    eng = Path(eng)
+    st = _G["read"](eng)
+    nodes = list(st.get("nodes", []))
+    edges = list(st.get("edges", []))
+    have = {n.get("id") for n in nodes}
+    for n in extra_nodes:
+        if n.get("id") not in have:
+            nodes.append(n)
+            have.add(n.get("id"))
+    for e in extra_edges:
+        if not any(x.get("src") == e.get("src") and x.get("rel") == e.get("rel")
+                   and x.get("dst") == e.get("dst") for x in edges):
+            edges.append(e)
+
+    _h, linhas, _s, _d = _D["parse_su"](su_new)
+    autoridade = _G["authority_from_rows"](linhas)
+
+    # Uma linha da SU sem no nenhum bloqueia a reconstrucao (F08, segunda metade). Quem a
+    # criou tem de a espelhar — senao a operacao bem sucedida bloqueia a seguinte.
+    espelhadas = {(n.get("provenance") or {}).get("mirror_of") for n in nodes}
+    por_id = {("SU:" + str(r.get("id") or "").strip()): r for r in linhas if r.get("id")}
+    for chave in sorted(set(autoridade) - espelhadas):
+        r = por_id[chave]
+        nodes.append({"id": r["id"], "type": "su-row", "props": {},
+                      "provenance": {"lens": r.get("lens") or "",
+                                     "ronda": r.get("ronda") or "",
+                                     "mirror_of": chave}})
+
+    nodes = [
+        dict(n, props=_G["mirror_props"](
+            n.get("props"), autoridade.get((n.get("provenance") or {}).get("mirror_of") or "",
+                                           {})))
+        if (n.get("provenance") or {}).get("mirror_of") in autoridade else n
+        for n in nodes
+    ]
+    ws = _G["write_set"](nodes, edges)
+    # Um espelho que nao muda nao se publica. A REGRA e que todo o escritor de autoridade
+    # chame isto — nao que toda a escrita carregue o grafo atras. `revalidate` mexe em
+    # `verificado_em`, que nao e campo espelhado: chamar e obrigatorio, publicar seria ruido
+    # (e um recibo a dizer que o grafo mudou quando nao mudou).
+    if all(_O["digest"](eng / rel) == hashlib.sha256(corpo.encode("utf-8")).hexdigest()
+           for rel, corpo in ws.items()):
+        return {}
+    return ws
+
+
+def _expected_for(eng, write_set, base=None):
     """A precondicao cobre TUDO o que o plano escreve — nao uma lista escrita a mao.
 
     O plano de uma resposta escreve o grafo INTEIRO (`_G["write_set"]` serializa todos os
@@ -676,14 +745,18 @@ def _expected_for(eng, write_set):
     Derivar do `write_set` em vez de enumerar fecha a classe, nao o caso: um escritor novo
     nao pode esquecer-se de acrescentar um ficheiro aqui.
     """
-    return {rel: _O["digest"](Path(eng) / rel) for rel in write_set}
+    lida = base or {}
+    return {rel: (lida[rel]["digest"] if rel in lida else _O["digest"](Path(eng) / rel))
+            for rel in write_set}
 
 
 def plan_revalidate(eng, row_id, still_holds, note="", by="", today=""):
     """L09. Facto mantem-se -> edicao sancionada. Facto mudou -> NAO e revalidacao."""
     eng = Path(eng)
     when = today or date.today().isoformat()
-    md, rows = read_su(eng)
+    lido = read_base(eng, (SU_FILE, ANSWERS_FILE))  # uma leitura: texto e digest
+    md = lido[SU_FILE]["text"]
+    _h, rows, _s, _d = _D["parse_su"](md)
     row = find_row(rows, row_id)
     parecer = revalidate(row, still_holds, note=note, today=when)
 
@@ -696,11 +769,12 @@ def plan_revalidate(eng, row_id, still_holds, note="", by="", today=""):
     su_new = set_cell(md, row_id, "verificado_em", when)
     ans_new = _answers_with(eng, _revalidation_section(row, note, by, when))
     write_set = {SU_FILE: su_new, ANSWERS_FILE: ans_new}
+    write_set.update(mirror_write_set(eng, su_new))
     return {"operation_id": "revalidate-{}-{}".format(row_id, when),
             "row": row_id, "mode": parecer["mode"], "verificado_em": when,
             "creates_row": False, "verdict": parecer,
             "write_set": write_set,
-            "expected": _expected_for(eng, write_set),
+            "expected": _expected_for(eng, write_set, lido),
             "summary": {"o que mudou": "{} revalidado — verificado_em {}".format(row_id, when),
                         "estado": "sem linha nova: o facto e o mesmo",
                         "proximo passo": "nada; a linha volta a estar dentro da validade"}}
@@ -709,17 +783,20 @@ def plan_revalidate(eng, row_id, still_holds, note="", by="", today=""):
 def plan_withdraw(eng, row_id, reason):
     """L08/P-21. Sai por um marcador na ultima coluna e por mais nada."""
     eng = Path(eng)
-    md, rows = read_su(eng)
+    lido = read_base(eng, (SU_FILE, ANSWERS_FILE))  # uma leitura: texto e digest
+    md = lido[SU_FILE]["text"]
+    _h, rows, _s, _d = _D["parse_su"](md)
     row = find_row(rows, row_id)
     parecer = withdraw(row, reason)
     _estado, headers, _i = _section_of(md, row_id)
     su_new = append_cell(md, row_id, headers[-1], parecer["marker"])
     write_set = {SU_FILE: su_new}
+    write_set.update(mirror_write_set(eng, su_new))
     return {"operation_id": "withdraw-{}".format(row_id),
             "row": row_id, "mode": parecer["mode"], "creates_row": False,
             "becomes_fact": False, "verdict": parecer,
             "write_set": write_set,
-            "expected": _expected_for(eng, write_set),
+            "expected": _expected_for(eng, write_set, lido),
             "summary": {"o que mudou": "{} retirada por ambito".format(row_id),
                         "estado": "nao virou facto; a linha fica para historia",
                         "proximo passo": "nada — retirar nao abre nada"}}
@@ -728,7 +805,9 @@ def plan_withdraw(eng, row_id, reason):
 def plan_accept_risk(eng, row_id, basis):
     """L08. O risco continua Risky; o que muda e a base ficar registada."""
     eng = Path(eng)
-    md, rows = read_su(eng)
+    lido = read_base(eng, (SU_FILE, ANSWERS_FILE))  # uma leitura: texto e digest
+    md = lido[SU_FILE]["text"]
+    _h, rows, _s, _d = _D["parse_su"](md)
     row = find_row(rows, row_id)
     parecer = accept_risk(row, basis)
     estado, headers, _i = _section_of(md, row_id)
@@ -736,11 +815,12 @@ def plan_accept_risk(eng, row_id, basis):
     su_new = append_cell(md, row_id, coluna,
                          "— risco aceite: {}".format(parecer["basis"]))
     write_set = {SU_FILE: su_new}
+    write_set.update(mirror_write_set(eng, su_new))
     return {"operation_id": "accept-risk-{}".format(row_id),
             "row": row_id, "mode": parecer["mode"], "becomes_fact": False,
             "creates_row": False, "verdict": parecer,
             "write_set": write_set,
-            "expected": _expected_for(eng, write_set),
+            "expected": _expected_for(eng, write_set, lido),
             "summary": {"o que mudou": "{} — risco aceite com base registada".format(row_id),
                         "estado": "continua {}; aceitar nao e resolver".format(estado),
                         "proximo passo": "nada; a base fica auditavel"}}
@@ -750,7 +830,9 @@ def plan_resolve_conflict(eng, row_id, sides, by_owner, by=None, today=""):
     """L07. Os DOIS lados sobrevivem: N linhas com decisao do dono, 1 Assumed sem ela."""
     eng = Path(eng)
     when = today or date.today().isoformat()
-    md, rows = read_su(eng)
+    lido = read_base(eng, (SU_FILE, ANSWERS_FILE))  # uma leitura: texto e digest
+    md = lido[SU_FILE]["text"]
+    _h, rows, _s, _d = _D["parse_su"](md)
     row = find_row(rows, row_id)
     parecer = resolve_conflict(row, sides, by_owner, today=when)
     by = by or {}
@@ -780,13 +862,22 @@ def plan_resolve_conflict(eng, row_id, sides, by_owner, by=None, today=""):
     ).format(rid=row_id, w=when, claim=row.get("claim", ""),
              lados=" | ".join(str(x) for x in sides), modo=parecer["reason"], q=quem)
 
+    # Os sucessores ligam-se ao conflito original; os campos espelhados vem da SU publicada.
+    ronda = row.get("ronda") or ""
+    lens = row.get("lens") or ""
+    extra_nodes = [{"id": nid, "type": "claim", "props": {},
+                    "provenance": {"lens": lens, "ronda": ronda, "answered_by": quem,
+                                   "mirror_of": "SU:" + nid}} for nid in novos]
+    extra_edges = [{"src": nid, "rel": "was", "dst": row_id, "props": {},
+                    "provenance": {"ronda": ronda}} for nid in novos]
     write_set = {SU_FILE: su_new, ANSWERS_FILE: _answers_with(eng, seccao)}
+    write_set.update(mirror_write_set(eng, su_new, extra_nodes, extra_edges))
     return {"operation_id": "resolve-conflict-{}-{}".format(row_id, operation_id(
                 row_id, "|".join(str(x) for x in sides))[-12:]),
             "row": row_id, "new_ids": novos, "state": estado_alvo,
             "mode": parecer["mode"], "verdict": parecer,
             "write_set": write_set,
-            "expected": _expected_for(eng, write_set),
+            "expected": _expected_for(eng, write_set, lido),
             "summary": {"o que mudou": "{} -> {} {}".format(
                             row_id, estado_alvo, ", ".join(novos)),
                         "estado": "os dois lados sobrevivem; nao se escolheu por recencia",
@@ -795,8 +886,20 @@ def plan_resolve_conflict(eng, row_id, sides, by_owner, by=None, today=""):
 
 
 def _apply_plan(eng, p):
-    """Publica um plano de ciclo de vida. Mesmo caminho do `/answer`: uma operacao, recibo."""
+    """Publica um plano de ciclo de vida. O MESMO caminho do `/answer`: gate, operacao, recibo.
+
+    «Mesmo caminho» era o que a docstring dizia e nao era verdade: `apply` consultava o
+    bootstrap e isto nao. A pendencia era apanhada na mesma — o coordenador tem a sua
+    verificacao —, mas desvio de autoridade e ausencia de grafo sao do bootstrap, e por ai
+    as quatro operacoes de ciclo de vida passavam sobre estado que o `/answer` recusava.
+    Medido: sobre `AUTHORITY_DRIFT`, `/answer` recusado e `revalidate`/`accept_risk`
+    publicados.
+    """
     eng = Path(eng)
+    boot = _B["bootstrap"](eng)
+    if not boot["ready"]:
+        raise ResolveError("bootstrap nao pronto — operacao recusada", "NOT_READY",
+                           {"limitations": boot["limitations"]})
     recibo = _O["run"](eng, p["operation_id"], p["write_set"], expected=p["expected"])
     return dict(p, receipt=recibo, published=recibo.get("published", []))
 

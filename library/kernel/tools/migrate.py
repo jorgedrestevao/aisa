@@ -391,6 +391,9 @@ def restore(eng, force=False):
         raise MigrationError("nao ha manifesto de migracao", "NO_MANIFEST",
                              {"engagement": str(eng)})
 
+    # `now` e a base que se VERIFICA e a base que se DECLARA — a mesma leitura. Sem isto,
+    # entre a verificacao e a publicacao cabia trabalho novo, e a reposicao escrevia-lhe por
+    # cima sem uma recusa: `expected` nao era passado de todo.
     now = _digests(eng)
     drifted = {rel: {"expected": man["after"].get(rel, ""), "actual": now.get(rel, "")}
                for rel in man["after"] if now.get(rel, "") != man["after"].get(rel, "")}
@@ -422,7 +425,8 @@ def restore(eng, force=False):
     # e o caso que esta funcao deixava por fazer.
     if conteudos:
         op_restore = "restore-{}".format(man["plan_hash"][:16])
-        _O["run"](eng, op_restore, conteudos)
+        _O["run"](eng, op_restore, conteudos,
+                  expected={rel: now.get(rel, "") for rel in conteudos})
 
     # Reverter e desfazer a operacao, logo o recibo dela deixa de descrever a
     # realidade. Deixa-lo para tras fazia com que uma re-migracao a partir do mesmo
@@ -435,12 +439,30 @@ def restore(eng, force=False):
         except OSError:
             pass
 
-    removed = []
-    for rel in man.get("new_files", []):
-        p = eng / rel
-        if p.exists():
-            p.unlink()
+    # O coordenador escreve e nao apaga — mas apagar sem precondicao era a outra metade do
+    # mesmo buraco. As remocoes acontecem sob o lock e so sobre os bytes que a verificacao
+    # viu: um ficheiro que mudou depois dela NAO se apaga, reporta-se.
+    removed, recusadas = [], []
+    ident = _O["acquire"](eng)
+    try:
+        for rel in man.get("new_files", []):
+            alvo = eng / rel
+            if not alvo.exists():
+                continue
+            if _O["digest"](alvo) != now.get(rel, ""):
+                recusadas.append({"path": rel, "verified": now.get(rel, ""),
+                                  "actual": _O["digest"](alvo)})
+                continue
+            alvo.unlink()
             removed.append(rel)
+    finally:
+        _O["release"](eng, ident)
+    if recusadas:
+        raise MigrationError(
+            "ficheiro(s) criados pela migracao mudaram depois da verificacao — nao "
+            "apagados", "REMOVAL_CHANGED",
+            {"paths": recusadas,
+             "detail": "o trabalho novo fica; reconciliar antes de reverter"})
     gd = eng / "_graph"
     if gd.is_dir() and not any(gd.iterdir()):
         gd.rmdir()

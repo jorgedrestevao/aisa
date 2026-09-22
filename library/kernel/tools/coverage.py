@@ -359,6 +359,32 @@ def _graph_module(eng: Path):
     return _GRAPH_MODULE["mod"]
 
 
+GRAPH_CONSUMED_PATH = "_graph#consumed"
+
+
+def declared_graph_consumed(record) -> tuple:
+    """As relações do grafo que uma revisão declara consumir.
+
+    Entra pela mesma porta que as `authorities`: `basis.graph_consumed` do registo ou do
+    rascunho. Um registo antigo não tem o campo — aí lê-se do que ele próprio publicou
+    (`basis.sources` → a entrada `_graph#consumed` carrega a lista), para uma revisão
+    publicada antes disto continuar a comparar contra o que comparou.
+
+    Sem declaração, tupla vazia: uma revisão que não consome relações não pode ficar `stale`
+    por causa delas — e também não pode ficar `stale` por a fonte desaparecer da comparação,
+    que era o que acontecia quando `compute_basis` aceitava o parâmetro e ninguém o passava.
+    """
+    base = _as_dict((record or {}).get("basis"))
+    declarado = _as_list(base.get("graph_consumed"))
+    if declarado:
+        return tuple(str(x) for x in declarado)
+    for src in _as_list(base.get("sources")):
+        d = _as_dict(src)
+        if d.get("path") == GRAPH_CONSUMED_PATH:
+            return tuple(str(x) for x in _as_list(d.get("consumed")))
+    return ()
+
+
 def graph_dependency(eng: Path, consumed) -> dict | None:
     """A dependência do grafo como FONTE, pelo fingerprint do que foi consumido.
 
@@ -3232,7 +3258,8 @@ def coverage_state(eng: Path, stage: str, target: dict | None = None,
         basis = compute_basis(eng, inventory, stage, _as_dict(record.get("target")) or None,
                               authorities=_as_list(_as_dict(record.get("basis"))
                                                    .get("authorities")),
-                              readers=readers, synthesis_authorities=synth)
+                              readers=readers, synthesis_authorities=synth,
+                              graph_consumed=declared_graph_consumed(record))
         fresh = check_freshness(record, basis, current_target(eng, record.get("target")))
         result["freshness"] = fresh["status"]
         result["freshness_detail"] = fresh
@@ -3641,7 +3668,8 @@ def finalize(eng: Path, draft_path: Path, readers: ReaderAdapter | None = None,
     before = compute_basis(eng, inventory, stage, draft.get("target"),
                            authorities=_as_list(_as_dict(draft.get("basis"))
                                                 .get("authorities")),
-                           readers=readers, synthesis_authorities=synth)
+                           readers=readers, synthesis_authorities=synth,
+                           graph_consumed=declared_graph_consumed(draft))
     fresh = finalize_recheck(draft, before, current_target(eng, draft.get("target")))
     del before                          # a comparação de saída recalcula tudo de novo
     if fresh["status"] != "current":
@@ -3682,7 +3710,8 @@ def finalize(eng: Path, draft_path: Path, readers: ReaderAdapter | None = None,
                               draft.get("target"),
                               authorities=_as_list(_as_dict(draft.get("basis"))
                                                 .get("authorities")),
-                              readers=readers, synthesis_authorities=synth)
+                              readers=readers, synthesis_authorities=synth,
+                              graph_consumed=declared_graph_consumed(draft))
         moved = finalize_recheck(published, after, current_target(eng,
                                                                  draft.get("target")))
         if moved["status"] != "current":

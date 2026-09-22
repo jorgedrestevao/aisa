@@ -52,27 +52,34 @@ class R2_01_UmaRevisaoSo(unittest.TestCase):
     errado."""
 
     def _plano_com_escrita_pelo_meio(self, eng):
+        """A escrita concorrente entra logo A SEGUIR à leitura do plano.
+
+        O degrau está em `read_base` porque é aí que a leitura acontece — e é o ponto que
+        importa: o que o plano preparou saiu de antes da escrita, e o que quer que ele
+        declare como base tem de ser dessa mesma leitura, não do ficheiro que está lá quando
+        o plano acaba.
+        """
         rg = R["plan"].__globals__
-        real = rg["read_su"]
+        real = rg["read_base"]
         disparado = []
 
-        def le_e_deixa_outro_escrever(e):
-            md, rows = real(e)
+        def le_e_deixa_outro_escrever(e, rels=()):
+            out = real(e, rels)
             if not disparado:
                 disparado.append(True)
                 su = Path(e) / SU_FILE
                 su.write_text(su.read_text(encoding="utf-8").replace(
                     "Base partilhada", "BASE ALTERADA POR OUTRO"),
                     encoding="utf-8", newline="\n")
-            return md, rows
+            return out
 
-        rg["read_su"] = le_e_deixa_outro_escrever
+        rg["read_base"] = le_e_deixa_outro_escrever
         try:
             return R["plan"](eng, row_id="U-001", answer_text="resposta",
                              answered_by={"role": "dono dos dados"},
                              locator="answers.md#U-001")
         finally:
-            rg["read_su"] = real
+            rg["read_base"] = real
 
     def test_the_base_it_declares_is_the_one_it_read(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -185,7 +192,6 @@ class R2_03_TodoOEscritorFechaOEspelho(unittest.TestCase):
                 _h, linhas, _s, _d = runpy.run_path(
                     str(TOOLS / "dashboard.py"))["parse_su"](su_nova)
                 nova = G["authority_from_rows"](linhas)
-                antiga = G["authority_from_rows"](FIX["make"] and [])  # placeholder
                 st = G["read"](eng)
                 # o espelho publicado (ou o que fica) tem de concordar com a SU publicada
                 nos = st["nodes"]
@@ -266,24 +272,50 @@ class R2_05_ACoberturaUsaAQuePublicou(unittest.TestCase):
     comparação — e uma fonte que desaparece é `stale`, sem nada ter mudado."""
 
     def test_every_call_site_passes_what_the_record_declared(self):
-        fonte = (TOOLS / "coverage.py").read_text(encoding="utf-8")
-        chamadas = [l.strip() for l in fonte.splitlines()
-                    if "compute_basis(" in l and not l.strip().startswith("def ")]
-        self.assertTrue(chamadas, "não há chamadas a `compute_basis`")
-        sem = [c for c in chamadas if "graph_consumed" not in c]
+        """Pela árvore sintáctica, não por regex: as chamadas têm parênteses aninhados e
+        uma expressão regular a persegui-los é a ferramenta errada."""
+        import ast
+        arvore = ast.parse((TOOLS / "coverage.py").read_text(encoding="utf-8"))
+        chamadas = [n for n in ast.walk(arvore)
+                    if isinstance(n, ast.Call)
+                    and getattr(n.func, "id", getattr(n.func, "attr", "")) == "compute_basis"]
+        self.assertGreaterEqual(len(chamadas), 3,
+                                "não achei as chamadas a `compute_basis`")
+        sem = [n.lineno for n in chamadas
+               if "graph_consumed" not in {k.arg for k in n.keywords if k.arg}]
         self.assertEqual(sem, [],
-                         "chamada que não passa a dependência declarada: " + " | ".join(sem))
+                         "chamada sem a dependência declarada, na(s) linha(s): " + str(sem))
 
-    def test_a_declared_dependency_survives_a_freshness_check(self):
+    def test_the_declaration_is_recovered_from_the_record(self):
+        """O parâmetro só vale se alguém o recuperar. É essa a metade que faltava."""
         with tempfile.TemporaryDirectory() as tmp:
             eng = eng_migrado(tmp)
-            inv = C["build_inventory"](eng)
-            base = C["compute_basis"](eng, inv, "reconciliation", graph_consumed=["C-001"])
-            agora = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation")
-            fresh = C["check_freshness"]({"basis": base}, agora)
-        self.assertEqual(
-            fresh["status"], "current",
-            "a dependência do grafo desapareceu da comparação e isso sozinho deu `stale`")
+            base = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation",
+                                      graph_consumed=["C-001"])
+            registo = {"basis": base}
+        self.assertEqual(C["declared_graph_consumed"](registo), ("C-001",),
+                         "o registo publicou a dependência e ninguém a sabe ler de volta")
+        self.assertEqual(C["declared_graph_consumed"]({"basis": {"graph_consumed": ["U-001"]}}),
+                         ("U-001",), "a declaração explícita não é lida")
+        self.assertEqual(C["declared_graph_consumed"]({}), ())
+
+    def test_a_declared_dependency_survives_a_freshness_check(self):
+        """Recomputar COM o que o registo declarou dá `current`; sem isso, a fonte
+        desaparecia da comparação e isso sozinho era `stale`."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = eng_migrado(tmp)
+            base = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation",
+                                      graph_consumed=["C-001"])
+            registo = {"basis": base}
+            agora = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation",
+                                       graph_consumed=C["declared_graph_consumed"](registo))
+            com = C["check_freshness"](registo, agora)
+            sem = C["check_freshness"](registo, C["compute_basis"](
+                eng, C["build_inventory"](eng), "reconciliation"))
+        self.assertEqual(com["status"], "current",
+                         "recomputou com a declaração e mesmo assim deu stale")
+        self.assertEqual(sem["status"], "stale",
+                         "o controlo falhou: sem a declaração a fonte tinha de desaparecer")
 
 
 # =============================================================================

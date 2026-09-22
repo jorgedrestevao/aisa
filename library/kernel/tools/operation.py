@@ -520,6 +520,10 @@ def run(eng: Path, operation_id: str, write_set: dict, expected: dict | None = N
 
         intent = {"intent_version": INTENT_VERSION, "operation_id": operation_id,
                   "request_hash": rq, "owner": ident,
+                  # A precondicao EXIGIDA fica registada. Um recibo diz o que aconteceu; sem
+                  # isto nao dizia sobre que base, e "publicou" e "publicou sobre a base que
+                  # tinha lido" sao afirmacoes diferentes — a segunda e auditavel.
+                  "expected": dict(expected) if expected is not None else None,
                   "before": before, "after": after,
                   "staging": str(stg.relative_to(eng)),
                   "opened_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
@@ -557,6 +561,7 @@ def _finish(eng: Path, intent: dict, published: list[str]) -> dict:
                 "VERIFY_FAILED", {"path": rel, "expected": want, "actual": got})
     receipt = {"operation_id": intent["operation_id"], "request_hash": intent["request_hash"],
                "result": "committed", "revision": intent["after"],
+               "expected": intent.get("expected"),
                "published": published,
                "committed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
     _atomic_write(receipt_path(eng, intent["operation_id"]),

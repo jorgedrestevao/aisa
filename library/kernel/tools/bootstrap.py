@@ -72,6 +72,7 @@ _G = runpy.run_path(str(_HERE / "graph.py"))
 _O = runpy.run_path(str(_HERE / "operation.py"))
 
 # Autoridades cujo digest entra no snapshot. Ausência é um estado, não um erro.
+SU_FILE = "shared-understanding.md"
 AUTHORITIES = ("_state.json", "shared-understanding.md", "answers.md", "decisions.md",
                "context.json", "enquadramento.md")
 
@@ -81,28 +82,47 @@ DEFAULT_BUDGET = 40
 # ------------------------------------------------------------------- snapshot
 
 def snapshot(eng: Path) -> dict:
-    """Digests das autoridades + revisão do conjunto. É a base que a mutação recompara."""
+    """Digests das autoridades, revisão do conjunto, E as linhas da SU dessa leitura.
+
+    As linhas vêm aqui de propósito. A validação da revisão (`consistent_read`) cobria
+    pendência, snapshot e grafo — e depois a comparação autoridade/espelho reabria a SU por
+    sua conta, fora da janela validada. Validar uma parte da leitura e concluir sobre o todo
+    é a mesma falha que o F02 fechou um nível acima.
+
+    Quem já leu não obriga o próximo a reabrir: as linhas saem com o digest que as
+    acompanha, e quem as consome está, por construção, na revisão que foi validada.
+    """
     eng = Path(eng)
-    digests = {rel: _O["digest"](eng / rel) for rel in AUTHORITIES}
+    digests, linhas = {}, []
+    for rel in AUTHORITIES:
+        caminho = eng / rel
+        try:
+            bruto = caminho.read_bytes()
+        except OSError:
+            digests[rel] = ""
+            continue
+        digests[rel] = hashlib.sha256(bruto).hexdigest()
+        if rel == SU_FILE:
+            try:
+                _h, linhas, _s, _d = _D["parse_su"](bruto.decode("utf-8"))
+            except Exception:                                   # noqa: BLE001
+                linhas = []
     body = json.dumps(digests, sort_keys=True, ensure_ascii=False)
-    return {"authorities": digests,
+    return {"authorities": digests, "rows": linhas,
             "revision": hashlib.sha256(body.encode("utf-8")).hexdigest()}
 
 
-def authority_check(eng: Path, nodes: list) -> tuple:
+def authority_check(rows, nodes: list) -> tuple:
     """`(autoridade, linhas sem nó, desvio)` — a comparação, sem decidir nada.
+
+    Recebe as LINHAS, não o caminho: reabrir a SU aqui punha a comparação fora da revisão
+    que `consistent_read` validou, e era possível comparar o espelho contra uma SU e
+    concluir sobre outra. Quem chama passa o que leu dentro da janela.
 
     Separada de propósito: quem decide o que cada caso vale é o `bootstrap`, e quem quiser
     ver o mesmo sem bloquear (a projecção, um relatório) chama isto.
     """
-    eng = Path(eng)
-    su = eng / "shared-understanding.md"
-    linhas = []
-    if su.exists():
-        try:
-            _h, linhas, _s, _d = _D["parse_su"](su.read_text(encoding="utf-8"))
-        except Exception:                                       # noqa: BLE001
-            linhas = []
+    linhas = rows or []
     autoridade = _G["authority_from_rows"](linhas)
     espelhadas = {(n.get("provenance") or {}).get("mirror_of") for n in nodes}
     sem_no = sorted(k for k in autoridade if k not in espelhadas)
@@ -314,7 +334,7 @@ def bootstrap(eng: Path, budget: int = DEFAULT_BUDGET) -> dict:
                     "limitations": limitations}
 
     # 4b. autoridade vs espelho — a MESMA regra, no mesmo sítio para toda a gente
-    autoridade, sem_no, desvio = authority_check(eng, st.get("nodes", []))
+    autoridade, sem_no, desvio = authority_check(snap.get("rows"), st.get("nodes", []))
     bloqueante = [d for d in desvio
                   if d["code"] in ("MIRROR_DRIFT", "MIRROR_SOURCE_MISSING")]
     if bloqueante:
