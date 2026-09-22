@@ -1,9 +1,19 @@
 # P1 — Ligar contratos ao código e fixar referências de aceitação
 
-Estado: **IN_PROGRESS**
+Estado: **GO**
 
-Não é GO. O template proíbe marcar GO com campos de evidência por preencher, e faltam
-quatro dos cinco entregáveis.
+Fechado em 2026-09-22. Os cinco entregáveis estão produzidos e **os dois oráculos estão
+validados pelo responsável** — era o que faltava, e era evidência que eu não podia produzir.
+
+| Oráculo | Itens | Críticos | Estado |
+|---|---:|---:|---|
+| `dpt-galp-jp-pilot-4` | 11 | 6 | `FULLY_VALIDATED` |
+| `pricing-bunkers-pilot-4` | 14 | 10 | `FULLY_VALIDATED` |
+
+**Limitação que fica registada:** o ficheiro autoritativo do piloto de pricing (o `.xlsx`,
+sha `cf40be3e…`) **não existe neste ambiente**. `P-01` e `P-04` foram re-medidos pelos anexos
+da especificação e confirmam-se, mas o input do engagement continua a ser o `.xlsm`
+desactualizado. Substituí-lo é precondição de P8, não de P1.
 
 ## Identidade e precondições
 
@@ -36,7 +46,7 @@ evidência de P8. Nada foi apagado.
 | `authority-map.md` | **feito** — 24 skills lidas; autoridades por artefacto e por modo |
 | `integration-adr.md` | **parcial** — ADR-001 (linguagem de runtime) aceite; falta o mapeamento módulo a módulo do doador |
 | `test-map.json` | **feito** — 61 casos ligados a fase, família e gate de saída; 0 implementados, e porquê |
-| Oráculos dos 2 pilotos | **extraídos** — 22 itens, 13 críticos **por validar pelo responsável** |
+| Oráculos dos 2 pilotos | **feito** — 25 itens, 16 críticos, todos validados |
 
 ## Progresso — o que está verificado
 
