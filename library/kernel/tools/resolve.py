@@ -778,6 +778,95 @@ def apply_resolve_conflict(eng, **kw):
     return _apply_plan(eng, plan_resolve_conflict(eng, **kw))
 
 
+# ============================================================================
+# W6 — o indice inverso das citacoes. Calculado a pedido, guardado em lado nenhum.
+# ============================================================================
+
+# Os derivados que `aisa-answer` passo 7 manda percorrer. A SU NAO esta aqui de proposito:
+# uma linha citar-se a si propria nao e dependencia, e inclui-la dava 100% de cobertura
+# falsa.
+DERIVED_GLOBS = (
+    "frame.md",
+    "options.md",
+    "decisions.md",
+    "story.md",
+    "_synthesis/*.md",
+    "_blueprint/*.yaml",
+    "_simulation/**/*.md",
+    "_render/**/*.md",
+)
+
+
+def derived_files(eng) -> list:
+    """Os artefactos derivados que existem, por ordem estavel."""
+    eng = Path(eng)
+    fora = []
+    for padrao in DERIVED_GLOBS:
+        fora += [f for f in sorted(eng.glob(padrao)) if f.is_file()]
+    return fora
+
+
+def cited_by(eng, row_ids=None) -> dict:
+    """`{id: [caminhos relativos]}` — quem cita cada linha da SU.
+
+    Os ids procurados vem da SU, nunca de um padrao inventado: medido nos pilotos, um
+    padrao generico apanhava `F-01`, `O-005`, `D-002` e `PM-003`, que sao rondas, opcoes,
+    decisoes e passos do modelo de processo — nao linhas da SU.
+
+    A fronteira da procura importa tanto como o alvo: `C-01` nao pode casar dentro de
+    `C-010`, e um id seguido de `)` ou `,` tem de casar na mesma.
+    """
+    eng = Path(eng)
+    if row_ids is None:
+        _md, rows = read_su(eng)
+        row_ids = [(r.get("id") or "").strip() for r in rows if (r.get("id") or "").strip()]
+
+    textos = []
+    for f in derived_files(eng):
+        try:
+            textos.append((str(f.relative_to(eng)), f.read_text(encoding="utf-8",
+                                                                errors="replace")))
+        except OSError:
+            continue
+
+    fora = {}
+    for rid in sorted(set(row_ids)):
+        padrao = re.compile(r"(?<![\w-])" + re.escape(rid) + r"(?![\w-])")
+        ficheiros = {rel for rel, texto in textos if padrao.search(texto)}
+        fora[rid] = sorted(ficheiros)
+    return fora
+
+
+def _G_dependents(eng, changed_ids) -> list:
+    """Os sucessores no grafo — a outra metade do impacto, que ja existia."""
+    st = _G["read"](Path(eng))
+    if st.get("status") != _G["OK"]:
+        return []
+    return dependents_of(st.get("nodes", []), st.get("edges", []), changed_ids)
+
+
+def impact_of(eng, changed_ids) -> dict:
+    """O que uma alteracao toca: os derivados que a citam e os sucessores no grafo.
+
+    Devolve CANDIDATOS, nunca um veredicto. Um derivado citar uma linha que mudou nao prova
+    que ele e anterior a mudanca — nenhum derivado regista contra que valores foi escrito.
+    Quem le decide, uma linha por dependente, e e isso que `aisa-answer` passo 7 ja pede.
+    """
+    eng = Path(eng)
+    alterados = [i for i in (changed_ids or []) if i]
+    indice = cited_by(eng, alterados)
+    por_id = {rid: fs for rid, fs in indice.items() if fs}
+    todos = sorted({f for fs in por_id.values() for f in fs})
+    return {
+        "changed": sorted(set(alterados)),
+        "cited_by": por_id,
+        "not_cited": sorted(set(alterados) - set(por_id)),
+        "files": todos,
+        "successors": _G_dependents(eng, alterados),
+        "verdict": "candidatos — citar nao prova anterioridade; o julgamento e de quem le",
+    }
+
+
 # O guard fica no FIM, e so no fim: tudo o que vier depois dele existe para quem
 # importa o modulo e NAO existe para quem o corre. As funcoes de ciclo de vida
 # viveram ai, e por isso a CLI nunca lhes chegou.
