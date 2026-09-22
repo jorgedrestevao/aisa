@@ -30,10 +30,25 @@ ela. O marcador de pendência é o contrário — tem de sobreviver a tudo, e fi
 
 EXCLUSÃO (B2.2)
 
-Posse identificada por `pid` + instante de arranque do processo, não por existência de
-ficheiro. Um pid é reutilizado depois de um crash; sem o instante de arranque, um lock
-abandonado seria confundido com um vivo. Lock abandonado NÃO é removido por timeout cego:
-verifica-se o processo, e só um lock cujo dono desapareceu é recuperável.
+Quem exclui é o kernel, por `flock` sobre o ficheiro de lock — não a existência do
+ficheiro. A diferença não é de estilo. Medido com processos reais barrados no mesmo
+instante sobre um lock abandonado, a exclusão por existência dava **seis donos do mesmo
+engagement em seis processos, doze corridas em doze**: todos liam o mesmo dono morto,
+todos o davam por recuperável, todos escreviam o seu por cima. A jusante, isso custava
+escrita confirmada e perdida em sete de oito corridas — quatro recibos `committed`, o
+ficheiro com um, e `BASE_CHANGED` calado porque todos tinham lido a mesma base.
+
+Com `flock` não há recuperação a decidir: um lock deixado por um processo morto não tem
+lock nenhum agarrado, e o próximo a chegar entra sem corrida. O `pid` + instante de
+arranque fica — mas como REGISTO de quem tem (o que `status` mostra) e como recusa
+conservadora perante um lock escrito por uma versão sem `flock`, não como o mecanismo.
+
+Lock abandonado continua a não ser removido por timeout cego, e um lock ilegível não é
+removido de todo.
+
+O limite, declarado: `flock` é do sistema de ficheiros local. Em NFS antigo ou num
+sistema sem `fcntl`, cai-se na criação exclusiva — e aí a recuperação de um lock morto
+volta a não ser exclusiva. `status()` diz qual dos dois está em uso (`exclusion`).
 
 ORDEM (B2)
 
@@ -53,6 +68,16 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:                                # pragma: no cover — não-POSIX
+    fcntl = None
+
+# Qual dos dois mecanismos está em uso. `status()` publica-o: quem lê um resultado tem de
+# poder saber sob que garantia ele foi produzido.
+EXCLUSION = "flock" if fcntl else "create-exclusive"
+LOCK_TRIES = 5
 
 OPS_DIR = "_ops"
 PENDING = "pending.json"
@@ -112,6 +137,11 @@ def _alive(pid: int, started: str) -> bool | None:
     return True
 
 
+# fds com `flock` agarrado, por caminho de lock. Vive em memória de propósito: um fd não
+# se herda por um ficheiro, e um lock que sobrevivesse ao processo seria o bug de origem.
+_HELD: dict = {}
+
+
 def _identity() -> dict:
     return {"pid": os.getpid(), "started": _proc_started(os.getpid()),
             "host": os.uname().nodename if hasattr(os, "uname") else "",
@@ -158,23 +188,70 @@ def digest(p: Path) -> str:
 
 # ----------------------------------------------------------------------- lock
 
-def acquire(eng: Path) -> dict:
-    """Exclusão por engagement. Criação exclusiva; lock vivo não é roubado (B2.2)."""
-    lp = _lock_path(eng)
-    ident = _identity()
-    ident["engagement"] = str(Path(eng).resolve())
+def _flock_fd(lp: Path) -> int:
+    """fd com `flock` exclusivo E a certeza de que o caminho ainda aponta para ele.
+
+    A segunda metade não é zelo a mais. Quem liberta o lock apaga o ficheiro, e entre o
+    `unlink` de um e o `open` de outro o inode pode já não ser o mesmo: sem a comparação,
+    ficava-se com um lock agarrado a um inode órfão enquanto um terceiro criava o ficheiro
+    novo e o trancava também. Dois donos outra vez, por outro caminho.
+    """
+    for _ in range(LOCK_TRIES):
+        fd = os.open(str(lp), os.O_CREAT | os.O_RDWR, 0o600)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            os.close(fd)
+            return -1                      # ocupado por um vivo, sem ambiguidade
+        try:
+            mesmo = os.fstat(fd).st_ino == os.stat(str(lp)).st_ino
+        except OSError:
+            mesmo = False
+        if mesmo:
+            return fd
+        _unlock(fd)                        # o caminho trocou de inode: recomeçar
+    raise OperationError(
+        "o ficheiro de lock trocou de inode {} vezes seguidas".format(LOCK_TRIES),
+        "LOCK_CONTENDED", {"lock": str(lp)})
+
+
+def _unlock(fd: int) -> None:
     try:
-        fd = os.open(str(lp), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            json.dump(ident, fh)
-        return ident
-    except FileExistsError:
+        if fcntl:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError:
+        pass
+    try:
+        os.close(fd)
+    except OSError:
         pass
 
-    held = _read_json(lp)
-    if not held:
+
+def _held_by(lp: Path):
+    """O que o ficheiro de lock diz. `None` se está vazio — recém-criado não é ilegível."""
+    try:
+        bruto = lp.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    if not bruto.strip():
+        return None
+    try:
+        return json.loads(bruto)
+    except ValueError:
         raise OperationError("lock ilegível — não removido às cegas", "LOCK_UNREADABLE",
                              {"lock": str(lp)})
+
+
+def _refuse_if_foreign(held, lp: Path) -> dict | None:
+    """Recusa conservadora sobre o REGISTO, para lá do que o kernel já garantiu.
+
+    Ter o `flock` prova que nenhum escritor desta versão está lá dentro. Não prova que não
+    está lá um de uma versão anterior, que nunca chamou `flock`. Por isso, se o registo diz
+    um dono vivo, recusa-se na mesma — e devolve-se o que ele era, para o recuperar ficar
+    registado em vez de silencioso.
+    """
+    if not held:
+        return None
     alive = _alive(int(held.get("pid") or -1), str(held.get("started") or ""))
     if alive is True:
         raise OperationError(
@@ -185,8 +262,62 @@ def acquire(eng: Path) -> dict:
             "lock de posse indeterminada (pid {}) — não removido por timeout cego".format(
                 held.get("pid")),
             "LOCK_UNDETERMINED", {"holder": held})
-    # dono morto: recuperação do lock é registada, não silenciosa
-    ident["recovered_from"] = held
+    return held
+
+
+def acquire(eng: Path) -> dict:
+    """Exclusão por engagement. Decide o kernel; o ficheiro só regista quem tem (B2.2)."""
+    lp = _lock_path(eng)
+    ident = _identity()
+    ident["engagement"] = str(Path(eng).resolve())
+    if not fcntl:                                  # pragma: no cover — não-POSIX
+        return _acquire_by_create(lp, ident)
+
+    fd = _flock_fd(lp)
+    if fd < 0:
+        held = None
+        try:
+            held = _held_by(lp)
+        except OperationError:
+            pass
+        raise OperationError(
+            "outro escritor tem o engagement (pid {})".format(
+                (held or {}).get("pid", "?")),
+            "LOCK_ACTIVE", {"holder": held})
+    try:
+        morto = _refuse_if_foreign(_held_by(lp), lp)
+        if morto:
+            # dono morto: a recuperação é registada, não silenciosa
+            ident["recovered_from"] = morto
+        # Escrita PELO fd, nunca `_atomic_write`: um `os.replace` trocava o inode por baixo
+        # do lock que estamos a segurar, e o lock deixava de valer para quem abrisse a
+        # seguir pelo caminho.
+        os.lseek(fd, 0, os.SEEK_SET)
+        os.ftruncate(fd, 0)
+        os.write(fd, json.dumps(ident).encode("utf-8"))
+        os.fsync(fd)
+    except BaseException:
+        _unlock(fd)
+        raise
+    _HELD[str(lp)] = fd
+    return ident
+
+
+def _acquire_by_create(lp: Path, ident: dict) -> dict:   # pragma: no cover — não-POSIX
+    """Sem `fcntl`: criação exclusiva. Declaradamente mais fraca — ver a docstring."""
+    try:
+        fd = os.open(str(lp), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(ident, fh)
+        return ident
+    except FileExistsError:
+        pass
+    held = _held_by(lp)
+    if not held:
+        raise OperationError("lock ilegível — não removido às cegas", "LOCK_UNREADABLE",
+                             {"lock": str(lp)})
+    morto = _refuse_if_foreign(held, lp)
+    ident["recovered_from"] = morto
     _atomic_write(lp, json.dumps(ident))
     return ident
 
@@ -195,11 +326,16 @@ def release(eng: Path, ident: dict) -> None:
     """Só o dono liberta. Um lock de outro nunca é apagado por engano."""
     lp = _lock_path(eng)
     held = _read_json(lp)
-    if held and held.get("pid") == ident.get("pid") and held.get("started") == ident.get("started"):
-        try:
-            lp.unlink()
-        except OSError:
-            pass
+    if not (held and held.get("pid") == ident.get("pid")
+            and held.get("started") == ident.get("started")):
+        return
+    fd = _HELD.pop(str(lp), None)
+    try:
+        lp.unlink()
+    except OSError:
+        pass
+    if fd is not None:
+        _unlock(fd)          # o unlock vem DEPOIS do unlink: o caminho já não é este
 
 
 # -------------------------------------------------------------------- pendência
@@ -222,15 +358,17 @@ def status(eng: Path) -> dict:
     if held:
         alive = _alive(int(held.get("pid") or -1), str(held.get("started") or ""))
     if p:
-        return {"state": PENDING_OPERATION, "operation_id": p.get("operation_id"),
+        return {"state": PENDING_OPERATION, "exclusion": EXCLUSION,
+                "operation_id": p.get("operation_id"),
                 "write_set": list(p.get("after", {})),
                 "detail": "operação pendente — mutação e gate bloqueados até recuperar",
                 "recovery": "python library/kernel/tools/operation.py recover --engagement <slug>",
                 "lock_held_by": held if alive else None}
     if held and alive is True:
-        return {"state": LOCKED, "detail": "escritor activo (pid {})".format(held.get("pid")),
+        return {"state": LOCKED, "exclusion": EXCLUSION,
+                "detail": "escritor activo (pid {})".format(held.get("pid")),
                 "lock_held_by": held}
-    return {"state": CLEAN, "detail": ""}
+    return {"state": CLEAN, "exclusion": EXCLUSION, "detail": ""}
 
 
 def gate_open(eng: Path) -> bool:
