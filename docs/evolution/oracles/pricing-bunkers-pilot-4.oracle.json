@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "FILLED_PENDING_OWNER_VALIDATION",
+  "status": "FULLY_VALIDATED",
   "pilot_id": "pricing-bunkers-pilot-4",
   "p8_type": "Excel com regras, cálculos e dependências",
   "source_files": [
@@ -160,15 +160,15 @@
     },
     {
       "id": "P-12",
-      "proposition_or_relation": "O CONTEUDO das decisoes de Q04 (premios/encargos e conversao do SLI), Q05 (indice do DMA e minimo), Q06+Q07 (conversoes, densidades, HSFO, logistica) e Q12 (folhas ocultas e GMC).",
-      "epistemic_state": "Unknown",
+      "proposition_or_relation": "As quatro decisoes de negocio, declaradas pelo operador em 2026-09-22:\n  Q04  SLI esta em EUR/t em TODAS as series. VLSFO e Diesel entrarem sem conversao e DEFEITO, nao regra -> `encargo = premio + SLI x FX` para todos.\n  Q05  «ISO F DMA» mantem Diesel 10ppm (apesar de existir AAYWS00); o MIN entre semana N e N-1 e regra deliberada e mantem-se.\n  Q06+Q07  a dupla conversao do premio na referencia do O02 e DEFEITO: converter exactamente uma vez, componentes normalizados USD/t somados nessa base. O HSFO deixa de usar a configuracao do VLSFO.\n  Q12  as cinco folhas ocultas de simulacao e o legado GMC sao HISTORICO — fora de ambito, fora da estimativa.",
+      "epistemic_state": "Confirmed",
       "criticality": "critical",
       "source_locator": "Pricing_Bancas_Especificacao/06_Duvidas_Decisoes.md — 18 grupos",
       "source_sha256": "b12fecd4ac0e5dba45c08a5962d5ad7554371f942d2c0876a1c219cb8ea3ee86",
-      "expected_resolution": "O operador declarou (2026-09-22) que os QUATRO grupos JA TEM decisao tomada. O conteudo NAO foi fornecido e NAO esta na especificacao: o `06_Duvidas_Decisoes.md` diz textualmente «Estado inicial de todas: Pendente» e traz as perguntas, nao as respostas. Pedir o conteudo.",
-      "gate_expectation": "Saber que a decisao existe nao e conhece-la. O candidato continua sem poder escolher nenhuma destas regras por conta propria.",
-      "review_notes": "Mudou de natureza duas vezes: de «ninguem tracou» para «ninguem decidiu» e agora para «esta decidido e eu nao sei o que e». O ultimo e o mais barato de fechar e o mais perigoso de adivinhar.",
-      "validation": "PENDING_OWNER"
+      "expected_resolution": "Declarado pelo operador (2026-09-22), por AskUserQuestion.",
+      "gate_expectation": "TRES destas mudam o to-be face ao as-is (Q04, Q06/Q07 como correccoes; Q12 como reducao de ambito). Uma solucao que replique o as-is fielmente esta ERRADA face a estas decisoes — e uma que as aplique nao reconcilia com os numeros publicados hoje. As duas coisas tem de conviver explicitamente.",
+      "review_notes": "Fechado. Nao estavam na especificacao: o `06_Duvidas_Decisoes.md` marca as 18 como «Pendente» e traz as perguntas, nao as respostas. Vieram do operador.",
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "P-13",
@@ -178,9 +178,21 @@
       "source_locator": "00_LEIA_PRIMEIRO.md («Resultado essencial») e 01_… seccao C06",
       "source_sha256": "284f6b7e117ecbab7fe6f00283b1e7af811ddaf636ece7c94e59e6ef530047a3",
       "expected_resolution": "Confirmado pela especificacao.",
-      "gate_expectation": "Replicar o as-is replica os defeitos. Corrigi-los e mudanca de negocio que precisa de aprovacao. Qualquer estimativa que ignore isto subestima.",
-      "review_notes": "Nao foram corrigidos sem validacao de negocio — e a postura certa. | Confirmado pela especificacao do ficheiro autoritativo.",
+      "gate_expectation": "Q04 e Q06/Q07 decidiram CORRIGIR dois dos defeitos (conversao do SLI e dupla conversao do premio). As 68 formulas #REF! e as 497 celulas com erro guardado continuam POR ADJUDICAR — nao foram cobertas por nenhuma das quatro decisoes. Replicar o as-is ja nao e o alvo; mas a reconciliacao com os numeros publicados hoje tem de mostrar a diferenca que as correccoes introduzem.",
+      "review_notes": "Nao foram corrigidos sem validacao de negocio — e a postura certa. | Confirmado pela especificacao do ficheiro autoritativo. | Parcialmente adjudicado: dois defeitos vao ser corrigidos por decisao; os #REF! e os erros em cache ficam em aberto.",
       "validation": "CLOSED_BY_SPEC"
+    },
+    {
+      "id": "P-14",
+      "proposition_or_relation": "A cadeia AS-IS e a cadeia TO-BE divergem, e a divergencia e deliberada:\n  AS-IS  encargo = premio + SLI   (SLI x FX SO em CIF MED DMA e HSFO)\n  TO-BE  encargo = premio + SLI x FX   (sempre — Q04)\n  AS-IS  premio convertido DUAS vezes na referencia do O02\n  TO-BE  convertido exactamente uma vez (Q06/Q07)\n  AS-IS  HSFO usa premio/desconto da configuracao VLSFO\n  TO-BE  HSFO usa a sua propria",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "P-10 (as-is, da especificacao) confrontado com P-12 (to-be, do operador)",
+      "source_sha256": "cf40be3ed65983d51e689d9d34ba1714fdb204794d34e89352be667be1692b52",
+      "expected_resolution": "Derivado de dois itens ja fechados; nada inferido.",
+      "gate_expectation": "O candidato NAO deve apresentar a cadeia to-be como descricao do processo actual, nem a as-is como especificacao do que construir. Confundi-las e o erro material deste piloto: a primeira reconcilia com o que existe, a segunda e o que foi decidido.",
+      "review_notes": "Este item nao veio de ler nada novo — veio de por P-10 e P-12 lado a lado. E o tipo de coisa que um oraculo tem de dizer, porque o candidato vai ver as duas cadeias nas fontes e tem de saber qual e qual.",
+      "validation": "DERIVED_FROM_CLOSED_ITEMS"
     }
   ],
   "forbidden_claims": [
@@ -189,8 +201,8 @@
     "Qualquer regra numérica ou ordem de componentes não traçada (P-10).",
     "Que a cadência semanal está confirmada (P-09 é Assumed).",
     "Que um par cliente×produto está activo só porque o named range existe (P-11).",
-    "Escolher por conta propria qualquer das regras que Q04-Q07/Q12 deixam em aberto (P-12).",
-    "Apresentar o as-is como correcto: ha 68 #REF! e 497 celulas com erro guardado (P-13)."
+    "Apresentar o as-is como correcto: ha 68 #REF! e 497 celulas com erro guardado (P-13).",
+    "Apresentar a cadeia as-is como especificacao do to-be, ou vice-versa (P-14)."
   ],
   "extraction_limits": [
     "A cadeia aritmetica DEIXOU de ser lacuna: a especificacao do operador fecha-a (P-10). O que resta e decisao de negocio por tomar (P-12), nao leitura por fazer.",
@@ -207,13 +219,11 @@
     "improper_gate_advances": 0
   },
   "owner_validation": {
-    "required_for": [
-      "P-12"
-    ],
-    "status": "PENDING",
+    "required_for": [],
+    "status": "COMPLETE",
     "why": "P-10 fechou com a especificacao. Restam os itens estruturais por confirmar e, sobretudo, P-12: 18 grupos de decisoes que so o negocio toma."
   },
-  "warning": "Itens críticos por validar, e P-10 é lacuna declarada. Referência fraca até o responsável a fechar.",
+  "warning": "Todos os itens criticos fechados. Limitacao que fica: o ficheiro autoritativo (.xlsx) nao esta neste ambiente — as medicoes vieram dos anexos da especificacao, e o input do piloto continua a ser o .xlsm desactualizado.",
   "authoritative_source": {
     "decided_by": "operator",
     "date": "2026-09-22",
