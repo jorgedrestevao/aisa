@@ -5521,6 +5521,82 @@ def kernel_state(eng: Path) -> dict:
             "graph": boot.get("graph", {})}
 
 
+def memory_state(eng: Path, rows: list) -> dict:
+    """A memoria do projecto, projectada para o que se mostra — e so isso.
+
+    NAO e «o grafo». Medido nos dois pilotos antes de desenhar: 117 nos / 9 arestas e
+    108 / 25, todas `was`. Com 0,08 arestas por no, um diagrama no-aresta e uma nuvem de
+    pontos soltos; e como os nos espelham as linhas da SU um-para-um, lista-los duplicava
+    o separador «Registo» inteiro.
+
+    O que NAO esta em lado nenhum, e e o que isto projecta:
+
+    - as cadeias `was` — «este facto veio daquela pergunta». Hoje so existe enterrado na
+      coluna da ronda, como `R-01 — resolved -> C-002`;
+    - a saude do espelho — linhas sem no, nos que afirmam uma linha que a SU ja nao tem,
+      campos divergentes. Zero nos pilotos, e e exactamente o que bloqueia quando acontece;
+    - a revisao e quantas operacoes foram publicadas.
+
+    Sem grafo devolve a forma vazia com `available: False`: nao rebenta e nao inventa.
+    """
+    eng = Path(eng)
+    vazio = {"available": False, "revision": "", "operations": 0, "history": [],
+             "health": {"rows_without_node": [], "nodes_without_row": [], "diverging": []}}
+    try:
+        g = _KERNEL_MODULE.get("graph")
+        if g is None:
+            g = _KERNEL_MODULE["graph"] = runpy.run_path(
+                str(Path(__file__).resolve().parent / "graph.py"))
+        st = g["read"](eng)
+    except Exception:                                           # noqa: BLE001
+        return vazio
+    if st.get("status") != g["OK"]:
+        return vazio
+
+    nodes, edges = st.get("nodes", []), st.get("edges", [])
+    por_id = {n.get("id"): n for n in nodes}
+    linhas = {(r.get("id") or "").strip(): r for r in rows if r.get("id")}
+
+    # --- de que pergunta veio cada facto
+    historia = []
+    for e in edges:
+        if e.get("rel") != "was":
+            continue
+        origem, destino = e.get("dst"), e.get("src")
+        n_orig, n_dest = por_id.get(origem) or {}, por_id.get(destino) or {}
+        l_orig, l_dest = linhas.get(origem) or {}, linhas.get(destino) or {}
+        historia.append({
+            "from_id": origem,
+            "to_id": destino,
+            "from_text": l_orig.get("claim") or (n_orig.get("props") or {}).get("text", ""),
+            "to_text": l_dest.get("claim") or (n_dest.get("props") or {}).get("text", ""),
+            "to_state": l_dest.get("state") or (n_dest.get("props") or {}).get("state", ""),
+            "ronda": l_dest.get("ronda") or (n_dest.get("provenance") or {}).get("ronda", ""),
+        })
+    historia.sort(key=lambda h: (h["from_id"], h["to_id"]))
+
+    # --- a memoria bate certo com o registo?
+    autoridade = g["authority_from_rows"](rows)
+    espelhadas = {(n.get("provenance") or {}).get("mirror_of") for n in nodes}
+    sem_no = sorted(k.split(":", 1)[-1] for k in set(autoridade) - espelhadas)
+    desvio = g["drift"](nodes, autoridade)
+    sem_linha = sorted({d.get("id") for d in desvio
+                        if d["code"] == "MIRROR_SOURCE_MISSING" and d.get("id")})
+    divergentes = [{"id": d.get("id"), "field": d.get("field"),
+                    "memory": d.get("graph"), "record": d.get("authority")}
+                   for d in desvio if d["code"] == "MIRROR_DRIFT"]
+
+    ops_dir = eng / "_ops" / "receipts"
+    try:
+        n_ops = len([f for f in ops_dir.glob("*.json") if f.is_file()])
+    except OSError:
+        n_ops = 0
+    return {"available": True, "revision": st.get("revision", ""), "operations": n_ops,
+            "history": historia,
+            "health": {"rows_without_node": sem_no, "nodes_without_row": sem_linha,
+                       "diverging": divergentes}}
+
+
 def build_model(eng: Path, today: date) -> dict:
     state = _read_json(eng / "_state.json")
     context = _read_json(eng / "context.json")
@@ -5647,6 +5723,7 @@ def build_model(eng: Path, today: date) -> dict:
             "rows": rows,
         },
         "kernel": kernel_state(eng),
+        "memory": memory_state(eng, rows),
         "health": health,
         "revalidate": revalidation_list(rows),
         "agenda": agenda,
@@ -6657,6 +6734,8 @@ TAB_SPEC = [
     ("outputs", "Etapas", "Outputs de fase: frame.md, options.md, premortem, síntese, blueprint"),
     ("agenda", "Agenda", "Meeting agenda: Unknown por custo e swing"),
     ("estado", "Registo", "Shared Understanding: Confirmed · Assumed · Unknown · Conflicted · Risky"),
+    ("memoria", "Memória",
+     "De que pergunta veio cada facto, e se a memória do projecto bate certo com o registo"),
     ("narrativa", "Narrativa", "story.md, council-log.md, decisions.md"),
     ("artefactos", "Ficheiros", "Artefactos do engagement"),
 ]
@@ -7104,6 +7183,7 @@ def render_html(model: dict, reload_secs: int) -> str:
     counts = {
         "panorama": "", "outputs": len(model["phase_docs"]), "agenda": n_ag,
         "estado": n_open, "narrativa": len(model["timeline"]),
+        "memoria": len(model["memory"]["history"]) or "",
         "artefactos": len([x for x in model["artefacts"] if x["exists"]]),
     }
 
@@ -7392,8 +7472,65 @@ def render_html(model: dict, reload_secs: int) -> str:
       '<button class="btn solid" data-clear="1">Limpar filtros</button></div>'.format(n_open))
     a("</div></section>")
 
+    # ---------------- panel: memoria
+    a('<section class="panel" role="tabpanel" id="panel-memoria" aria-labelledby="tab-memoria"'
+      ' tabindex="0" data-tab="memoria" data-title="Memória" hidden>')
+    mem = model["memory"]
+    a('<div><div class="eyebrow">De onde veio o que sabemos</div>'
+      '<h1 class="pt">Memória</h1></div>')
+    if not mem["available"]:
+        a('<div class="blk"><p class="stamp">Este projecto ainda não tem memória '
+          'construída — não há histórico para mostrar.</p></div>')
+    else:
+        saude = mem["health"]
+        problemas = (saude["rows_without_node"] or saude["nodes_without_row"]
+                     or saude["diverging"])
+        if problemas:
+            a('<div class="kstate" role="alert"><b>O registo e a memória não batem certo.</b>'
+              " Isto impede o projecto de avançar até estar resolvido.<ul>")
+            if saude["rows_without_node"]:
+                a("<li>{} linha(s) que a memória não tem: {}</li>".format(
+                    len(saude["rows_without_node"]),
+                    esc(", ".join(saude["rows_without_node"][:12]))))
+            if saude["nodes_without_row"]:
+                a("<li>{} entrada(s) na memória sobre linhas que já não existem: {}</li>"
+                  .format(len(saude["nodes_without_row"]),
+                          esc(", ".join(saude["nodes_without_row"][:12]))))
+            for d in saude["diverging"][:8]:
+                a("<li>{}: o registo diz <b>{}</b>, a memória diz <b>{}</b> ({})</li>".format(
+                    esc(str(d["id"])), esc(str(d["record"])), esc(str(d["memory"])),
+                    esc(str(d["field"]))))
+            a("</ul></div>")
+        else:
+            a('<div class="blk"><p class="stamp">O registo e a memória batem certo.</p></div>')
+
+        if mem["history"]:
+            a('<div class="blk"><h2 class="sec">De que pergunta veio cada facto '
+              '<span class="n">{}</span></h2>'.format(len(mem["history"])))
+            a('<div class="tw"><table><thead><tr>'
+              '<th scope="col">perguntou-se</th><th scope="col">ficou a saber-se</th>'
+              '<th scope="col">com que certeza</th><th scope="col">passagem</th>'
+              "</tr></thead><tbody>")
+            for h in mem["history"]:
+                a('<tr><td>{} <span class="stamp">({})</span></td>'
+                  '<td>{} <span class="stamp">({})</span></td>'
+                  '<td class="c-meta">{}</td><td class="c-meta">{}</td></tr>'.format(
+                      esc(h["from_text"]), esc(str(h["from_id"])),
+                      esc(h["to_text"]), esc(str(h["to_id"])),
+                      esc(STATE_LABEL.get(h["to_state"], h["to_state"] or "-")),
+                      esc(h["ronda"] or "-")))
+            a("</tbody></table></div></div>")
+        else:
+            a('<div class="blk"><p class="stamp">Ainda não foi respondida nenhuma '
+              "pergunta — quando for, o percurso aparece aqui.</p></div>")
+        a('<div class="blk"><p class="stamp">Memória na versão <code>{}</code> · '
+          "{} alteração(ões) registada(s).</p></div>".format(
+              esc(mem["revision"][:12]), mem["operations"]))
+    a("</section>")
+
     # ---------------- panel: narrativa
-    a('<section class="panel" role="tabpanel" id="panel-narrativa" aria-labelledby="tab-narrativa"'
+    a('<section class="panel" role="tabpanel" id="panel-narrativa"'
+      ' aria-labelledby="tab-narrativa"'
       ' tabindex="0" data-tab="narrativa" data-title="Narrativa" hidden>')
     a('<div><div class="eyebrow">A leitura corrida do que aconteceu</div>'
       '<h1 class="pt">Narrativa</h1></div>')
