@@ -44,12 +44,33 @@ aisa tem 2 repositórios + 1 sistema de fases:
 │   │   ├── lens-outputs/     ← prose por lens                    │
 │   │   ├── _synthesis/       ← topic packs (auto)                │
 │   │   ├── _render/          ← 6 deliverables (v01, v02, ...)    │
+│   │   ├── _graph/           ← ESTADO COORDENADO — nunca à mão    │
+│   │   ├── _ops/             ← a barreira: pendência + recibos    │
 │   │   └── ...                                                   │
 │   └── galp-procurement/     ← engagement 2 (em paralelo)        │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 Fluxo de uma engagement: `Discovery → Framing → Options → Decision → (auto) Synthesize → Render`.
+
+### 1.3 A camada que faz o estado sobreviver
+
+O que está acima é o que se vê. Por baixo há uma camada que não se edita e que convém
+perceber antes de mexer em alguma coisa — porque ela **recusa** trabalho quando o estado não
+está reconstruído, e essa recusa vai parecer um erro se não se souber o que é.
+
+- **`_graph/` e `_ops/` são estado coordenado.** Quem escreve lá é `library/kernel/tools/operation.py`, em Python. Uma edição à mão (`Write`/`Edit`) nesses caminhos é recusada por um hook, e a recusa diz porquê e o que fazer. O grafo é autoridade operacional: o contexto que uma sessão nova recebe é construído dele.
+- **Antes de concluir, consulta-se.** `bootstrap.py` reconstrói o estado — pendência, autoridades e grafo de **uma revisão só** — e devolve `ready` ou as limitações. É o que o `/status`, o `/answer` e o guarda de escrita consultam. `ready=False` nomeia sempre a acção que desbloqueia.
+- **O grafo é obrigatório.** Um engagement sem grafo bloqueia. Um engagement novo nasce com ele (o `/start` corre `migrate.py init`); um engagement antigo migra-se (`migrate.py apply --engagement <slug>`).
+
+Se um comando parar e disser «o engagement não está reconstruído», **não é uma avaria**: é a
+barreira a funcionar. A linha diz a limitação e o comando que a levanta. Correr esse comando
+é a acção — nunca contornar editando o ficheiro à mão.
+
+Duas garantias, ditas como são e não mais do que são:
+
+- a atomicidade é **observável pelos leitores suportados** (quem passa pelo bootstrap), não uma transacção do sistema de ficheiros. Editar a SU num editor por fora continua a ser possível; o que o sistema faz é **detectar** que mudou antes da operação seguinte;
+- um derivado que cita uma linha alterada é **suspeita**, não prova de que é anterior à alteração. O motor entrega a lista; quem lê decide.
 
 ---
 
@@ -179,7 +200,11 @@ O `aisa-start` vai:
    }
    ```
    (`round: R-00` = nenhuma ronda corrida ainda; o primeiro `/round` corre e regista `R-01`.)
-5. Output esperado:
+5. Correr `python library/kernel/tools/migrate.py init --engagement galp-adv` — o grafo vazio
+   com que o engagement nasce, publicado pelo coordenador. **Não é opcional**: sem ele o
+   engagement fica bloqueado à nascença, à espera de uma migração que não tem o que migrar.
+   Idempotente: correr outra vez devolve `already`.
+6. Output esperado:
    > `Engagement galp-adv criado. Phase: discovery. Próximo passo: /round (corre Discovery completo) ou /round business (lens-a-lens).`
 
 ### 3.3 Passo 2 — `/round` (Discovery completo)

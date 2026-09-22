@@ -5,15 +5,59 @@
 
 **Architecture & Concept Specification**
 
-> Versão: v2.0.0 — DRAFT para revisão da equipa
-> Data: 2026-05-28
-> Estado: Conceptual — pré-build
+> Versão: v3.5.0 — ver *Changelog* abaixo
+> Data: 2026-09-22 (primeira redacção: 2026-05-28)
+> Estado: **construído e em uso**, sob endurecimento contínuo. O que falta demonstrar está
+> nomeado no fim do `README.md` e em `docs/evolution/p8/PROTOCOLO.md` — não é este documento
+> que o declara feito.
 > Autor: Jorge Estêvão
 > Substitui: `aisa v1` / SPEA v2 (manter-se-á em arquivo como referência). Este documento define **aisa v2.0** — major architectural rewrite, mesmo brand.
 
 ---
 
 ## Changelog
+
+### v3.5.0 — 2026-09-22 (memória persistente, e a auditoria que a pôs à prova)
+
+P2–P8 construíram a camada que faz o estado do engagement sobreviver a uma sessão e a uma
+falha; P7.5 ligou-a aos comandos; uma auditoria externa ao commit que a fechou encontrou
+onze defeitos, todos reproduzidos e todos corrigidos. Plano e evidência em
+`docs/evolution/P7.5-integracao.md`.
+
+- **Seis motores novos** (§6, stdlib-only): `graph.py` (grafo aditivo, espelha a SU e nunca
+  prevalece sobre ela), `operation.py` (o coordenador), `bootstrap.py` (a reconstrução
+  comum), `resolve.py` (transições + as 4 operações de ciclo de vida), `migrate.py` (legado
+  → memória, e o `init` com que um engagement nasce), `projection.py` (estado operacional em
+  linguagem de negócio).
+- **Três pastas novas por engagement**: `_graph/`, `_ops/`, `_migration/`. As duas primeiras
+  são **estado coordenado** e nunca se editam à mão — quem lá escreve é o coordenador.
+- **Um invariante hard novo** (§9.1): não se escreve numa autoridade sobre estado por
+  reconstruir (`pre-authority-guard.py`, fail-closed).
+- **O grafo passou a ser obrigatório** (decisão do operador, 2026-09-22). `LEGACY_MODE`
+  deixou de ser um caminho legítimo: bloqueia, com a acção nomeada. Um engagement novo nasce
+  já com grafo, senão bloqueava à nascença por trabalho que não existe.
+- **A exclusão passou a ser do kernel** (`flock`). Antes era por existência do ficheiro, e
+  medido com processos reais dava seis donos do mesmo engagement em seis processos — com
+  escrita confirmada e perdida em sete de oito corridas, porque `BASE_CHANGED` lia sempre a
+  mesma base debaixo de um lock que não excluía.
+
+Limites que ficam declarados, e que não são provisórios:
+
+- **Atomicidade é observável pelos leitores suportados**, não transacção do sistema de
+  ficheiros. Quem lê por fora da barreira está fora da garantia; o que se faz é detectar.
+- **`flock` é do sistema de ficheiros local.** Sem ele cai-se na criação exclusiva, mais
+  fraca; `status()` diz qual está em uso.
+- **Citar não prova anterioridade.** `impact_of` entrega os derivados que citam uma linha
+  alterada; nenhum derivado regista contra que valores foi escrito, por isso são candidatos
+  e o veredicto é humano — decisão tomada, não tarefa pendente.
+- **Integridade operacional não é gate metodológico.** O primeiro bloqueia; o segundo
+  reporta. Confundi-los foi erro cometido e corrigido durante a auditoria.
+
+O que a auditoria provou e vale mais do que as correcções: **exercer o ramo não é exercer a
+condição**. Os 25 casos do coordenador passavam com a exclusão partida; os do marcador de
+pendência passavam com um marcador corrompido a ler-se como ausente. E a suite só era verde
+em máquinas com os engagements privados presentes — `projects/` é gitignored, e uma garantia
+obrigatória dependia dele.
 
 ### v3.4.0 — 2026-09-16 (reconciliação e cobertura — seis fases; pack pp 1.8.3)
 
@@ -310,6 +354,13 @@ session context      = disposable cache
 repository state     = durable memory
 ```
 
+Desde v3.5.0 essa **memória durável tem mecanismo, e não só convenção**: o estado do
+engagement é reconstruído por `bootstrap.py` — pendência, snapshot das autoridades e grafo
+de **uma revisão só** — e toda a escrita de conhecimento passa pelo coordenador. O que muda
+na prática para quem retoma: uma sessão nova não depende de o agente se lembrar de
+verificar; consulta a reconstrução, e ela diz se o estado é sequer legível e o que o impede.
+`ready=False` nomeia sempre a acção que o desbloqueia.
+
 Uma fase pode atravessar várias sessões; um engagement pequeno corre várias fases numa só. Nada no runtime usa a fronteira de sessão como fronteira semântica: `_state.json.phase`/`round` são os únicos marcadores de fase, os hooks resolvem o engagement a partir do disco, e **nenhuma instrução de runtime depende do transcript anterior**. O raciocínio profundo é local e temporário; o entendimento material tem de ser durável e recarregável selectivamente — daí a sinopse de processo em `process-model.md` §4 e o bloco *What must survive into Options* em `frame.md`.
 
 Uma sessão nova recarrega **selectivamente** — o bloco *Read to resume* que `/status` (e por delegação `/resume`) deriva de `_state.json` e do sistema de ficheiros: autoridade da fase + estado material do SU + sinopse do processo quando relevante + artefacto da fase corrente + pulls dirigidos de evidência/Domain Knowledge. Nunca toda a evidência raw, todos os transcripts, todos os lens outputs ou toda a DK. O bloco é computado, não persistido: não é uma nova autoridade e não é um ficheiro de handoff — os artefactos canónicos são a memória. Teste adversarial de sessão nova: `docs/pp-pack-authoring/pilot/pilot-2-protocol.md`.
@@ -504,6 +555,9 @@ aisa/                                              # repo 1 — partilhável den
 │   ├── output-styles/                               # (vazio; opcional)
 │   └── hooks/                                       # todos Python 3 (ver .claude/hooks/HOOKS.md)
 │       ├── pre-write-guard.py                       # ENFORCE: library/ read-only (o hard guard)
+│       ├── pre-authority-guard.py                   # ENFORCE: não escrever numa autoridade
+│       │                                            # (SU, decisions, answers, _state, _graph/, _ops/)
+│       │                                            # sobre estado por reconstruir. Fail-closed
 │       ├── pre-lens-order-check.py                  # ENFORCE: ordem das lenses na passagem completa (Discovery)
 │       ├── on-su-change.py                          # ACTIVO: regenera <slug>/dashboard.html
 │       └── phase-gate-check.py · synthesis-validate.py · render-validate.py   # log-only
@@ -515,9 +569,22 @@ aisa/                                              # repo 1 — partilhável den
 │   │   ├── synthesis-templates/{business-story,as-is,architecture-story,risks-and-assumptions,financial-story}.template.md
 │   │   ├── capture-templates/process-model.template.md
 │   │   └── tools/                                   # motores determinísticos, LIDOS E EXECUTADOS
+│   │       │                                        # -- conteúdo --
 │   │       ├── xlsx_extract.py                      # L1 extracção + L3 replay (/capture)
+│   │       ├── text_extract.py                      # capture-lite: .docx/.pdf/.vtt (/capture)
+│   │       ├── fields_draft.py                      # L1 → rascunho de campos/contratos (/blueprint)
 │   │       ├── dashboard.py                         # gera <slug>/dashboard.html (/dashboard + hook)
-│   │       └── coverage.py                          # revisão de cobertura: inventory · check · report · finalize
+│   │       ├── coverage.py                          # revisão de cobertura: inventory · check · report · finalize
+│   │       │                                        # -- memória persistente (P2-P8) --
+│   │       ├── graph.py                             # grafo aditivo em <slug>/_graph/; espelha a SU e
+│   │       │                                        # NUNCA prevalece sobre ela (drift reporta)
+│   │       ├── operation.py                         # o coordenador: intenção → pendência → publicação
+│   │       │                                        # → verificação → recibo. Exclusão por flock
+│   │       ├── bootstrap.py                         # a reconstrução comum que leitores E escritores
+│   │       │                                        # consultam ANTES de concluir
+│   │       ├── resolve.py                           # transições do /answer + as 4 operações de ciclo de vida
+│   │       ├── migrate.py                           # legado → memória: dry-run · apply · restore · init
+│   │       └── projection.py                        # estado operacional em linguagem de negócio (/status)
 │   │                                                # executar não é escrever: a regra read-only
 │   │                                                # aplica-se a EDIÇÕES em runtime, não à execução
 │   └── packs/
@@ -570,6 +637,11 @@ aisa/                                              # repo 1 — partilhável den
 #   ├── _simulation/                             # options-comparison_v<NN>.md (/simulate)
 #   ├── _blueprint/                              # ux-blueprint_v<NN>.yaml + blueprint-log.md (/blueprint)
 #   ├── _coverage/                               # coverage_v<NN>.json + .md — revisões de cobertura (imutáveis)
+#   ├── _graph/                                  # grafo do engagement (graph.jsonl + meta.json)
+#   │                                            # ESTADO COORDENADO — nunca editar à mão
+#   ├── _ops/                                    # a barreira: pending.json + receipts/ + staging/
+#   │                                            # ESTADO COORDENADO — nunca editar à mão
+#   ├── _migration/                              # manifesto + backup verificável do migrate
 #   ├── _retro/                                  # diary-<persona>.md (staged, curadoria humana)
 #   ├── _synthesis/                              # 5 topic packs + _synthesis-log.md (auto no /decide)
 #   └── _render/                                 # deliverables v<NN> + render-gaps.md + render-log.md
@@ -851,10 +923,13 @@ Plano de implementação e evidência das seis fases: `docs/runtime-hardening/co
 
 ### 9.1 Hard (não overrideable)
 
-Apenas 2 invariantes são hard-enforced:
+3 invariantes são hard-enforced:
 
 1. **`library/` é read-only em runtime.** Hook `pre-write-guard.py` rejeita qualquer Write/Edit a paths sob `library/`. Backup: `.claude/settings.json` `deny: Write(./library/**)`.
-2. **`_state.json` writes são atómicos.** Hook (ou skill convention) força padrão `_state.json.tmp` → `mv _state.json`. Crash mid-write nunca corrompe estado.
+2. **A escrita de conhecimento é atómica e coordenada.** `operation.py` publica em intenção → marcador de pendência → temp+rename → verificação → recibo → retirar a pendência, sob exclusão do kernel (`flock`). O que isto garante é **atomicidade observável pelos leitores suportados**, não transacção do sistema de ficheiros: uma falha pode deixar bytes parcialmente publicados, mas nunca produz uma leitura de sucesso sobre esse estado. Quem lê por fora da barreira está declaradamente fora da garantia — o que se faz é DETECTAR que mudou, antes da operação seguinte.
+3. **Não se escreve numa autoridade sobre estado por reconstruir.** Hook `pre-authority-guard.py`, fail-closed: consulta `bootstrap.py` e recusa com a limitação e a acção que a desfaz. Cobre a SU, `decisions.md`, `answers.md`, `_state.json`, e ainda `_graph/` e `_ops/` — o grafo é autoridade operacional e `_ops/` é a barreira.
+
+> **Integridade operacional ≠ gate metodológico.** O que bloqueia aqui é o primeiro: pendência, desvio entre grafo e SU, estado por reconstruir. Os gates de fase (`phases.md`) continuam soft por desenho — reportam, nunca bloqueiam. Converter um no outro foi um erro cometido e corrigido durante a auditoria de `212cdc6`: um gate metodológico que deixa de avaliar não protege nada e esconde o veredicto.
 
 ### 9.2 Soft (advisory, overrideable com justificação)
 

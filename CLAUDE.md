@@ -25,12 +25,20 @@
 ## Key paths
 
 - `library/kernel/` — universal protocols (phases, states, orchestration, render-contract, blueprint-contract, coverage-contract, glossary).
-- `library/kernel/tools/` — deterministic motors, **read and executed** at runtime (`xlsx_extract.py`, `text_extract.py`, `dashboard.py`, `fields_draft.py` — L1 → rascunho de campos/contratos, invocado por `/blueprint`; `coverage.py` — a conferência de que o que se produz responde ao que foi pedido, em três etapas (`reconciliation` · `blueprint` · `render`), invocada por `/blueprint` (passos 1b e 13b), `/render` (passos 2b e 9b), `/answer`, `/capture` e `/status`; contrato em `library/kernel/coverage-contract.md`). Executing is not writing: the read-only rule covers runtime *edits* — e `finalize` é a única operação de escrita do motor, e escreve só em `<engagement>/_coverage/`.
+- `library/kernel/tools/` — **a camada de memória persistente** (P2–P8), os seis motores que fazem o estado do engagement sobreviver a uma sessão e a uma falha. Nenhum é opcional desde que o grafo é obrigatório:
+  - `graph.py` — o grafo aditivo do engagement (`<engagement>/_graph/`). Espelha a SU (`provenance.mirror_of`) e **nunca prevalece sobre ela**: `drift` compara e reporta; `state`, `criticidade` e `resolved` divergentes bloqueiam, texto divergente informa.
+  - `operation.py` — o coordenador. Toda a escrita de conhecimento passa por aqui: intenção → marcador de pendência → publicação temp+rename → verificação → recibo → retirar a pendência. Exclusão por `flock` (do kernel, não pela existência do ficheiro); `status()` publica sob que garantia foi produzido (`exclusion`).
+  - `bootstrap.py` — a reconstrução comum. É o que qualquer leitor ou escritor consulta ANTES de concluir: pendência, snapshot e grafo de **uma revisão só**, autoridade comparada com o espelho, contexto com orçamento e truncagem declarada. `ready=False` nomeia sempre a acção que o desbloqueia.
+  - `resolve.py` — as transições de estado do `/answer` e as quatro operações de ciclo de vida (`revalidate` · `withdraw` · `accept_risk` · `resolve_conflict`), planeadas e publicadas pelo coordenador. `cited_by`/`impact_of` dão os derivados que citam uma linha — **candidatos, não veredicto**.
+  - `migrate.py` — legado → memória persistente (`dry-run` · `apply` · `restore` · `init`). `init` é o grafo com que um engagement NASCE, e recusa um engagement que já tem conhecimento — isso migra-se.
+  - `projection.py` — o estado operacional em linguagem de negócio: bloqueios com motivo, evidência e acção; é o que o `/status` consulta antes de responder.
+- `library/kernel/tools/` — motores determinísticos de conteúdo, **read and executed** at runtime (`xlsx_extract.py`, `text_extract.py`, `dashboard.py`, `fields_draft.py` — L1 → rascunho de campos/contratos, invocado por `/blueprint`; `coverage.py` — a conferência de que o que se produz responde ao que foi pedido, em três etapas (`reconciliation` · `blueprint` · `render`), invocada por `/blueprint` (passos 1b e 13b), `/render` (passos 2b e 9b), `/answer`, `/capture` e `/status`; contrato em `library/kernel/coverage-contract.md`). Executing is not writing: the read-only rule covers runtime *edits* — e `finalize` é a única operação de escrita do motor, e escreve só em `<engagement>/_coverage/`.
 - `library/packs/<id>/` — domain-specific (PP, OS, Mendix). Read-only at runtime.
 - `.claude/skills/` — lenses + commands + synthesis + render.
 - `.claude/agents/` — personas for council-independent mode.
 - `.claude/hooks/` — programmatic enforcement.
 - `projects/<slug>/` — engagement state (mount point to private repo).
+- `projects/<slug>/_graph/` · `_ops/` · `_migration/` — **estado coordenado. Nunca editar à mão.** O grafo é autoridade operacional (o contexto é construído dele); `_ops/` é a barreira (marcador de pendência + recibos). Quem lá escreve é `operation.py`, em Python. O hook `pre-authority-guard.py` recusa `Write`/`Edit` nestes caminhos — uma escrita por ferramenta aqui é, por construção, edição à mão de estado coordenado.
 - `projects/<slug>/dashboard.html` — generated living page. Never hand-edit: `shared-understanding.md` stays the source of truth.
 
 ## Slash commands
@@ -85,6 +93,8 @@ Uma mensagem que descreve um processo, um problema ou uma intenção de começar
 - Editing `library/` at runtime (hook will reject).
 - Inventing claim states without evidence (use Unknown instead).
 - Bypassing `/synthesize` between `/decide` and `/render`.
+- Editar `_graph/`, `_ops/` ou `_migration/` à mão (o guarda recusa, e com razão: apaga a prova de que uma operação aconteceu, ou inventa uma que não aconteceu).
+- Concluir antes de apresentar limitações. Um leitor que responde sobre estado por reconstruir apresenta estado misto como estado — as contagens ficam certas e a conclusão errada, e a diferença não aparece em contagem nenhuma.
 
 ## Where things live
 

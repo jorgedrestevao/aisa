@@ -37,6 +37,8 @@ O fim de cada resposta diz **A seguir:** — o passo humano, se houver, e o coma
 
 Quando voltas noutro dia: escreve o que queres («quero a estimativa») ou `/resume`. Ficas a saber onde estás, o que falta e o que tens de fazer tu.
 
+Se um comando parar e disser que o projecto **não está reconstruído**, não é uma avaria: é uma verificação a fazer o seu trabalho. Alguma coisa ficou a meio ou por arrumar, e o sistema prefere parar a responder-te por cima disso. A própria mensagem diz o que resolve. Se o que ela pede for um comando técnico, é para quem instalou o aisa, não para ti.
+
 ## Os passos, pela ordem
 
 | Etapa | O que acontece | Comando |
