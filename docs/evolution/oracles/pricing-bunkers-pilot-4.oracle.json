@@ -28,15 +28,15 @@
   "items": [
     {
       "id": "P-01",
-      "proposition_or_relation": "As quatro folhas `usd_ton`, `eur_ton`, `usd_m3`, `eur_m3` são o **mesmo cálculo em quatro apresentações**, não quatro cálculos. Todas 80×104, e partilham 249 de 249 padrões de fórmula.",
+      "proposition_or_relation": "As quatro folhas `usd_ton`/`eur_ton`/`usd_m3`/`eur_m3` sao o MESMO calculo em quatro apresentacoes. No ficheiro autoritativo: 668 formulas cada, 250 padroes cada, 250/250 partilhados.",
       "epistemic_state": "Confirmed",
       "criticality": "critical",
-      "source_locator": "Comparação exaustiva dos padrões de fórmula das 4 folhas (normalizando literais numéricos)",
-      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
-      "expected_resolution": "Confirmado por comparação de conjuntos: interseção = união.",
+      "source_locator": "anexos/formulas_completas.json (13 197 registos) — comparacao de padroes normalizados entre as quatro folhas",
+      "source_sha256": "cf40be3ed65983d51e689d9d34ba1714fdb204794d34e89352be667be1692b52",
+      "expected_resolution": "Re-medido sobre o ficheiro autoritativo (2026-09-22).",
       "gate_expectation": "Tratá-las como quatro regras distintas multiplica por 4 o esforço estimado. É erro material de dimensionamento.",
-      "review_notes": "Moeda (USD/EUR) × unidade (tonelada/m³). A conversão é apresentação. | MEDIDO NO FICHEIRO NAO AUTORITATIVO (.xlsm). A afirmacao nao esta desmentida — esta por re-medir sobre o .xlsx, que este ambiente nao tem.",
-      "validation": "REMEASURE_ON_AUTHORITATIVE_FILE"
+      "review_notes": "Confirmado nas DUAS versoes. No .xlsm eram 667 formulas / 249 padroes, no .xlsx 668 / 250 — uma formula de diferenca entre versoes, e a propriedade estrutural identica em ambas. Tratar as quatro como calculos distintos multiplica a estimativa por quatro.",
+      "validation": "CLOSED_BY_REMEASURE"
     },
     {
       "id": "P-02",
@@ -64,15 +64,15 @@
     },
     {
       "id": "P-04",
-      "proposition_or_relation": "`Inputs` é uma **série temporal de 1461 linhas** (B9:B1469 datas; R9:R1469 taxa de câmbio), com 7906 fórmulas — a maior folha do livro.",
+      "proposition_or_relation": "`Inputs` e a maior folha do livro: 1470 linhas, 134 colunas, 89 970 celulas nao vazias, 7906 formulas, ZERO erros em cache. O historico e mecanismo, nao arquivo.",
       "epistemic_state": "Confirmed",
       "criticality": "critical",
-      "source_locator": "Named ranges `Data_Lista` → `Inputs!$B$9:$B$1469`; `Index_TaxaCâmbio` → `Inputs!$R$9:$R$1469`",
-      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
-      "expected_resolution": "Confirmado por resolução dos named ranges.",
+      "source_locator": "anexos/inventario_folhas.json -> Inputs; named ranges `Data_Lista` e `Index_TaxaCambio` sobre B9:B1469 / R9:R1469 (1461 linhas de dados)",
+      "source_sha256": "cf40be3ed65983d51e689d9d34ba1714fdb204794d34e89352be667be1692b52",
+      "expected_resolution": "Re-medido sobre o ficheiro autoritativo (2026-09-22).",
       "gate_expectation": "O histórico é parte do mecanismo, não arquivo. Uma solução que só guarde o presente perde-o.",
-      "review_notes": "1461 linhas ≈ 4 anos de dias. | MEDIDO NO FICHEIRO NAO AUTORITATIVO (.xlsm). A afirmacao nao esta desmentida — esta por re-medir sobre o .xlsx, que este ambiente nao tem.",
-      "validation": "REMEASURE_ON_AUTHORITATIVE_FILE"
+      "review_notes": "Confirmado no ficheiro autoritativo, com os mesmos numeros do .xlsm. `cachedErrors: 0` nesta folha — os 497 erros do P-13 estao noutras.",
+      "validation": "CLOSED_BY_REMEASURE"
     },
     {
       "id": "P-05",
@@ -160,14 +160,14 @@
     },
     {
       "id": "P-12",
-      "proposition_or_relation": "A propria especificacao deixa 18 grupos de perguntas por decidir (Q01-Q18). As que tocam a aritmetica: Q04 premios/encargos Supply (que regra de conversao por componente), Q05 indice do DMA e minimo X-Author, Q06 conversoes e ajustes, Q07 densidades e regras HSFO/logistica, Q12 folhas ocultas e GMC.",
+      "proposition_or_relation": "O CONTEUDO das decisoes de Q04 (premios/encargos e conversao do SLI), Q05 (indice do DMA e minimo), Q06+Q07 (conversoes, densidades, HSFO, logistica) e Q12 (folhas ocultas e GMC).",
       "epistemic_state": "Unknown",
       "criticality": "critical",
       "source_locator": "Pricing_Bancas_Especificacao/06_Duvidas_Decisoes.md — 18 grupos",
       "source_sha256": "b12fecd4ac0e5dba45c08a5962d5ad7554371f942d2c0876a1c219cb8ea3ee86",
-      "expected_resolution": "Decisao de negocio. Nao e determinavel de nenhum ficheiro.",
-      "gate_expectation": "O candidato NAO deve escolher uma destas regras por conta propria. Implementar Q04/Q06/Q07 sem decisao e inventar comportamento.",
-      "review_notes": "Substitui a lacuna de traçado que P-10 era. A aritmetica esta conhecida; o que falta agora e DECISAO, nao leitura. Mudanca material: o bloqueio passou de «ninguem tracou» para «ninguem decidiu». | O operador declarou (2026-09-22) que JA HA RESPOSTAS para alguns dos 18 grupos, sem as indicar. Continua Unknown: saber que existem respostas nao e te-las. NAO inferir nenhuma.",
+      "expected_resolution": "O operador declarou (2026-09-22) que os QUATRO grupos JA TEM decisao tomada. O conteudo NAO foi fornecido e NAO esta na especificacao: o `06_Duvidas_Decisoes.md` diz textualmente «Estado inicial de todas: Pendente» e traz as perguntas, nao as respostas. Pedir o conteudo.",
+      "gate_expectation": "Saber que a decisao existe nao e conhece-la. O candidato continua sem poder escolher nenhuma destas regras por conta propria.",
+      "review_notes": "Mudou de natureza duas vezes: de «ninguem tracou» para «ninguem decidiu» e agora para «esta decidido e eu nao sei o que e». O ultimo e o mais barato de fechar e o mais perigoso de adivinhar.",
       "validation": "PENDING_OWNER"
     },
     {
@@ -208,8 +208,6 @@
   },
   "owner_validation": {
     "required_for": [
-      "P-01",
-      "P-04",
       "P-12"
     ],
     "status": "PENDING",
@@ -226,7 +224,7 @@
     "ruling": "O .xlsx da especificacao e a versao actual. O .xlsm que o engagement carrega (sha 677e7963…, 18 folhas, COM VBA) esta desactualizado.",
     "consequence": [
       "O input do piloto tem de ser SUBSTITUIDO pelo .xlsx antes de P8.",
-      "As medicoes feitas sobre o .xlsm sao medicoes de um ficheiro nao autoritativo. P-01 e P-04 ficam por re-medir; nao sao falsas, sao de outra versao.",
+      "P-01 e P-04 foram RE-MEDIDOS sobre os anexos do ficheiro autoritativo e confirmam-se. A substituicao do input continua necessaria para P8 correr sobre a fonte certa.",
       "Os locators da spec (`Motor!C24:H24`, `Relatorio!B5`) resolvem no .xlsx e NAO no .xlsm — as folhas `Motor`, `Relatorio Precos` e `Relatorio Precos Bios` nao existem no .xlsm, que tem `Outputs` e `Outputs BIOS` em vez.",
       "O ficheiro autoritativo NAO existe neste ambiente. Ate chegar, P8 nao pode correr sobre a fonte certa."
     ]

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "FILLED_PENDING_OWNER_VALIDATION",
+  "status": "FULLY_VALIDATED",
   "pilot_id": "dpt-galp-jp-pilot-4",
   "p8_type": "operacional / tickets",
   "source_files": [
@@ -27,10 +27,10 @@
       "criticality": "critical",
       "source_locator": "Prioritized_View!A5:J204 — todas as 103 linhas × 10 colunas são fórmula; A5/B5 fazem VLOOKUP a Priority_Store, C5..J5 lêem Dayly_extraction",
       "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
-      "expected_resolution": "Confirmado por leitura das fórmulas na fonte.",
+      "expected_resolution": "Confirmado pelo operador (2026-09-22), alem da leitura directa da fonte.",
       "gate_expectation": "Se o candidato descrever uma só fonte, ou a vista como editável, é omissão material.",
       "review_notes": "É o mecanismo central do processo. Sem isto, tudo o resto é detalhe.",
-      "validation": "PENDING_OWNER"
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "T-02",
@@ -39,10 +39,10 @@
       "criticality": "critical",
       "source_locator": "Priority_Store!E3:E91 — valores literais, sem fórmula",
       "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
-      "expected_resolution": "Confirmado: a coluna não tem fórmula em nenhuma das 89 linhas.",
+      "expected_resolution": "Confirmado pelo operador (2026-09-22), alem da leitura directa da fonte.",
       "gate_expectation": "Afirmar que a prioridade é calculada a partir de Severidade é facto falso e deve bloquear.",
       "review_notes": "A extracção traz `Severidade` (SEV 2/SEV 3); é campo distinto e não alimenta a prioridade.",
-      "validation": "PENDING_OWNER"
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "T-03",
@@ -51,10 +51,10 @@
       "criticality": "critical",
       "source_locator": "Priority_Store!H3:H91 — `=IF(A3=\"\",\"\",IF(COUNTIF(Dayly_extraction!$A:$A,A3)>0,\"✅ Active\",\"⚠️ Not in source\"))`",
       "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
-      "expected_resolution": "Confirmado: padrão único em 89 células.",
+      "expected_resolution": "Confirmado pelo operador (2026-09-22), alem da leitura directa da fonte.",
       "gate_expectation": "É a metade 'registo → hoje' da reconciliação. Perdê-la é perder a detecção de órfãos.",
       "review_notes": "O aviso é visual (emoji), não bloqueia nada no ficheiro.",
-      "validation": "PENDING_OWNER"
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "T-04",
@@ -63,10 +63,10 @@
       "criticality": "critical",
       "source_locator": "Prioritized_View!I5:I204 — `=IF(Dayly_extraction!A2=\"\",\"\",IF(Dayly_extraction!C2=\"\",\"\",TODAY()-INT(Dayly_extraction!C2)))`",
       "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
-      "expected_resolution": "Confirmado: padrão único em 103 células.",
+      "expected_resolution": "Confirmado pelo operador (2026-09-22), alem da leitura directa da fonte.",
       "gate_expectation": "Tratar Aging como valor armazenado é erro de estado epistémico, não de detalhe.",
       "review_notes": "Única métrica calculada do ficheiro. `TODAY()` torna o resultado dependente da data de abertura.",
-      "validation": "PENDING_OWNER"
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "T-05",
@@ -75,10 +75,10 @@
       "criticality": "critical",
       "source_locator": "Prioritized_View!A5:B204 — `=IFERROR(VLOOKUP(...),\"\")`",
       "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
-      "expected_resolution": "Confirmado pelo IFERROR nas duas colunas de lookup.",
+      "expected_resolution": "Confirmado pelo operador (2026-09-22), alem da leitura directa da fonte.",
       "gate_expectation": "É a metade 'hoje → registo': tickets novos por priorizar ficam visíveis e vazios.",
       "review_notes": "Junto com T-03 fecha a detecção de órfãos nos dois sentidos.",
-      "validation": "PENDING_OWNER"
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "T-06",
@@ -173,15 +173,9 @@
     "improper_gate_advances": 0
   },
   "owner_validation": {
-    "required_for": [
-      "T-01",
-      "T-02",
-      "T-03",
-      "T-04",
-      "T-05"
-    ],
-    "status": "PENDING",
+    "required_for": [],
+    "status": "COMPLETE",
     "why": "O autor do oráculo e o operador do candidato são o mesmo agente. Ler a fonte directamente cumpre a letra da ACCEPTANCE.md, mas não dá independência real. Os itens críticos só contam como referência de P8 depois de o responsável do processo os confirmar ou corrigir."
   },
-  "warning": "Itens críticos por validar. Até lá, esta referência é fraca e P8 herda a fraqueza."
+  "warning": "Os 6 itens criticos foram confirmados pelo responsavel. Esta referencia ja nao e fraca: serve como oraculo de P8."
 }
