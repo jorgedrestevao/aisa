@@ -374,5 +374,88 @@ class EngagementReal(unittest.TestCase):
         self.assertEqual(sum(plan["counts"].values()), plan["rows"])
 
 
+class M07_ReAplicarDepoisDeReverter(unittest.TestCase):
+    """O defeito que nenhum destes 28 testes apanhava, porque nenhum fazia o ciclo inteiro.
+
+    `apply` -> `restore` -> `apply`. O id da operacao e `migrate-<plan_hash[:16]>`, e o
+    `plan_hash` deriva dos digests PRE-migracao. Depois de reverter, o estado volta a ser o
+    de antes, o plano volta a dar o mesmo hash, e o coordenador reconhecia o recibo antigo:
+    devolvia sucesso sem escrever nada, e `apply` respondia `migrated` sobre um grafo
+    AUSENTE. `ACCEPTANCE.md` §2 — «Zero sucesso falso de operacao interrompida/rejeitada».
+
+    Encontrado a correr o ciclo sobre o engagement real, nao por um teste vermelho."""
+
+    def ciclo(self, tmp):
+        eng = make(tmp, RESOLVIDO)
+        M["apply"](eng)
+        return eng
+
+    def test_the_graph_is_really_there_after_apply(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = self.ciclo(tmp)
+            st = G["read"](eng)
+            self.assertEqual(st["status"], G["OK"])
+            self.assertGreater(len(st["nodes"]), 0)
+
+    def test_restore_takes_the_graph_away_and_the_receipt_with_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = self.ciclo(tmp)
+            op = M["read_manifest"](eng)["operation_id"]
+            self.assertTrue(O["receipt_path"](eng, op).is_file(), "o apply deixa recibo")
+            M["restore"](eng)
+            self.assertEqual(G["read"](eng)["status"], G["ABSENT"])
+            self.assertFalse(O["receipt_path"](eng, op).is_file(),
+                             "reverter desfaz a operacao: o recibo dela nao pode sobreviver")
+
+    def test_reapplying_after_a_restore_really_writes_the_graph(self):
+        """O caso do defeito. Antes da correccao isto dava `migrated` com grafo ausente."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = self.ciclo(tmp)
+            revisao1 = G["read"](eng)["revision"]
+            M["restore"](eng)
+            r = M["apply"](eng)
+            st = G["read"](eng)
+        self.assertEqual(r["result"], "migrated")
+        self.assertEqual(st["status"], G["OK"], "dizer `migrated` sobre grafo ausente e mentira")
+        self.assertGreater(len(st["nodes"]), 0)
+        self.assertEqual(st["revision"], revisao1,
+                         "a mesma entrada da a mesma revisao — a serializacao e canonica")
+
+    def test_a_receipt_left_behind_makes_apply_refuse_instead_of_lying(self):
+        """Defesa em profundidade: se o recibo sobreviver por outra via, `apply` recusa."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = self.ciclo(tmp)
+            op = M["read_manifest"](eng)["operation_id"]
+            guardado = O["receipt_path"](eng, op).read_text(encoding="utf-8")
+            M["restore"](eng)
+            # o recibo volta a aparecer sem os ficheiros que ele diz ter publicado
+            rp = O["receipt_path"](eng, op)
+            rp.parent.mkdir(parents=True, exist_ok=True)
+            rp.write_text(guardado, encoding="utf-8")
+            with self.assertRaises(M["MigrationError"]) as ctx:
+                M["apply"](eng)
+        self.assertEqual(ctx.exception.code, "RECEIPT_STALE")
+        self.assertIn("restore", str(ctx.exception))
+
+    def test_the_coordinator_reports_whether_the_effects_survived(self):
+        """A peca generica: um recibo diz que aconteceu, nao que sobreviveu."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = Path(tmp) / "e"
+            eng.mkdir()
+            ws = {"x.txt": "conteudo\n"}
+            primeiro = O["run"](eng, "op-1", ws)
+            self.assertNotIn("replayed", primeiro)
+
+            repetido = O["run"](eng, "op-1", ws)
+            self.assertTrue(repetido["replayed"])
+            self.assertTrue(repetido["effects_present"], "os ficheiros ainda la estao")
+
+            (eng / "x.txt").unlink()
+            depois = O["run"](eng, "op-1", ws)
+            self.assertTrue(depois["replayed"])
+            self.assertFalse(depois["effects_present"],
+                             "o ficheiro desapareceu: o recibo ja nao descreve a realidade")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

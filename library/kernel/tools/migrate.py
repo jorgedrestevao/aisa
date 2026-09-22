@@ -276,6 +276,18 @@ def apply(eng, plan=None):
     receipt = _O["run"](eng, op, write_set, expected={k: plan["before"].get(k, "")
                                                      for k in write_set})
 
+    # O id da operacao deriva do `plan_hash`, que deriva dos digests PRE-migracao.
+    # Depois de um `restore` o estado volta a ser o de antes, o plano volta a dar o
+    # mesmo hash, e o coordenador reconhecia o recibo antigo e devolvia sucesso sem
+    # escrever nada — um `migrated` sobre um grafo ausente. `ACCEPTANCE.md` §2 diz
+    # «Zero sucesso falso de operacao interrompida/rejeitada», e era isso.
+    if receipt.get("replayed") and receipt.get("effects_present") is False:
+        raise MigrationError(
+            "o recibo desta migracao existe mas os ficheiros nao — um `restore` "
+            "reverteu-a e deixou o recibo para tras", "RECEIPT_STALE",
+            {"operation_id": op, "published": receipt.get("published", []),
+             "recovery": "apagar o recibo desta operacao antes de re-migrar"})
+
     manifest = {"runtime_version": plan["runtime_version"], "when": plan["when"],
                 "plan_hash": plan["plan_hash"], "operation_id": op,
                 "before": plan["before"], "after": _digests(eng),
@@ -326,6 +338,17 @@ def restore(eng, force=False):
             raise MigrationError("backup de `{}` nao confere".format(rel), "BACKUP_CORRUPT",
                                  {"path": rel})
         shutil.copy2(src, eng / rel)
+
+    # Reverter e desfazer a operacao, logo o recibo dela deixa de descrever a
+    # realidade. Deixa-lo para tras fazia com que uma re-migracao a partir do mesmo
+    # estado batesse no recibo antigo e recebesse sucesso sem escrita nenhuma —
+    # ver `RECEIPT_STALE` em `apply`.
+    op_revertida = man.get("operation_id")
+    if op_revertida:
+        try:
+            _O["receipt_path"](eng, op_revertida).unlink()
+        except OSError:
+            pass
 
     removed = []
     for rel in man.get("new_files", []):

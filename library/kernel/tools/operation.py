@@ -276,7 +276,13 @@ def run(eng: Path, operation_id: str, write_set: dict, expected: dict | None = N
             raise OperationError(
                 "mesmo operation_id com pedido diferente", "RECEIPT_MISMATCH",
                 {"operation_id": operation_id, "have": prior.get("request_hash"), "got": rq})
-        return dict(prior, replayed=True)
+        # Um recibo diz que a operacao aconteceu; NAO diz que os efeitos sobreviveram. Um
+        # `restore` a montante apaga os ficheiros e deixa o recibo para tras — e repetir a
+        # operacao passava a devolver sucesso sem escrever nada. Quem chama tem de poder
+        # distinguir «ja feito» de «ja feito e desfeito», entao a resposta di-lo.
+        gravado = prior.get("revision") or {}
+        agora = {rel: digest(eng / rel) for rel in gravado}
+        return dict(prior, replayed=True, effects_present=(agora == gravado))
 
     ident = acquire(eng)
     try:
