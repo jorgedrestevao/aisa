@@ -332,7 +332,20 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="resolver uma linha da SU")
     ap.add_argument("--engagement", required=True)
     ap.add_argument("--row", required=True)
-    ap.add_argument("--answer", required=True)
+    ap.add_argument("--answer", default="")
+    ap.add_argument("--op", default="answer",
+                    choices=["answer", "revalidate", "withdraw", "accept-risk",
+                             "resolve-conflict"],
+                    help="a operacao; `answer` por defeito, para nao mudar o que ja existia")
+    ap.add_argument("--note", default="", help="revalidate: a nota de confirmacao")
+    ap.add_argument("--changed", action="store_true",
+                    help="revalidate: o facto MUDOU — recusa, porque isso e transicao")
+    ap.add_argument("--reason", default="", help="withdraw: a razao da retirada")
+    ap.add_argument("--basis", default="", help="accept-risk: a base da aceitacao")
+    ap.add_argument("--side", action="append", default=[],
+                    help="resolve-conflict: um lado; repetir por cada lado")
+    ap.add_argument("--by-owner", action="store_true",
+                    help="resolve-conflict: o dono decidiu (senao resolve por evidencia interna)")
     ap.add_argument("--by", default="")
     ap.add_argument("--locator", default="")
     ap.add_argument("--inference", action="store_true")
@@ -355,11 +368,35 @@ def main(argv=None):
         by = {"source": a.by.split(":", 1)[1].strip()}
     elif a.by:
         by = {"other": a.by}
+    def _exige(nome, valor):
+        if not valor:
+            raise ResolveError(
+                "`--op {}` exige `--{}`".format(a.op, nome), "MISSING_ARG",
+                {"op": a.op, "falta": nome})
+        return valor
+
     try:
-        fn = plan if a.dry_run else apply
-        out = fn(eng, row_id=a.row, answer_text=a.answer, answered_by=by,
-                 locator=a.locator, inference=a.inference, settles=a.settles,
-                 claim=a.claim, to=a.to)
+        if a.op == "answer":
+            _exige("answer", a.answer)
+            fn = plan if a.dry_run else apply
+            out = fn(eng, row_id=a.row, answer_text=a.answer, answered_by=by,
+                     locator=a.locator, inference=a.inference, settles=a.settles,
+                     claim=a.claim, to=a.to)
+        elif a.op == "revalidate":
+            fn = plan_revalidate if a.dry_run else apply_revalidate
+            out = fn(eng, row_id=a.row, still_holds=not a.changed, note=a.note, by=a.by)
+        elif a.op == "withdraw":
+            fn = plan_withdraw if a.dry_run else apply_withdraw
+            out = fn(eng, row_id=a.row, reason=_exige("reason", a.reason))
+        elif a.op == "accept-risk":
+            fn = plan_accept_risk if a.dry_run else apply_accept_risk
+            out = fn(eng, row_id=a.row, basis=_exige("basis", a.basis))
+        else:
+            if len(a.side) < 2:
+                raise ResolveError("`--op resolve-conflict` exige pelo menos dois `--side`",
+                                   "TOO_FEW_SIDES", {"lados": len(a.side)})
+            fn = plan_resolve_conflict if a.dry_run else apply_resolve_conflict
+            out = fn(eng, row_id=a.row, sides=a.side, by_owner=a.by_owner, by=by)
     except (ResolveError, _O["OperationError"], _G["GraphError"]) as exc:
         print(json.dumps(exc.as_dict(), ensure_ascii=False, indent=2), file=sys.stderr)
         return 1
@@ -370,12 +407,9 @@ def main(argv=None):
         for k, v in out["summary"].items():
             print("{:16} {}".format(k, v))
         print("{:16} {}".format("porque", out["verdict"]["reason"]))
-        print("{:16} {}".format("estrutural", out["structural"]["note"]))
+        if "structural" in out:
+            print("{:16} {}".format("estrutural", out["structural"]["note"]))
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
 
 
 # ============================================================================
@@ -516,3 +550,236 @@ def decision_rewritten_by(answer_targets, decision_ids):
     return {"would_rewrite": bool(hit), "decisions": hit,
             "reason": ("uma resposta nao reescreve uma decisao — isso e `/decide`"
                        if hit else "")}
+
+
+# ============================================================================
+# W4 — as operacoes de ciclo de vida passam pelo coordenador.
+#
+# Cada uma tem `plan_*` (compoe o conjunto de escrita, publica nada) e `apply_*`
+# (publica por `_O["run"]`, com recibo). A DECISAO fica nas funcoes de parecer acima —
+# `revalidate`, `withdraw`, `resolve_conflict`, `accept_risk` — que estes chamam. A regra
+# vive num sitio so; o que muda e passar a haver quem a escreva.
+# ============================================================================
+
+SECTION_RE = re.compile(r"^##\s+(\w[\w \-]*)\s*$")
+
+
+def _section_of(md, row_id):
+    """`(estado, cabecalhos, indice da linha)` da seccao onde a linha vive.
+
+    A coluna e encontrada pelo NOME no cabecalho da seccao, nao por indice fixo: as cinco
+    seccoes da SU tem colunas diferentes (`Risky` nao tem `verificado_em`, `Unknown` nao tem
+    `validade`), e um indice contado a olho parte na primeira seccao que nao for a esperada.
+    """
+    estado, headers = "", []
+    linhas = md.splitlines()
+    for i, linha in enumerate(linhas):
+        m = SECTION_RE.match(linha.strip())
+        if m:
+            estado, headers = m.group(1), []
+            continue
+        if linha.lstrip().startswith("|") and not headers and estado:
+            headers = [c.strip() for c in linha.strip().strip("|").split("|")]
+            continue
+        if re.match(r"^\|\s*" + re.escape(row_id) + r"\s*\|", linha):
+            return estado, headers, i
+    raise ResolveError("nao encontrei a linha `{}` no texto da SU".format(row_id),
+                       "ROW_LINE_NOT_FOUND", {"row": row_id})
+
+
+def set_cell(md, row_id, coluna, valor):
+    """Substitui UMA celula, identificada pelo nome da coluna na sua seccao."""
+    estado, headers, i = _section_of(md, row_id)
+    if coluna not in headers:
+        raise ResolveError(
+            "a seccao `{}` nao tem coluna `{}`".format(estado, coluna),
+            "COLUMN_MISSING", {"row": row_id, "section": estado, "headers": headers})
+    k = headers.index(coluna)
+    linhas = md.splitlines()
+    cells = linhas[i].rstrip().rstrip("|").split("|")
+    # `split("|")` sobre `| a | b |` da um primeiro elemento vazio: o indice da coluna k
+    # esta em k+1.
+    cells[k + 1] = " {} ".format(valor)
+    linhas[i] = "|".join(cells) + "|"
+    return "\n".join(linhas) + ("\n" if md.endswith("\n") else "")
+
+
+def append_cell(md, row_id, coluna, sufixo):
+    """Acrescenta a uma celula sem apagar o que la esta. Idempotente sobre o mesmo sufixo."""
+    estado, headers, i = _section_of(md, row_id)
+    if coluna not in headers:
+        raise ResolveError(
+            "a seccao `{}` nao tem coluna `{}`".format(estado, coluna),
+            "COLUMN_MISSING", {"row": row_id, "section": estado, "headers": headers})
+    k = headers.index(coluna)
+    linhas = md.splitlines()
+    cells = linhas[i].rstrip().rstrip("|").split("|")
+    actual = cells[k + 1].strip()
+    if sufixo in actual:
+        return md                      # ja la esta: repetir nao acrescenta informacao
+    cells[k + 1] = " {} {} ".format(actual, sufixo).replace("  ", " ")
+    linhas[i] = "|".join(cells) + "|"
+    return "\n".join(linhas) + ("\n" if md.endswith("\n") else "")
+
+
+def _revalidation_section(row, note, by, when):
+    return (
+        "\n## {rid} — {w} (revalidacao)\n"
+        "- **Claim**: {claim}\n"
+        "- **Confirmacao**: mantem-se — {note}\n"
+        "- **Fonte**: {by}\n"
+        "- **verificado_em**: {old} -> {w}\n"
+    ).format(rid=row.get("id", ""), w=when, claim=row.get("claim", ""),
+             note=(note or "").strip() or "(sem nota)", by=by or "—",
+             old=row.get("verificado_em") or "—")
+
+
+def _answers_with(eng, seccao):
+    ap = eng / ANSWERS_FILE
+    antigo = ap.read_text(encoding="utf-8") if ap.exists() else "# Respostas\n"
+    return antigo.rstrip("\n") + "\n" + seccao
+
+
+def _expected(eng, *rels):
+    return {rel: _O["digest"](eng / rel) for rel in rels}
+
+
+def plan_revalidate(eng, row_id, still_holds, note="", by="", today=""):
+    """L09. Facto mantem-se -> edicao sancionada. Facto mudou -> NAO e revalidacao."""
+    eng = Path(eng)
+    when = today or date.today().isoformat()
+    md, rows = read_su(eng)
+    row = find_row(rows, row_id)
+    parecer = revalidate(row, still_holds, note=note, today=when)
+
+    if parecer["mode"] == "transition":
+        raise ResolveError(
+            "o facto mudou — `states.md`: «Never renew a changed fact». Isto e uma "
+            "transicao normal (`was {}`), nao uma revalidacao".format(row_id),
+            "FACT_CHANGED", {"row": row_id, "proximo": "resolve.plan(...)"})
+
+    su_new = set_cell(md, row_id, "verificado_em", when)
+    ans_new = _answers_with(eng, _revalidation_section(row, note, by, when))
+    return {"operation_id": "revalidate-{}-{}".format(row_id, when),
+            "row": row_id, "mode": parecer["mode"], "verificado_em": when,
+            "creates_row": False, "verdict": parecer,
+            "write_set": {SU_FILE: su_new, ANSWERS_FILE: ans_new},
+            "expected": _expected(eng, SU_FILE, ANSWERS_FILE),
+            "summary": {"o que mudou": "{} revalidado — verificado_em {}".format(row_id, when),
+                        "estado": "sem linha nova: o facto e o mesmo",
+                        "proximo passo": "nada; a linha volta a estar dentro da validade"}}
+
+
+def plan_withdraw(eng, row_id, reason):
+    """L08/P-21. Sai por um marcador na ultima coluna e por mais nada."""
+    eng = Path(eng)
+    md, rows = read_su(eng)
+    row = find_row(rows, row_id)
+    parecer = withdraw(row, reason)
+    _estado, headers, _i = _section_of(md, row_id)
+    su_new = append_cell(md, row_id, headers[-1], parecer["marker"])
+    return {"operation_id": "withdraw-{}".format(row_id),
+            "row": row_id, "mode": parecer["mode"], "creates_row": False,
+            "becomes_fact": False, "verdict": parecer,
+            "write_set": {SU_FILE: su_new},
+            "expected": _expected(eng, SU_FILE),
+            "summary": {"o que mudou": "{} retirada por ambito".format(row_id),
+                        "estado": "nao virou facto; a linha fica para historia",
+                        "proximo passo": "nada — retirar nao abre nada"}}
+
+
+def plan_accept_risk(eng, row_id, basis):
+    """L08. O risco continua Risky; o que muda e a base ficar registada."""
+    eng = Path(eng)
+    md, rows = read_su(eng)
+    row = find_row(rows, row_id)
+    parecer = accept_risk(row, basis)
+    estado, headers, _i = _section_of(md, row_id)
+    coluna = "mitigação proposta" if "mitigação proposta" in headers else headers[-2]
+    su_new = append_cell(md, row_id, coluna,
+                         "— risco aceite: {}".format(parecer["basis"]))
+    return {"operation_id": "accept-risk-{}".format(row_id),
+            "row": row_id, "mode": parecer["mode"], "becomes_fact": False,
+            "creates_row": False, "verdict": parecer,
+            "write_set": {SU_FILE: su_new},
+            "expected": _expected(eng, SU_FILE),
+            "summary": {"o que mudou": "{} — risco aceite com base registada".format(row_id),
+                        "estado": "continua {}; aceitar nao e resolver".format(estado),
+                        "proximo passo": "nada; a base fica auditavel"}}
+
+
+def plan_resolve_conflict(eng, row_id, sides, by_owner, by=None, today=""):
+    """L07. Os DOIS lados sobrevivem: N linhas com decisao do dono, 1 Assumed sem ela."""
+    eng = Path(eng)
+    when = today or date.today().isoformat()
+    md, rows = read_su(eng)
+    row = find_row(rows, row_id)
+    parecer = resolve_conflict(row, sides, by_owner, today=when)
+    by = by or {}
+    quem = by.get("role") or by.get("source") or by.get("other") or "—"
+
+    estado_alvo = parecer["state"]
+    lens, ronda = row.get("lens") or "", row.get("ronda") or ""
+    novos, su_new = [], md
+    lados = list(sides) if by_owner else [" · ".join(str(x) for x in sides)]
+    for lado in lados:
+        # cada linha recebe o id livre SEGUINTE, calculado sobre a SU ja com as anteriores
+        _h, rows_agora, _s, _d = _D["parse_su"](su_new)
+        novo_id = next_id(rows_agora, estado_alvo)
+        base = "RESOLUCAO {w} — {q} (was {old}), {af}#{old}".format(
+            w=when, q=quem, old=row_id, af=ANSWERS_FILE)
+        cells = [novo_id, lens, str(lado), base, when, "organizacional", ronda]
+        su_new = append_row(su_new, estado_alvo, cells)
+        novos.append(novo_id)
+    su_new = mark_resolved(su_new, row_id, novos)
+
+    seccao = (
+        "\n## {rid} — {w} (conflito resolvido)\n"
+        "- **Conflito**: {claim}\n"
+        "- **Lados preservados**: {lados}\n"
+        "- **Resolucao**: {modo}\n"
+        "- **Fonte**: {q}\n"
+    ).format(rid=row_id, w=when, claim=row.get("claim", ""),
+             lados=" | ".join(str(x) for x in sides), modo=parecer["reason"], q=quem)
+
+    return {"operation_id": "resolve-conflict-{}-{}".format(row_id, operation_id(
+                row_id, "|".join(str(x) for x in sides))[-12:]),
+            "row": row_id, "new_ids": novos, "state": estado_alvo,
+            "mode": parecer["mode"], "verdict": parecer,
+            "write_set": {SU_FILE: su_new, ANSWERS_FILE: _answers_with(eng, seccao)},
+            "expected": _expected(eng, SU_FILE, ANSWERS_FILE),
+            "summary": {"o que mudou": "{} -> {} {}".format(
+                            row_id, estado_alvo, ", ".join(novos)),
+                        "estado": "os dois lados sobrevivem; nao se escolheu por recencia",
+                        "proximo passo": "nada" if by_owner else
+                                         "confirmar com o dono para passar a Confirmed"}}
+
+
+def _apply_plan(eng, p):
+    """Publica um plano de ciclo de vida. Mesmo caminho do `/answer`: uma operacao, recibo."""
+    eng = Path(eng)
+    recibo = _O["run"](eng, p["operation_id"], p["write_set"], expected=p["expected"])
+    return dict(p, receipt=recibo, published=recibo.get("published", []))
+
+
+def apply_revalidate(eng, **kw):
+    return _apply_plan(eng, plan_revalidate(eng, **kw))
+
+
+def apply_withdraw(eng, **kw):
+    return _apply_plan(eng, plan_withdraw(eng, **kw))
+
+
+def apply_accept_risk(eng, **kw):
+    return _apply_plan(eng, plan_accept_risk(eng, **kw))
+
+
+def apply_resolve_conflict(eng, **kw):
+    return _apply_plan(eng, plan_resolve_conflict(eng, **kw))
+
+
+# O guard fica no FIM, e so no fim: tudo o que vier depois dele existe para quem
+# importa o modulo e NAO existe para quem o corre. As funcoes de ciclo de vida
+# viveram ai, e por isso a CLI nunca lhes chegou.
+if __name__ == "__main__":
+    sys.exit(main())
