@@ -22,10 +22,11 @@ Each row in the Shared Understanding (`shared-understanding.md`) is in **exactly
 
 Five rules. They own what `Confirmed` means; lens files and `aisa-answer` point here and do not restate them.
 
-1. **Locator resolvable by machine**, in one of five classes:
+1. **Locator resolvable by machine**, in one of six classes:
    - `<ficheiro>.xlsx|xlsm#<folha>!<célula|coluna>` — an explicit formula (`custo + margem = preço`) or prose text in the cell; counts and structure from the extractor cite `<ficheiro>.extraction.json#<folha>` or `<ficheiro>.replay.md#<n>`;
-   - `<ficheiro>.vtt#[hh:mm:ss]` (or the capture-lite form `<file> · [hh:mm:ss] <speaker>`) — an explicit passage of a transcript;
-   - `<ficheiro>.docx#¶n` (or `<file> · §<heading> ¶n` / `· p.n`) — an explicit passage of a document;
+   - `<ficheiro>.vtt|srt#[hh:mm:ss]` (or the capture-lite form `<file> · [hh:mm:ss] <speaker>`) — an explicit passage of a transcript;
+   - `<ficheiro>.docx|pdf|txt|md#¶n` (or `<file> · §<heading> ¶n` / `· ¶n` / `· p.n`) — an explicit passage of a document. A `.txt` numbers every non-empty line; a `.md` keeps its headings, so it carries the `§` form too;
+   - `<ficheiro>.csv#linha n` (or `<file> · linha n`) — an explicit row of a table in text. The extractor keeps **every** row, never a sample, so the row it cites is evidence like any other;
    - `answers.md#<secção>` or `enquadramento.md#M-n` — a **dated declaration of the process owner**, recorded by the executor via `AskUserQuestion`. The `answers.md` anchor is the first segment of the section heading (before ` — `), spaces as hyphens: `answers.md#U-073`, `answers.md#BLOCO-H`;
    - `_capture/<ficheiro>.<extracção>.json#<chave>` or `.md#<secção>` — a **direct extraction over the raw source, persisted**. When the capture pass did not cover what the claim needs — VBA text the extraction never decompiles, an aggregation the per-column statistics cannot answer, a sheet the model only summarizes — the lens may go to the raw source (`orchestration.md` → *Raw inspection*) **and what it takes from there is written to `_capture/`** under its own name, with the method and the source's SHA-256 in the artefact's header. The locator points at that file, never at the method. A method declared in prose and a result nobody can reopen is not a locator: without the artefact the class does not apply.
    Without a locator in one of these classes, the row is not `Confirmed`. The target must exist (`inputs/`, `_capture/`, `answers.md`, `enquadramento.md`); `context.json.literal_request` is the one accepted exception — the owner's own words at intake.

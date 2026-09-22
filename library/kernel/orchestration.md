@@ -32,7 +32,7 @@ raw source inspected selectively when needed
 | Source | Tier | What the lens gets |
 |---|---|---|
 | `.xlsx`, `.xlsm` | specialized deterministic capture (L1 extraction + L3 replay + L2 process model — `docs/PROCESS_CAPTURE_SPEC.md`) | `process-model.md` (`PM-NNN` business rules with cell citations) + `*.replay.md` |
-| `.docx`, `.pdf`, `.vtt` | **capture-lite** (`library/kernel/tools/text_extract.py`, deterministic) | `_capture/<file>.text.md` — loss-minimizing text extraction with provenance markers (`§<heading> ¶NN`, `p.N`, `[HH:MM:SS] <speaker>`); where the source carries process semantics, the L2 pass folds them into the cross-source synopsis (`process-model.md` §4) with those locators |
+| `.docx`, `.pdf`, `.vtt`, `.srt`, `.txt`, `.md`, `.csv` | **capture-lite** (`library/kernel/tools/text_extract.py`, deterministic) | `_capture/<file>.text.md` — loss-minimizing text extraction with provenance markers (`§<heading> ¶NN`, `p.N`, `[HH:MM:SS] <speaker>`, `¶NN`, `linha N`); where the source carries process semantics, the L2 pass folds them into the cross-source synopsis (`process-model.md` §4) with those locators |
 | anything else | not captured (not a failure) | raw inspection per the format table below |
 
 Capture-lite is **loss-minimizing extraction with provenance, never semantic summarization**: everything the source said, plus where it said it. No LLM in the text path. The **L2 process model** (LLM, `aisa-capture` step 5) is the one comprehension pass and reads **all** normalized evidence — extraction JSON, replay reports and `*.text.md` — selected through `evidence-index.md`: **source-complete in coverage, never source-total in simultaneous context**. Every process-bearing source receives a disposition (`USED` / `CHECKED` / `TARGETED`) in `_capture-log.md`; there is no source count, size or length threshold — the contract is *enough evidence inspected to reconstruct the material process*. Its §4 is the engagement's durable process synopsis: normalized evidence, richer than the Shared Understanding, never authoritative over it. A source whose extraction is `failed`, `skipped` or `empty` — the index says which, and why — is read raw with the table below; so is any format outside the tiers.
@@ -41,7 +41,7 @@ Capture-lite is **loss-minimizing extraction with provenance, never semantic sum
 
 | Format | How to read |
 |---|---|
-| `.md`, `.txt`, `.json`, `.csv` | read directly |
+| `.json` | read directly |
 | `.xlsx`, `.xlsm` | the `xlsx` skill, or `openpyxl` with `data_only=False` **and** `data_only=True` (two passes: formulas, then cached values). Data profile: sheets, columns, row counts, value distributions, date ranges. **Logic profile** (obrigatório quando a folha tem colunas derivadas): grafo de dependências entre folhas, histograma de funções, intervalos nomeados agrupados por prefixo, células com `#REF!`, fórmulas que quebram o padrão da coluna |
 | `.pdf` | the `pdf` skill |
 | `.docx` | the `docx` skill |

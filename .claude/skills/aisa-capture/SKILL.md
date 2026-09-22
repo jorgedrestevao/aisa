@@ -1,6 +1,6 @@
 ---
 name: aisa-capture
-description: Process-capture pipeline for engagement inputs — the structured xlsx tier (L1 deterministic extraction + L3 replay + L2 process model) plus the capture-lite text tier (LT, deterministic .docx/.pdf/.vtt extraction). Runs at the end of aisa-start, on stale hashes in aisa-round step 3.5, or manually via /capture. Produces the _capture/ shared evidence surface (entry point evidence-index.md) that lenses and council personas read.
+description: Process-capture pipeline for engagement inputs — the structured xlsx tier (L1 deterministic extraction + L3 replay + L2 process model) plus the capture-lite text tier (LT, deterministic .docx/.pdf/.vtt/.srt/.txt/.md/.csv extraction). Runs at the end of aisa-start, on stale hashes in aisa-round step 3.5, or manually via /capture. Produces the _capture/ shared evidence surface (entry point evidence-index.md) that lenses and council personas read.
 ---
 
 # aisa-capture
@@ -33,7 +33,8 @@ Also invoked programmatically by `aisa-start` (step 11) and `aisa-round` (step 3
 | Source | Tier | What it becomes |
 |---|---|---|
 | `.xlsx`, `.xlsm` | **structured capture** (L1 + L3 + L2) | `process-model.md` (`PM-NNN` rules with cell citations) + `*.replay.md` |
-| `.docx`, `.pdf`, `.vtt` | **capture-lite** (LT) | `<file>.text.md` — loss-minimizing text with provenance markers (`### <heading>` + `[¶NN]`, `## [p.N]`, `[HH:MM:SS] **Speaker:**`) |
+| `.docx`, `.pdf`, `.vtt`, `.srt` | **capture-lite** (LT) | `<file>.text.md` — loss-minimizing text with provenance markers (`### <heading>` + `[¶NN]`, `## [p.N]`, `[HH:MM:SS] **Speaker:**`) |
+| `.txt`, `.md`, `.csv` | **capture-lite** (LT) | `<file>.text.md` — `.txt` uma linha não vazia por `[¶NN]`; `.md` cabeçalhos e tabelas intactos; `.csv` **todas** as linhas em tabela, citadas por `linha N`. Nenhum dos três amostra |
 | anything else | not captured (**not a failure**) | raw reading per the format table in `library/kernel/orchestration.md` → *Evidence contract* |
 
 **Capture-lite is extraction, never summarization.** It writes no model, no findings, no requirements, no risks, no interrogation list, no architectural inference — everything the source said, plus where it said it. There is no LLM in the LT path. The L2 process model (LLM, step 5) is the **one comprehension pass** and reads every tier's normalized output — extraction JSON, replay reports **and** `*.text.md` — so the as-is process is reconstructed across sources, not from the workbook alone. Capture does not own epistemic classification: an extraction failure is a `status`, never an `Unknown`; a synopsis marker (`OBSERVED` / `INFERRED` / `HYPOTHESIS` / `UNKNOWN`) is a marker on normalized evidence, never an engagement state.

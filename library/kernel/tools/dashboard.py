@@ -1061,12 +1061,13 @@ LOCATOR_PATTERNS: tuple[tuple[str, "re.Pattern[str]"], ...] = (
     ("replay", re.compile(r"\.replay\.md#\d+|\breplay\s*#\s*\d+", re.U)),
     # 2. transcript passage
     ("transcricao", re.compile(
-        r"\.vtt#\s*\[?\d{1,2}:\d{2}:\d{2}"
+        r"\.(?:vtt|srt)#\s*\[?\d{1,2}:\d{2}:\d{2}"
         r"|[·•]\s*`?\[\d{1,2}:\d{2}:\d{2}\]", re.U)),
     # 3. document passage
     ("documento", re.compile(
-        r"\.(?:docx|pdf)#\s*¶?\s*\d+"
+        r"\.(?:docx|pdf|txt|md)#\s*¶?\s*\d+"
         r"|[·•]\s*§[^|]{0,80}¶\s*\d+"
+        r"|[·•]\s*¶\s*\d+"
         r"|[·•]\s*p\.\s*\d+", re.U)),
     # 4. dated owner declaration
     ("answers", re.compile(r"answers\.md#([0-9A-Za-zÀ-ɏ._-]+)", re.U)),
@@ -1075,7 +1076,7 @@ LOCATOR_PATTERNS: tuple[tuple[str, "re.Pattern[str]"], ...] = (
     #    `_capture/` (states.md rule 1, fifth class). `<source>.<ext>.<what>.(json|md)`
     #    where <what> is not a pipeline artefact -- those are class 1.
     ("extraccao-directa", re.compile(
-        r"[^\s`|]+\.(?:xlsx|xlsm|vtt|docx|pdf)\."
+        r"[^\s`|]+\.(?:xlsx|xlsm|vtt|srt|docx|pdf|txt|md|csv)\."
         r"(?!extraction\.json|replay\.md|text\.md)[A-Za-z0-9_-]+\.(?:json|md)(?:#\S+)?",
         re.I | re.U)),
     # 6. what the FRAMEWORK itself writes at the start of the engagement (DEF-P1-01).
@@ -1089,6 +1090,11 @@ LOCATOR_PATTERNS: tuple[tuple[str, "re.Pattern[str]"], ...] = (
     ("enquadramento-tema", re.compile(r"enquadramento\.md#(T\d+)\b", re.U)),
     ("contexto", re.compile(r"context\.json[.#]([A-Za-z_][A-Za-z0-9_]*"
                             r"(?:\.[A-Za-z_][A-Za-z0-9_]*)*)", re.U)),
+    # 7. a linha de um `.csv` extraido. O `.csv` passou a ter extractor com a mesma
+    #    garantia dos outros -- TODAS as linhas, nunca uma amostra -- e por isso a
+    #    linha que ele cita e prova como qualquer outra. Sem esta classe o guarda
+    #    dizia "sem locator" sobre evidencia que o proprio motor produziu.
+    ("tabela-csv", re.compile(r"\.csv#\s*linha\s*\d+|[·•]\s*linha\s*\d+", re.U)),
 )
 
 LOCATOR_BY_NAME = {name: rx for name, rx in LOCATOR_PATTERNS}
@@ -1096,7 +1102,7 @@ LOCATOR_BY_NAME = {name: rx for name, rx in LOCATOR_PATTERNS}
 LOCATOR_EXCEPTION = re.compile(r"context\.json[.#]literal_request", re.U)
 
 NAMED_FILE_RE = re.compile(
-    r"[`'\"]?([^\s`'\"|]+\.(?:xlsx|xlsm|vtt|docx|pdf)"
+    r"[`'\"]?([^\s`'\"|]+\.(?:xlsx|xlsm|vtt|srt|docx|pdf|txt|md|csv)"
     r"(?:\.(?:extraction\.json|replay\.md|text\.md|[A-Za-z0-9_-]+\.(?:json|md)))?)",
     re.I | re.U)
 
@@ -1162,8 +1168,9 @@ def evidence_targets(eng: Path) -> dict:
         "context_broken": bool(ctx_raw) and not ctx,
         "has_workbook": any(n.endswith((".xlsx", ".xlsm")) or ".extraction.json" in n
                             or ".replay.md" in n for n in names),
-        "has_transcript": any(".vtt" in n for n in names),
-        "has_document": any(n.endswith((".docx", ".pdf")) for n in names),
+        "has_transcript": any(".vtt" in n or ".srt" in n for n in names),
+        "has_document": any(n.endswith((".docx", ".pdf", ".txt", ".md")) for n in names),
+        "has_table": any(n.endswith(".csv") for n in names),
     }
 
 
@@ -1260,6 +1267,8 @@ def locator_target_gaps(text: str, classes: list[str], tgt: dict) -> list[str]:
         add("timestamp citado e o engagement nao tem transcricao")
     if "documento" in classes and not tgt["has_document"]:
         add("passagem citada e o engagement nao tem documento")
+    if "tabela-csv" in classes and not tgt.get("has_table"):
+        add("linha citada e o engagement nao tem tabela em texto")
     return gaps
 
 

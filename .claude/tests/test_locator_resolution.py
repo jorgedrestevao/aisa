@@ -300,9 +300,23 @@ class IndicesDoResolvedor(unittest.TestCase):
         self.assertEqual(nomes[6], "enquadramento")
         self.assertEqual(len(set(nomes)), len(nomes), "nomes de classe duplicados")
 
+    ORIGINAIS = ["xlsx-celula", "extraction-json", "replay", "transcricao",
+                 "documento", "answers", "enquadramento", "extraccao-directa"]
+    ACRESCENTADAS = ["enquadramento-tema", "contexto", "tabela-csv"]
+
     def test_as_classes_novas_ficam_no_fim(self):
+        """A invariante, nao o retrato.
+
+        A versao anterior fixava a cauda literal (`[-2:]`) e por isso falhava a cada
+        classe nova — inclusive quando a classe estava CERTA e no sitio certo. O que
+        tem de se segurar e outra coisa: o bloco original nao se mexe (as posicoes 5 e
+        6 eram indexadas), e tudo o que se acrescenta vai para depois dele, pela ordem
+        em que foi acrescentado."""
         nomes = [n for n, _rx in D.LOCATOR_PATTERNS]
-        self.assertEqual(nomes[-2:], ["enquadramento-tema", "contexto"])
+        self.assertEqual(nomes[:len(self.ORIGINAIS)], self.ORIGINAIS,
+                         "o bloco original de classes mudou de posicao")
+        self.assertEqual(nomes[len(self.ORIGINAIS):], self.ACRESCENTADAS,
+                         "uma classe nova foi inserida no meio, nao acrescentada ao fim")
 
 
 # ------------------------------------------------------- o guarda, ponta a ponta

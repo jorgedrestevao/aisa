@@ -2,7 +2,8 @@
 """text_extract.py — aisa process-capture: capture-lite (deterministic text extraction).
 
 Kernel asset (library/kernel/tools/). Read + executed at runtime, never edited at runtime.
-Dependencies: Python 3.10+, python-docx (.docx), pypdf (.pdf), stdlib (.vtt).
+Dependencies: Python 3.10+, python-docx (.docx), pypdf (.pdf),
+              stdlib (.vtt, .srt, .txt, .md, .csv).
 No LLM, no network, no writes outside the given output paths.
 
 Usage:
@@ -22,25 +23,31 @@ Contract (library/kernel/orchestration.md -> Evidence contract):
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
 import hashlib
 import html
+import io
 import json
 import os
 import re
 import sys
 
-TOOL_VERSION = "1.0.1"
+TOOL_VERSION = "1.1.0"
 ARTEFACT_ID = "aisa.capture.text-extraction"
 XLSX_ARTEFACT_ID = "aisa.capture.extraction"
 
-TEXT_FORMATS = (".docx", ".pdf", ".vtt")
+TEXT_FORMATS = (".docx", ".pdf", ".vtt", ".srt", ".txt", ".md", ".csv")
 XLSX_FORMATS = (".xlsx", ".xlsm")
 
 CITE = {
     ".docx": "<file> · §<heading> ¶NN",
     ".pdf": "<file> · p.N",
     ".vtt": "<file> · [HH:MM:SS] <speaker>",
+    ".srt": "<file> · [HH:MM:SS] <speaker>",
+    ".txt": "<file> · ¶NN",
+    ".md": "<file> · §<heading> ¶NN",
+    ".csv": "<file> · linha N",
 }
 
 
@@ -268,15 +275,23 @@ def _hhmmss(stamp: str) -> str:
 
 
 def extract_vtt(path: str) -> tuple[list[str], dict, str, str]:
-    try:
-        with open(path, "r", encoding="utf-8-sig", errors="replace") as fh:
-            raw = fh.read()
-    except Exception as exc:
-        raise ExtractionError(f"{type(exc).__name__}: {exc}")
-
+    raw = read_text_file(path)
     if "WEBVTT" not in raw[:64]:
         raise ExtractionError("not a WebVTT file (missing WEBVTT signature)")
+    return transcript_body(raw)
 
+
+def extract_srt(path: str) -> tuple[list[str], dict, str, str]:
+    """`.srt` — a mesma gramatica de tempo, sem a assinatura.
+
+    Um SRT numera o bloco antes do tempo e escreve a fraccao com virgula; `TIMING_RE`
+    ja aceita as duas formas e a procura da linha de tempo salta o indice. O que muda
+    e so a assinatura: exigir `WEBVTT` a um `.srt` recusava todos. A recusa mantem-se
+    para quem se declara `.vtt`."""
+    return transcript_body(read_text_file(path))
+
+
+def transcript_body(raw: str) -> tuple[list[str], dict, str, str]:
     blocks = re.split(r"\n\s*\n", raw.replace("\r\n", "\n").replace("\r", "\n"))
     cues: list[dict] = []
     for block in blocks:
@@ -307,7 +322,7 @@ def extract_vtt(path: str) -> tuple[list[str], dict, str, str]:
 
     if not cues:
         return [], {"unit": "cue", "cues": 0, "passages": 0, "speakers": 0}, "empty", \
-            "WebVTT file contains 0 cues"
+            "transcript contains 0 cues"
 
     # Merge consecutive cues from the SAME named speaker; never merge unattributed cues.
     merged: list[dict] = []
@@ -335,8 +350,143 @@ def extract_vtt(path: str) -> tuple[list[str], dict, str, str]:
     return collapse_blanks(body), units, "ok", ""
 
 
-EXTRACTORS = {".docx": extract_docx, ".pdf": extract_pdf, ".vtt": extract_vtt}
-LIBRARIES = {".docx": "python-docx", ".pdf": "pypdf", ".vtt": "stdlib"}
+# ---------------------------------------------------------------- plain readers
+
+ENCODINGS = ("utf-8-sig", "cp1252", "latin-1")
+
+
+def read_text_file(path: str) -> str:
+    """O texto do ficheiro, venha na codificacao que vier.
+
+    Um input real vem como o gerou quem o gerou. Recusar um `.txt` por nao ser UTF-8
+    perde a fonte inteira por causa de um acento, e a fonte era o que interessava.
+    Tenta-se por ordem e a ultima da lista nunca falha (latin-1 mapeia todos os bytes);
+    a degradacao fica visivel no proprio texto, nunca silenciosa."""
+    ultimo = None
+    for enc in ENCODINGS:
+        try:
+            with open(path, "r", encoding=enc) as fh:
+                return fh.read()
+        except UnicodeDecodeError as exc:
+            ultimo = exc
+        except Exception as exc:
+            raise ExtractionError(f"{type(exc).__name__}: {exc}")
+    raise ExtractionError(f"UnicodeDecodeError: {ultimo}")
+
+
+def normalize_newlines(raw: str) -> str:
+    return raw.replace("\r\n", "\n").replace("\r", "\n")
+
+
+HEADING_RE = re.compile(r"^(#{1,6})\s+(?P<text>.+?)\s*#*$")
+
+
+def extract_txt(path: str) -> tuple[list[str], dict, str, str]:
+    """`.txt` — uma linha nao vazia e um paragrafo, e o numero dela e o locator.
+
+    Agrupar por linha em branco parecia mais natural e perde: medido no input real do
+    piloto de onboarding (um despejo de texto de PDF, 410 linhas, 48 em branco), linhas
+    consecutivas sao celulas de tabela e cabecalhos soltos — juntas por espacos ficam
+    uma frase que ninguem escreveu. Uma linha por unidade nao perde nada e da `¶NN`
+    estavel."""
+    body: list[str] = []
+    n_par = 0
+    for linha in normalize_newlines(read_text_file(path)).split("\n"):
+        texto = linha.strip()
+        if not texto:
+            continue
+        n_par += 1
+        body.append(f"[¶{n_par}] {texto}")
+        body.append("")
+    units = {"unit": "paragraph", "paragraphs": n_par}
+    if n_par == 0:
+        return [], units, "empty", "file contains no non-empty line"
+    return collapse_blanks(body), units, "ok", ""
+
+
+def extract_md(path: str) -> tuple[list[str], dict, str, str]:
+    """`.md` — cabecalhos ficam cabecalhos, tabelas ficam tabelas, o resto numera-se.
+
+    O locator e a seccao, como no `.docx`. Uma linha de tabela nao leva `[¶N]`: o prefixo
+    partia a tabela no artefacto, e a tabela e evidencia estrutural, nao prosa."""
+    body: list[str] = []
+    n_par = n_head = n_tab = 0
+    for linha in normalize_newlines(read_text_file(path)).split("\n"):
+        texto = linha.rstrip()
+        if not texto.strip():
+            continue
+        m = HEADING_RE.match(texto.strip())
+        if m:
+            n_head += 1
+            body.append("")
+            body.append(texto.strip())
+            body.append("")
+            continue
+        if texto.lstrip().startswith("|"):
+            n_tab += 1
+            body.append(texto.strip())
+            continue
+        n_par += 1
+        body.append(f"[¶{n_par}] {texto.strip()}")
+        body.append("")
+    units = {"unit": "paragraph", "paragraphs": n_par, "headings": n_head,
+             "table_lines": n_tab}
+    if n_par == 0 and n_head == 0 and n_tab == 0:
+        return [], units, "empty", "file contains no non-empty line"
+    return collapse_blanks(body), units, "ok", ""
+
+
+def sniff_delimiter(sample: str) -> str:
+    """O delimitador, por contagem fora de aspas. `;` e o que o Excel pt-PT escreve.
+
+    `csv.Sniffer` engasga-se em ficheiros de uma coluna e em cabecalhos curtos; a contagem
+    na primeira linha nao vazia decide e nunca levanta excepcao."""
+    primeira = next((ln for ln in sample.split("\n") if ln.strip()), "")
+    fora = STRINGS_CSV.sub("", primeira)
+    contagens = [(fora.count(d), d) for d in (";", ",", "\t", "|")]
+    melhor = max(contagens)
+    return melhor[1] if melhor[0] else ","
+
+
+STRINGS_CSV = re.compile(r'"[^"]*"')
+
+
+def extract_csv(path: str) -> tuple[list[str], dict, str, str]:
+    """`.csv` — TODAS as linhas, nenhuma amostra.
+
+    E aqui que a distincao entre preservar e contar se decide: um extractor que le 500
+    linhas e guarda 20 devolve estatistica, e o conteudo de negocio ficou no ficheiro.
+    A primeira linha conta como cabecalho (convencao do formato) e por isso nao entra em
+    `rows`; entra na tabela na mesma, por isso nada se perde — so a contagem o diz."""
+    raw = normalize_newlines(read_text_file(path))
+    if not raw.strip():
+        return [], {"unit": "row", "rows": 0, "columns": 0}, "empty", "file is empty"
+    delim = sniff_delimiter(raw)
+    try:
+        linhas = list(csv.reader(io.StringIO(raw), delimiter=delim))
+    except Exception as exc:
+        raise ExtractionError(f"{type(exc).__name__}: {exc}")
+    linhas = [r for r in linhas if any(str(c).strip() for c in r)]
+    if not linhas:
+        return [], {"unit": "row", "rows": 0, "columns": 0}, "empty", \
+            "file contains no non-empty row"
+
+    largura = max(len(r) for r in linhas)
+    linhas = [list(r) + [""] * (largura - len(r)) for r in linhas]
+    cabecalho = [md_escape_cell(str(c)) for c in linhas[0]]
+    body = ["| " + " | ".join(cabecalho) + " |", "|" + "---|" * largura]
+    for r in linhas[1:]:
+        body.append("| " + " | ".join(md_escape_cell(str(c)) for c in r) + " |")
+    units = {"unit": "row", "rows": len(linhas) - 1, "columns": largura,
+             "delimiter": delim}
+    return body, units, "ok", ""
+
+
+EXTRACTORS = {".docx": extract_docx, ".pdf": extract_pdf, ".vtt": extract_vtt,
+              ".srt": extract_srt, ".txt": extract_txt, ".md": extract_md,
+              ".csv": extract_csv}
+LIBRARIES = {".docx": "python-docx", ".pdf": "pypdf", ".vtt": "stdlib",
+             ".srt": "stdlib", ".txt": "stdlib", ".md": "stdlib", ".csv": "stdlib"}
 
 
 # ---------------------------------------------------------------- extract driver
