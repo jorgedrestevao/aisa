@@ -70,25 +70,9 @@ def projection_freshness(eng):
                        else "a projeccao esta a par das autoridades")}
 
 
-def authority_from_rows(rows) -> dict:
-    """`{"SU:<id>": {campo: valor}}` a partir das linhas da SU — quem manda, em forma de mapa.
-
-    As chaves sao as que a migracao e o `resolve` projectam para `props`, e a chave do mapa
-    e o `mirror_of` que cada no carrega. Um campo que a SU nao tenha sai vazio em vez de
-    ausente, porque ausente e indistinguivel de «ainda nao comparado».
-    """
-    fora = {}
-    for r in rows or []:
-        rid = str(r.get("id") or "").strip()
-        if not rid:
-            continue
-        fora["SU:" + rid] = {
-            "state": r.get("state") or "",
-            "criticidade": r.get("criticidade") or "",
-            "resolved": str(r.get("resolved")) == "True",
-            "text": r.get("claim") or "",
-        }
-    return fora
+# A forma do mapa de autoridade vive em `graph.py`, ao lado do `drift` que a consome.
+# Aqui fica so o nome, para nao mudar quem ja o chama por este modulo.
+authority_from_rows = _G["authority_from_rows"]
 
 
 def operational_state(eng, today=None):

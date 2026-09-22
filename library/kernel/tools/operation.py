@@ -88,6 +88,7 @@ INTENT_VERSION = 1
 # Estados devolvidos por `status()`. Cada um é distinto — B4 proíbe mascarar uns nos outros.
 CLEAN = "clean"
 PENDING_OPERATION = "pending_operation"
+PENDING_UNREADABLE = "pending_unreadable"
 LOCKED = "active_lock"
 CONFLICT = "conflict"
 
@@ -344,14 +345,79 @@ def pending_path(eng: Path) -> Path:
     return ops_dir(eng) / PENDING
 
 
+# O mínimo para se saber O QUE ficou pendente. É esse o critério — e não «é recuperável»:
+# um marcador sem `staging` sabe-se o que prometia e recusa-se na recuperação com o seu
+# próprio erro (`STAGING_INCOMPLETE`); um com versão não suportada tem o seu
+# (`INTENT_VERSION`). Alargar esta lista engolia esses dois casos e trocava-lhes o
+# diagnóstico por «ilegível», que diz menos.
+INTENT_REQUIRED = ("operation_id", "after")
+
+
+class PendingUnreadable(OperationError):
+    """O marcador existe e não se entende. Nunca se confunde com não existir."""
+
+    def __init__(self, detail: dict):
+        super().__init__(
+            "marcador de pendência ilegível — estado por determinar, nada se mexe",
+            "PENDING_UNREADABLE", detail)
+
+
 def read_pending(eng: Path) -> dict | None:
-    return _read_json(pending_path(eng))
+    """A intenção pendente, `None` se não há — e um ERRO se há e não se entende.
+
+    `_read_json` devolve `None` para ausente **e** para ilegível, e durante muito tempo
+    quem chamava não podia distinguir. Mas o marcador é a barreira: é ele que impede
+    ler e mutar sobre uma operação a meio. Um marcador truncado a valer por «não há»
+    abre exactamente a porta que ele existe para fechar — e a operação seguinte
+    substituía a pendência anterior sem nunca a ver.
+
+    Ausente é um estado. Ilegível é um problema, e reporta-se como tal.
+    """
+    pp = pending_path(eng)
+    try:
+        bruto = pp.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return None
+    except OSError as exc:
+        raise PendingUnreadable({"path": str(pp), "reason": "não se consegue ler",
+                                 "errno": getattr(exc, "errno", None)})
+    if not bruto.strip():
+        raise PendingUnreadable({"path": str(pp), "reason": "vazio"})
+    try:
+        intent = json.loads(bruto)
+    except ValueError as exc:
+        raise PendingUnreadable({"path": str(pp), "reason": "JSON inválido",
+                                 "detail": str(exc)})
+    if not isinstance(intent, dict):
+        raise PendingUnreadable({"path": str(pp), "reason": "não é um objecto",
+                                 "type": type(intent).__name__})
+    versao = intent.get("intent_version")
+    if versao is not None and versao != INTENT_VERSION:
+        # Os campos obrigatórios são os DESTA versão. Exigi-los a um marcador que declara
+        # outra é validar contra um esquema que não é o dele — e trocava o diagnóstico
+        # certo (`INTENT_VERSION`, que `recover` dá) por «ilegível», que diz menos.
+        return intent
+    faltam = [k for k in INTENT_REQUIRED if k not in intent]
+    if faltam:
+        raise PendingUnreadable({"path": str(pp), "reason": "campos em falta",
+                                 "missing": faltam})
+    if not isinstance(intent.get("after"), dict):
+        raise PendingUnreadable({"path": str(pp), "reason": "`after` não é um mapa"})
+    return intent
 
 
 def status(eng: Path) -> dict:
     """O que um leitor vê ANTES de decidir seja o que for (B3)."""
     eng = Path(eng)
-    p = read_pending(eng)
+    try:
+        p = read_pending(eng)
+    except PendingUnreadable as exc:
+        # Não se sabe o que ficou por publicar. Isso fecha tudo, e os bytes ficam.
+        return {"state": PENDING_UNREADABLE, "exclusion": EXCLUSION,
+                "detail": str(exc),
+                "recovery": "python library/kernel/tools/operation.py recover "
+                            "--engagement <slug>",
+                "problem": exc.detail}
     lp = _lock_path(eng)
     held = _read_json(lp) if lp.exists() else None
     alive = None
@@ -424,7 +490,7 @@ def run(eng: Path, operation_id: str, write_set: dict, expected: dict | None = N
 
     ident = acquire(eng)
     try:
-        existing = read_pending(eng)
+        existing = read_pending(eng)      # ilegível sobe como PENDING_UNREADABLE
         if existing:
             raise OperationError(
                 "existe operação pendente ({}) — recuperar antes de mutar".format(
@@ -534,18 +600,39 @@ def recover(eng: Path) -> dict:
                 "THIRD_STATE", {"paths": third,
                                 "detail": "ficheiro alterado por fora durante a pendência"})
 
+        # --- TUDO se valida antes de UM alvo se mexer.
+        #
+        # Antes desta ordem, verificava-se que o staging EXISTIA e publicava-se; a
+        # verificação dos bytes vinha em `_finish`, depois de os alvos já estarem
+        # escritos. Um staging corrompido dava `VERIFY_FAILED` — com o ficheiro original
+        # já substituído pelos bytes corrompidos, e um terceiro estado criado pela própria
+        # recuperação, que a recuperação seguinte recusaria. A base válida morria a tentar
+        # ser salva.
         stg = eng / intent["staging"]
-        missing = [rel for rel in intent["after"]
-                   if not (stg / rel.replace("/", "__")).is_file()
-                   and digest(eng / rel) != intent["after"][rel]]
+        por_publicar = [rel for rel in sorted(intent["after"])
+                        if digest(eng / rel) != intent["after"][rel]]
+        missing, corrompido = [], []
+        for rel in por_publicar:
+            src = stg / rel.replace("/", "__")
+            if not src.is_file():
+                missing.append(rel)
+                continue
+            if digest(src) != intent["after"][rel]:
+                corrompido.append({"path": rel, "staging": str(src.relative_to(eng)),
+                                   "expected": intent["after"][rel],
+                                   "actual": digest(src)})
         if missing:
             raise OperationError(
                 "staging incompleto e alvo por publicar", "STAGING_INCOMPLETE",
                 {"paths": missing})
+        if corrompido:
+            raise OperationError(
+                "bytes preparados não são os prometidos — nada publicado",
+                "STAGING_CORRUPT",
+                {"paths": corrompido,
+                 "detail": "os alvos ficam intactos e a pendência mantém-se"})
 
-        for rel in sorted(intent["after"]):
-            if digest(eng / rel) == intent["after"][rel]:
-                continue                      # já publicado: roll-forward é no-op
+        for rel in por_publicar:
             src = stg / rel.replace("/", "__")
             dst = eng / rel
             dst.parent.mkdir(parents=True, exist_ok=True)

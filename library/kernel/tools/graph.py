@@ -181,6 +181,44 @@ GATE_FIELDS = ("state", "criticidade", "resolved")
 INFO_FIELDS = ("text",)
 
 
+def authority_from_rows(rows) -> dict:
+    """`{"SU:<id>": {campo: valor}}` a partir das linhas da SU — quem manda, em forma de mapa.
+
+    Vive aqui, ao lado do `drift`, porque e a outra metade do mesmo contrato: um lado diz o
+    que o espelho tem, o outro o que a autoridade tem. Tinha duas copias — a projeccao
+    comparava e o `resolve` escrevia — e duas copias da mesma forma sao duas formas a prazo.
+
+    As chaves sao as que a migracao e o `resolve` projectam para `props`, e a chave do mapa
+    e o `mirror_of` que cada no carrega. Um campo que a SU nao tenha sai vazio em vez de
+    ausente, porque ausente e indistinguivel de «ainda nao comparado».
+    """
+    fora = {}
+    for r in rows or []:
+        rid = str(r.get("id") or "").strip()
+        if not rid:
+            continue
+        fora["SU:" + rid] = {
+            "state": r.get("state") or "",
+            "criticidade": r.get("criticidade") or "",
+            "resolved": str(r.get("resolved")) == "True",
+            "text": r.get("claim") or "",
+        }
+    return fora
+
+
+def mirror_props(props: dict, valores: dict) -> dict:
+    """Os `props` de um no, com os campos espelhados postos ao que a autoridade diz.
+
+    E a operacao que faltava: quem escreve a autoridade tem de escrever o espelho na MESMA
+    transaccao, senao a propria operacao bem sucedida deixa o estado divergente de si.
+    """
+    fora = dict(props or {})
+    for campo in GATE_FIELDS + INFO_FIELDS:
+        if campo in (valores or {}):
+            fora[campo] = valores[campo]
+    return fora
+
+
 def drift(nodes: list[dict], authority: dict, fields=None) -> list[dict]:
     """Campos espelhados que já não batem com a sua autoridade (K05).
 

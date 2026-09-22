@@ -335,6 +335,27 @@ def init(eng):
         raise MigrationError(
             "grafo em estado `{}` — nao se substitui por um vazio".format(st["status"]),
             "NOT_ABSENT", {"status": st["status"], "detail": st["detail"]})
+
+    # Olhar so para o estado do GRAFO nao chega, e foi assim que isto nasceu partido: um
+    # engagement com SU povoada e sem grafo recebia um grafo VAZIO, e a partir dai o
+    # bootstrap dizia `ready` com zero itens de contexto e o gate aberto. A ausencia ficava
+    # «resolvida» sem nada do conhecimento existente estar representado — exactamente o que
+    # tornar o grafo obrigatorio queria impedir. `init` e para o que esta vazio; o que tem
+    # conhecimento migra-se.
+    linhas = []
+    su = eng / SU_FILE
+    if su.exists():
+        _h, linhas, _s, _d = _D["parse_su"](su.read_text(encoding="utf-8"))
+    if linhas:
+        raise MigrationError(
+            "o engagement tem {} linha(s) na autoridade — `init` e para um scaffold "
+            "vazio; isto migra-se".format(len(linhas)),
+            "NOT_EMPTY",
+            {"rows": len(linhas),
+             "ids": [r.get("id") for r in linhas][:10],
+             "action": "python library/kernel/tools/migrate.py apply "
+                       "--engagement <slug>"})
+
     recibo = _O["run"](eng, "graph-init", _G["write_set"]([], []))
     return {"result": "created", "status": _G["read"](eng)["status"],
             "nodes": 0, "edges": 0,

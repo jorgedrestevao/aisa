@@ -284,14 +284,34 @@ def plan(eng, row_id, answer_text, answered_by, locator="", inference=False,
         edges.append({"src": new_id, "rel": "was", "dst": row_id, "props": {},
                       "provenance": {"ronda": ronda}})
 
+    # --- O espelho fecha com a linha, na MESMA transaccao.
+    #
+    # Antes disto, a SU saia com `resolved ->` e o no do grafo ficava `resolved=false`: a
+    # pergunta voltava a aparecer aberta no contexto, e a projeccao — que compara — via uma
+    # divergencia criada pela propria operacao bem sucedida. O no da linha original so era
+    # tocado quando NAO existia; num engagement migrado existia sempre, e ninguem lhe mexia.
+    #
+    # A correccao nao remenda os dois nos: reconstroi os campos espelhados de TODOS os nos a
+    # partir da autoridade que esta operacao vai publicar. Quem escreve a autoridade escreve
+    # o espelho dela — nao uma versao sua. Historia, `was` e proveniencia ficam onde estao,
+    # porque so os campos do contrato do espelho sao tocados.
+    _h_novo, linhas_novas, _s, _d = _D["parse_su"](su_new)
+    autoridade = _G["authority_from_rows"](linhas_novas)
+    nodes = [
+        dict(n, props=_G["mirror_props"](n.get("props"),
+                                         autoridade.get((n.get("provenance") or {}).get(
+                                             "mirror_of") or "", {})))
+        if (n.get("provenance") or {}).get("mirror_of") in autoridade else n
+        for n in nodes
+    ]
+
     write_set = {SU_FILE: su_new, ANSWERS_FILE: ans_new}
     write_set.update(_G["write_set"](nodes, edges))
 
     return {"operation_id": operation_id(row_id, answer_text), "row": row_id,
             "new_id": new_id, "state": state, "verdict": verdict, "structural": struct,
             "write_set": write_set,
-            "expected": {SU_FILE: _O["digest"](eng / SU_FILE),
-                         ANSWERS_FILE: _O["digest"](eng / ANSWERS_FILE)},
+            "expected": _expected_for(eng, write_set),
             "summary": {
                 "o que mudou": "{} -> {} {}".format(row_id, state, new_id),
                 "estado": ("escolha estrutural em aberto" if struct["choice_open"]
@@ -644,6 +664,21 @@ def _expected(eng, *rels):
     return {rel: _O["digest"](eng / rel) for rel in rels}
 
 
+def _expected_for(eng, write_set):
+    """A precondicao cobre TUDO o que o plano escreve — nao uma lista escrita a mao.
+
+    O plano de uma resposta escreve o grafo INTEIRO (`_G["write_set"]` serializa todos os
+    nos e arestas), e a precondicao so exigia os digests da SU e do answers. Quem
+    escrevesse no grafo entre o planeamento e a publicacao desaparecia, com recibo
+    `committed` e sem uma recusa — `BASE_CHANGED` existe e nunca era consultado para os
+    ficheiros do grafo, porque nunca lhe foram declarados.
+
+    Derivar do `write_set` em vez de enumerar fecha a classe, nao o caso: um escritor novo
+    nao pode esquecer-se de acrescentar um ficheiro aqui.
+    """
+    return {rel: _O["digest"](Path(eng) / rel) for rel in write_set}
+
+
 def plan_revalidate(eng, row_id, still_holds, note="", by="", today=""):
     """L09. Facto mantem-se -> edicao sancionada. Facto mudou -> NAO e revalidacao."""
     eng = Path(eng)
@@ -660,11 +695,12 @@ def plan_revalidate(eng, row_id, still_holds, note="", by="", today=""):
 
     su_new = set_cell(md, row_id, "verificado_em", when)
     ans_new = _answers_with(eng, _revalidation_section(row, note, by, when))
+    write_set = {SU_FILE: su_new, ANSWERS_FILE: ans_new}
     return {"operation_id": "revalidate-{}-{}".format(row_id, when),
             "row": row_id, "mode": parecer["mode"], "verificado_em": when,
             "creates_row": False, "verdict": parecer,
-            "write_set": {SU_FILE: su_new, ANSWERS_FILE: ans_new},
-            "expected": _expected(eng, SU_FILE, ANSWERS_FILE),
+            "write_set": write_set,
+            "expected": _expected_for(eng, write_set),
             "summary": {"o que mudou": "{} revalidado — verificado_em {}".format(row_id, when),
                         "estado": "sem linha nova: o facto e o mesmo",
                         "proximo passo": "nada; a linha volta a estar dentro da validade"}}
@@ -678,11 +714,12 @@ def plan_withdraw(eng, row_id, reason):
     parecer = withdraw(row, reason)
     _estado, headers, _i = _section_of(md, row_id)
     su_new = append_cell(md, row_id, headers[-1], parecer["marker"])
+    write_set = {SU_FILE: su_new}
     return {"operation_id": "withdraw-{}".format(row_id),
             "row": row_id, "mode": parecer["mode"], "creates_row": False,
             "becomes_fact": False, "verdict": parecer,
-            "write_set": {SU_FILE: su_new},
-            "expected": _expected(eng, SU_FILE),
+            "write_set": write_set,
+            "expected": _expected_for(eng, write_set),
             "summary": {"o que mudou": "{} retirada por ambito".format(row_id),
                         "estado": "nao virou facto; a linha fica para historia",
                         "proximo passo": "nada — retirar nao abre nada"}}
@@ -698,11 +735,12 @@ def plan_accept_risk(eng, row_id, basis):
     coluna = "mitigação proposta" if "mitigação proposta" in headers else headers[-2]
     su_new = append_cell(md, row_id, coluna,
                          "— risco aceite: {}".format(parecer["basis"]))
+    write_set = {SU_FILE: su_new}
     return {"operation_id": "accept-risk-{}".format(row_id),
             "row": row_id, "mode": parecer["mode"], "becomes_fact": False,
             "creates_row": False, "verdict": parecer,
-            "write_set": {SU_FILE: su_new},
-            "expected": _expected(eng, SU_FILE),
+            "write_set": write_set,
+            "expected": _expected_for(eng, write_set),
             "summary": {"o que mudou": "{} — risco aceite com base registada".format(row_id),
                         "estado": "continua {}; aceitar nao e resolver".format(estado),
                         "proximo passo": "nada; a base fica auditavel"}}
@@ -742,12 +780,13 @@ def plan_resolve_conflict(eng, row_id, sides, by_owner, by=None, today=""):
     ).format(rid=row_id, w=when, claim=row.get("claim", ""),
              lados=" | ".join(str(x) for x in sides), modo=parecer["reason"], q=quem)
 
+    write_set = {SU_FILE: su_new, ANSWERS_FILE: _answers_with(eng, seccao)}
     return {"operation_id": "resolve-conflict-{}-{}".format(row_id, operation_id(
                 row_id, "|".join(str(x) for x in sides))[-12:]),
             "row": row_id, "new_ids": novos, "state": estado_alvo,
             "mode": parecer["mode"], "verdict": parecer,
-            "write_set": {SU_FILE: su_new, ANSWERS_FILE: _answers_with(eng, seccao)},
-            "expected": _expected(eng, SU_FILE, ANSWERS_FILE),
+            "write_set": write_set,
+            "expected": _expected_for(eng, write_set),
             "summary": {"o que mudou": "{} -> {} {}".format(
                             row_id, estado_alvo, ", ".join(novos)),
                         "estado": "os dois lados sobrevivem; nao se escolheu por recencia",

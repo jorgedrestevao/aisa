@@ -55,6 +55,21 @@ SU = """> Fase actual: Discovery
 """
 
 
+def _nascer_migrado(eng):
+    """O engagement fica com grafo, pela via que lhe corresponde.
+
+    `init` e para um scaffold vazio; um engagement com linhas na SU migra-se. A fixture
+    tinha `init` fixo e passou a rebentar quando `init` deixou de aceitar conhecimento
+    (F08) — que e exactamente a recusa que se quer.
+    """
+    try:
+        return _MIG["init"](eng)
+    except _MIG["MigrationError"] as exc:
+        if exc.code != "NOT_EMPTY":
+            raise
+        return _MIG["apply"](eng)
+
+
 def new_eng(tmp, name="eng"):
     eng = Path(tmp) / name
     eng.mkdir(parents=True, exist_ok=True)
@@ -69,7 +84,7 @@ def new_eng(tmp, name="eng"):
     # fixture modelava um engagement que hoje nao existe — e que, desde que `LEGACY_MODE`
     # bloqueia, nao avancaria: o bloqueio de topo seria a ausencia de grafo, e nao o que
     # cada caso aqui quer exercer.
-    _MIG["init"](eng)
+    _nascer_migrado(eng)
     return eng
 
 

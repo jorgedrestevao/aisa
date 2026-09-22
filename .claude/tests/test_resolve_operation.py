@@ -51,6 +51,21 @@ SU = """> Fase actual: Discovery
 """
 
 
+def _nascer_migrado(eng):
+    """O engagement fica com grafo, pela via que lhe corresponde.
+
+    `init` e para um scaffold vazio; um engagement com linhas na SU migra-se. A fixture
+    tinha `init` fixo e passou a rebentar quando `init` deixou de aceitar conhecimento
+    (F08) — que e exactamente a recusa que se quer.
+    """
+    try:
+        return _MIG["init"](eng)
+    except _MIG["MigrationError"] as exc:
+        if exc.code != "NOT_EMPTY":
+            raise
+        return _MIG["apply"](eng)
+
+
 def new_eng(tmp, name="eng"):
     eng = Path(tmp) / name
     eng.mkdir(parents=True, exist_ok=True)
@@ -62,7 +77,7 @@ def new_eng(tmp, name="eng"):
     # fixture modelava um engagement que hoje nao existe — e que, desde que `LEGACY_MODE`
     # bloqueia, nao avancaria: o bloqueio de topo seria a ausencia de grafo, e nao o que
     # cada caso aqui quer exercer.
-    _MIG["init"](eng)
+    _nascer_migrado(eng)
     return eng
 
 
@@ -336,7 +351,11 @@ class SequenciaEntreSessoes(unittest.TestCase):
                              settles="fact", today="2026-09-22")
             boot = fresh_session(eng, "B['bootstrap'](eng)")
         self.assertTrue(boot["ready"], "a sessao nova nao arrancou")
-        self.assertEqual(boot["graph"]["nodes"], 2)
+        # A contagem era 2 porque a fixture nascia com um grafo VAZIO. Desde que `init`
+        # recusa um engagement com conhecimento (F08), a fixture migra — e o grafo traz
+        # tambem as linhas que a SU ja tinha. O que este caso guarda nao e o numero: e que
+        # a resposta acrescenta os seus dois nos ao que la estava.
+        self.assertGreaterEqual(boot["graph"]["nodes"], 2)
         ids = {i["id"] for i in boot["context"]["included"]}
         self.assertIn(out["new_id"], ids, "o facto novo nao esta no contexto da sessao nova")
         self.assertIn("U-001", ids, "a pergunta original desapareceu do contexto")
@@ -530,9 +549,9 @@ class L12_OAnswerPassaPeloMotor(unittest.TestCase):
         self.assertEqual(p.returncode, 0, p.stderr)
         self.assertEqual(antes, depois, "o ensaio escreveu na SU")
         self.assertEqual(recibos_depois, recibos_antes, "o ensaio deixou recibo")
-        self.assertEqual(recibos_antes, ["graph-init.json"],
-                         "a fixture deixou de nascer com grafo, e o caso passou a medir "
-                         "outra coisa")
+        self.assertEqual(len(recibos_antes), 1,
+                         "a fixture deixou de nascer com grafo por UMA operacao, e o caso "
+                         "passou a medir outra coisa: " + str(recibos_antes))
 
     def test_repeating_the_same_answer_does_not_transition_twice(self):
         """Idempotencia pelo coordenador: o mesmo pedido nao cria uma segunda linha."""
