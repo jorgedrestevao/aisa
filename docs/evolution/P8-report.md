@@ -9,8 +9,8 @@ por razões que não são de engenharia e que estão nomeadas abaixo.
 
 | Caso | Estado | Evidência |
 |---|---|---|
-| **E01** Sessões reais | **NÃO EXECUTADO** | Exige sessões Claude Code independentes. Ver §4.1. |
-| **E02** Dois pilotos vs oráculos | **NÃO EXECUTADO** | Depende das sessões de E01. O ficheiro autoritativo de pricing entrou e verifica (§4.2); falta correr. |
+| **E01** Sessões reais | **RETIDO** | Exige sessões Claude Code independentes (§4.1) **e** o wiring de `P7.5-integracao.md` — corrido hoje mediria o fluxo antigo. Ver §4.5. |
+| **E02** Dois pilotos vs oráculos | **RETIDO** | Depende de E01. O ficheiro autoritativo de pricing entrou e verifica (§4.2). |
 | **E03** Referência independente | **CUMPRIDO** | Oráculos extraídos da fonte em P1 e validados pelo dono **antes** de existir candidato (`docs/evolution/oracles/`). A referência precede o candidato, como `ACCEPTANCE.md` §5 exige. |
 | **E04** Inspeção completa | **CUMPRIDO** | `graph.py` ganhou `traverse`/`components`/`provenance`/`export`/`inspect` + CLI `inspect\|export`. 22 testes em `.claude/tests/test_graph_inspection.py`. |
 | **E05** Limites de extração | **CUMPRIDO** | 14 testes em `.claude/tests/test_extraction_limits.py`, sobre fonte construída **e** sobre o livro real do piloto. |
@@ -184,6 +184,36 @@ localizar. Fica por afirmar.
 
 **Não promovi `P-10`** de `CLOSED_BY_OPERATOR_SPEC` a re-medido: mexer na validação de um
 item que não está partido é decisão do operador, não minha.
+
+### 4.5 O bloqueio real de E01 não era o que eu escrevi
+
+Uma revisão externa ao repositório levantou a integração. Verifiquei-a, e o que encontrei é
+pior do que o que ela alegava:
+
+- **Nenhuma** das 24 skills invoca `bootstrap.py`, `operation.py`, `graph.py`,
+  `resolve.py`, `migrate.py` ou `projection.py`. `/answer` — o comando que o `resolve.py`
+  existe para servir — chama `coverage.py check` e mais nada.
+- Nos dois engagements reais, `bootstrap` devolve `ready=True` com **zero** itens de
+  contexto e `LEGACY_MODE`: o grafo está `absent`. Se as skills chamassem hoje, não
+  receberiam nada.
+
+Consequência directa sobre este relatório:
+
+> **E01 corrido hoje mediria o fluxo antigo — e daria GO.**
+
+O comparador comparava ids, estados e decisões recuperados. O fluxo legacy produz
+exactamente isso, lendo `shared-understanding.md` como sempre leu. Não distinguia
+«recuperou pelo bootstrap» de «leu o ficheiro à moda antiga». **Defeito do aparato que
+escrevi neste P8**, não da revisão.
+
+Corrigido: `truth` regista `kernel.mode` (`graph` · `legacy` · `blocked`), o relatório da
+sessão passa a ter de declarar `recovered_via`, e `check` cruza os dois — `LEGACY_PATH`,
+`KERNEL_BLOCKED` e `PROVENANCE_MISMATCH` são críticos. Seis testes novos, um deles contra o
+engagement real.
+
+E01/E02 passam de **NÃO EXECUTADO** a **RETIDO**: o ficheiro já cá está, as sessões
+continuam a exigir uma pessoa, mas correr agora mediria a coisa errada. O âmbito do que
+falta está em `docs/evolution/P7.5-integracao.md`.
 
 ---
 

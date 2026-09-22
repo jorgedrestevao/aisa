@@ -53,6 +53,8 @@ TOOLS = ROOT / "library" / "kernel" / "tools"
 
 _P = runpy.run_path(str(TOOLS / "projection.py"))
 _D = runpy.run_path(str(TOOLS / "dashboard.py"))
+_B = runpy.run_path(str(TOOLS / "bootstrap.py"))
+_G = runpy.run_path(str(TOOLS / "graph.py"))
 
 # Severidades. Só as críticas fecham o gate de P8 — são as de `ACCEPTANCE.md` §2.
 CRITICO = "critical"
@@ -60,6 +62,11 @@ AVISO = "warning"
 
 CAMPOS_OBRIGATORIOS = ("engagement", "checkpoint", "phase", "facts", "open_questions",
                        "decisions", "coverage", "blockers", "next_step")
+
+# Mecanismos que contam como reconstrucao pelo kernel. `ACCEPTANCE.md` §6 exige «apenas
+# mecanismos oficiais do projeto»; com o grafo obrigatorio, ler `shared-understanding.md`
+# a olho deixou de ser um deles.
+MECANISMOS_KERNEL = ("bootstrap", "graph", "resume", "projection", "operation")
 
 
 # ----------------------------------------------------------------- verdade do momento
@@ -94,6 +101,25 @@ def truth(eng_path: Path) -> dict:
     # D-001 e D-002 escritas — um zero que se le como "nao ha decisoes" sem se queixar.
     decisoes = [d.get("id") for d in ((modelo.get("status") or {}).get("decisions") or [])
                 if d.get("id")]
+
+    # Por que caminho e que este engagement se reconstroi HOJE. Sem isto o comparador mede
+    # ids recuperados e da GO — mesmo quando a recuperacao veio de ler a SU a moda antiga,
+    # que e exactamente o que E01 nao pode dar por provado.
+    boot = _B["bootstrap"](eng_path)
+    codigos = [l.get("code") for l in boot.get("limitations", [])]
+    itens = len((boot.get("context") or {}).get("items") or [])
+    if not boot.get("ready"):
+        modo = "blocked"
+    elif "LEGACY_MODE" in codigos:
+        modo = "legacy"
+    else:
+        modo = "graph"
+    kernel = {"mode": modo, "context_items": itens, "limitations": codigos,
+              "graph_status": _G["read"](eng_path).get("status", ""),
+              "detail": {"legacy": "o grafo esta ausente: o bootstrap nao devolve contexto, "
+                                   "logo nada do que a sessao recuperar veio por ele",
+                         "blocked": "o bootstrap nao esta pronto",
+                         "graph": ""}[modo]}
     return {
         "engagement": Path(eng_path).name,
         "phase": estado.get("phase", ""),
@@ -106,6 +132,7 @@ def truth(eng_path: Path) -> dict:
                           if b.get("kind") == "CRITICAL_OPEN"],
         "decisions": sorted(decisoes),
         "next_action": estado.get("next_action", {}),
+        "kernel": kernel,
     }
 
 
@@ -196,6 +223,38 @@ def check(t: dict, report: dict) -> dict:
         if did:
             achados.append(_achado("INVENTED_DECISION", CRITICO,
                                    "decisão reportada que não está em decisions.md", id=did))
+
+    # proveniencia: por que mecanismo e que a sessao diz ter reconstruido, e se esse
+    # mecanismo estava sequer disponivel. Sem isto o comparador da GO a uma recuperacao que
+    # leu `shared-understanding.md` a moda antiga — que e o fluxo que E01 existe para NAO
+    # dar por provado.
+    kernel = t.get("kernel") or {}
+    modo = kernel.get("mode", "")
+    declarados = [str(x).strip().lower() for x in (report.get("recovered_via") or [])]
+    pelo_kernel = [x for x in declarados if any(m in x for m in MECANISMOS_KERNEL)]
+
+    if modo == "legacy":
+        achados.append(_achado(
+            "LEGACY_PATH", CRITICO,
+            "o bootstrap correu em modo legacy ({} itens de contexto): o que a sessao "
+            "recuperou NAO veio pelo kernel".format(kernel.get("context_items", 0)),
+            graph_status=kernel.get("graph_status", "")))
+    elif modo == "blocked":
+        achados.append(_achado("KERNEL_BLOCKED", CRITICO,
+                               "o bootstrap nao ficou pronto; nao ha recuperacao a medir"))
+
+    if "recovered_via" not in report:
+        achados.append(_achado("PROVENANCE_UNDECLARED", AVISO,
+                               "a resposta nao diz por que mecanismo reconstruiu"))
+    elif pelo_kernel and modo != "graph":
+        achados.append(_achado(
+            "PROVENANCE_MISMATCH", CRITICO,
+            "a sessao diz ter usado {} mas o bootstrap estava em modo {!r}".format(
+                pelo_kernel, modo or "desconhecido")))
+    elif declarados and not pelo_kernel:
+        achados.append(_achado(
+            "PROVENANCE_OUTSIDE_KERNEL", AVISO,
+            "reconstrucao declarada sem nenhum mecanismo do kernel: {}".format(declarados)))
 
     # avanço indevido: propor o passo seguinte com o gate fechado
     passo = str(report.get("next_step") or "")

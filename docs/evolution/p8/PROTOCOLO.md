@@ -77,12 +77,35 @@ Uma sessão que recebe o resumo não prova recuperação nenhuma.
 >   "decisions": [{"id": "D-001"}],
 >   "coverage": {"status": "<fresh|stale|absent>"},
 >   "blockers": [{"id": "U-002"}],
->   "next_step": "/comando args"
+>   "next_step": "/comando args",
+>   "recovered_via": ["bootstrap", "graph"]
 > }
 > ```
 >
 > Não inventes ids. Se não encontrares algo, deixa a lista vazia — uma lista vazia é uma
 > resposta; um id inventado não é.
+>
+> Em `recovered_via`, diz **por que mecanismos** reconstruíste, com honestidade brutal: se
+> leste `shared-understanding.md` directamente, escreve isso. Não escrevas `bootstrap` se
+> não o correste.
+
+**Porque é que `recovered_via` existe.** Sem ele o comparador mede ids recuperados e dá GO —
+mesmo quando a recuperação veio de ler a SU à moda antiga, que é exactamente o que E01
+existe para **não** dar por provado. Agora `truth` regista por que caminho o engagement se
+reconstrói (`kernel.mode`: `graph` · `legacy` · `blocked`) e o `check` cruza-o com o que a
+sessão declara:
+
+| situação | achado | gravidade |
+|---|---|---|
+| bootstrap em modo legacy | `LEGACY_PATH` | crítico |
+| bootstrap não pronto | `KERNEL_BLOCKED` | crítico |
+| sessão diz «bootstrap», mas estava legacy | `PROVENANCE_MISMATCH` | crítico |
+| `recovered_via` ausente | `PROVENANCE_UNDECLARED` | aviso |
+| reconstrução sem mecanismo do kernel | `PROVENANCE_OUTSIDE_KERNEL` | aviso |
+
+> **Hoje os dois pilotos estão em `legacy`** (grafo `absent`, contexto com 0 itens). Correr
+> E01 agora dá `LEGACY_PATH` em todos os pontos de reinício — correctamente. O protocolo só
+> mede o que se quer medir **depois do P7.5** (ver `P7.5-integracao.md`).
 
 Gravar como `docs/evolution/p8/runs/<slug>/cp<N>-<nome>.report.json`.
 

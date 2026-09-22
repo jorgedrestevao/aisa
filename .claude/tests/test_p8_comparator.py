@@ -38,6 +38,10 @@ def verdade(**kw):
         "all_ids": ["C-001", "U-002", "U-003"],
         "critical_open": [], "decisions": ["D-001"],
         "next_action": {"text": "", "command": "/answer U-002"},
+        # O caso base e o mundo depois do wiring: grafo presente, bootstrap com contexto.
+        # Antes dele o modo e `legacy` e isso tem de ser CRITICO — ver a classe propria.
+        "kernel": {"mode": "graph", "context_items": 3, "limitations": [],
+                   "graph_status": "ok", "detail": ""},
     }
     base.update(kw)
     return base
@@ -53,6 +57,7 @@ def relatorio(**kw):
         "coverage": {"status": "fresh"},
         "blockers": [],
         "next_step": "/answer U-002",
+        "recovered_via": ["bootstrap", "graph"],
     }
     base.update(kw)
     return base
@@ -354,6 +359,63 @@ class GuardaContraALeituraSilenciosaDoVazio(unittest.TestCase):
         self.assertTrue(t["by_state"], "os estados não podem vir todos vazios")
 
 
+class ProvenienciaDaRecuperacao(unittest.TestCase):
+    """O defeito que esta classe fecha: sem isto o comparador dava GO a uma sessao que
+    reconstruiu lendo `shared-understanding.md` a moda antiga.
+
+    E01 existe para provar que o agente recupera pelos mecanismos oficiais. Com o grafo
+    obrigatorio, uma recuperacao com o bootstrap em modo legacy nao prova nada sobre o
+    kernel — recuperou-se pelo caminho que ja existia antes de P2."""
+
+    def test_a_legacy_bootstrap_is_critical_however_faithful_the_report(self):
+        t = verdade(kernel={"mode": "legacy", "context_items": 0,
+                            "limitations": ["LEGACY_MODE"], "graph_status": "absent",
+                            "detail": "grafo ausente"})
+        v = C["check"](t, relatorio())
+        self.assertIn("LEGACY_PATH", codigos(v))
+        self.assertEqual(v["verdict"], "NO-GO",
+                         "um relatorio perfeito pelo caminho antigo continua a nao provar E01")
+
+    def test_a_blocked_bootstrap_is_critical(self):
+        t = verdade(kernel={"mode": "blocked", "context_items": 0,
+                            "limitations": ["PENDING_OPERATION"], "graph_status": "ok",
+                            "detail": ""})
+        v = C["check"](t, relatorio())
+        self.assertIn("KERNEL_BLOCKED", codigos(v))
+
+    def test_claiming_the_kernel_while_it_was_in_legacy_is_a_mismatch(self):
+        t = verdade(kernel={"mode": "legacy", "context_items": 0,
+                            "limitations": ["LEGACY_MODE"], "graph_status": "absent",
+                            "detail": ""})
+        v = C["check"](t, relatorio(recovered_via=["bootstrap"]))
+        self.assertIn("PROVENANCE_MISMATCH", codigos(v))
+        self.assertEqual(v["verdict"], "NO-GO")
+
+    def test_not_declaring_the_mechanism_is_a_warning_not_a_failure(self):
+        r = relatorio()
+        del r["recovered_via"]
+        v = C["check"](verdade(), r)
+        self.assertEqual(codigos(v), ["PROVENANCE_UNDECLARED"])
+        self.assertEqual(v["critical"], 0)
+
+    def test_a_recovery_with_no_kernel_mechanism_is_flagged(self):
+        v = C["check"](verdade(), relatorio(recovered_via=["li o shared-understanding.md"]))
+        self.assertIn("PROVENANCE_OUTSIDE_KERNEL", codigos(v))
+        self.assertEqual(v["critical"], 0, "e aviso: diz-se, nao se reprova so por isto")
+
+    def test_the_real_engagement_is_still_on_the_legacy_path_today(self):
+        """Estado de facto, 2026-09-22: o wiring nao existe. Quando existir, isto muda."""
+        eng = ROOT / "projects" / "dpt-galp-jp-pilot-4"
+        if not (eng / "shared-understanding.md").is_file():
+            self.skipTest("engagement do piloto ausente neste ambiente")
+        t = C["truth"](eng)
+        self.assertIn(t["kernel"]["mode"], ("legacy", "graph"))
+        if t["kernel"]["mode"] == "legacy":
+            self.assertEqual(t["kernel"]["context_items"], 0,
+                             "em modo legacy o contexto vem vazio — e por isso que E01 "
+                             "corrido hoje nao mediria o kernel")
+
+
 class GuardaContraOProprioRelatorio(unittest.TestCase):
     """O relatório de P8 não pode declarar E01/E02 cumpridos sem execução em `runs/`.
 
@@ -371,11 +433,15 @@ class GuardaContraOProprioRelatorio(unittest.TestCase):
         veredictos = list(self.RUNS.rglob("*.verdict.json")) if self.RUNS.is_dir() else []
         if veredictos:
             return          # há execução: o relatório pode falar dela
+        # Marcadores que NAO sao alegacao de sucesso. `RETIDO` entrou quando se percebeu que
+        # E01 corrido antes do wiring mediria o fluxo antigo: e uma razao diferente de
+        # `NAO EXECUTADO`, mas tambem nao e um caso cumprido.
+        NAO_CUMPRIDO = ("NÃO EXECUTADO", "NAO EXECUTADO", "RETIDO")
         for caso in ("E01", "E02"):
             linhas = [l for l in texto.splitlines() if l.strip().startswith("| **" + caso)]
             self.assertTrue(linhas, "o relatório tem de ter uma linha para " + caso)
             self.assertTrue(
-                any("NÃO EXECUTADO" in l or "NAO EXECUTADO" in l for l in linhas),
+                any(any(m in l for m in NAO_CUMPRIDO) for l in linhas),
                 "{} não pode aparecer como cumprido sem um veredicto em runs/: {!r}".format(
                     caso, linhas))
 
