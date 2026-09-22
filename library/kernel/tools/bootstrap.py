@@ -109,14 +109,25 @@ def build_context(items: list[dict], budget: int = DEFAULT_BUDGET) -> dict:
 
 
 def items_from_graph(nodes: list[dict]) -> list[dict]:
-    """Itens de contexto a partir do grafo. Em P3 o grafo ainda não tem conhecimento real."""
+    """Itens de contexto a partir do grafo.
+
+    `criticality` decide a prioridade no orçamento, e uma linha **já resolvida** não é um
+    bloqueio: a pergunta foi respondida e a resposta vive na linha sucessora. Ordená-la como
+    crítica gastava orçamento a repetir história e empurrava para fora do contexto perguntas
+    que continuam abertas — medido no piloto de tickets: 4 dos 40 lugares ocupados por
+    `CF-001`, `CF-002`, `U-006` e `U-013`, todas resolvidas.
+
+    A linha resolvida NÃO é descartada: continua no conjunto, como não-crítica. Descartá-la
+    apagaria proveniência, e o grafo é aditivo por contrato."""
     out = []
     for n in nodes:
         props = n.get("props") or {}
         prov = n.get("provenance") or {}
+        aberta = props.get("state") in ("Unknown", "Conflicted", "Risky")
+        resolvida = bool(props.get("resolved"))
         out.append({"id": n.get("id"), "text": props.get("text", ""),
-                    "criticality": "critical" if props.get("state") in ("Unknown", "Conflicted",
-                                                                        "Risky") else "noncritical",
+                    "criticality": "critical" if (aberta and not resolvida) else "noncritical",
+                    "resolved": resolvida,
                     "provenance": prov,
                     "depends_on": [e for e in (props.get("depends_on") or [])]})
     return out

@@ -354,5 +354,56 @@ class B07_DerivaVersusCorrupcao(unittest.TestCase):
         self.assertFalse(corrupt["ready"])
 
 
+class B08_LinhaResolvidaNaoGastaOrcamentoComoCritica(unittest.TestCase):
+    """`criticality` decide a prioridade no orcamento, e uma linha ja RESOLVIDA nao bloqueia.
+
+    Medido no piloto de tickets depois de migrar: 4 dos 40 lugares de contexto estavam
+    ocupados por `CF-001`, `CF-002`, `U-006` e `U-013` — todas resolvidas, todas ordenadas
+    como criticas por `items_from_graph` olhar so ao estado. O orcamento gastava-se a
+    repetir historia e empurrava para fora perguntas que continuam abertas: `omitted_critical`
+    caiu de 19 para 10 quando isto passou a olhar tambem a `resolved`.
+
+    A linha resolvida NAO desaparece — continua no conjunto, como nao-critica. O grafo e
+    aditivo por contrato e descarta-la apagava proveniencia."""
+
+    def no(self, nid, state, resolvida):
+        return {"id": nid, "type": "claim",
+                "props": {"state": state, "text": "t", "resolved": resolvida},
+                "provenance": {}}
+
+    def test_a_resolved_open_row_is_not_ranked_critical(self):
+        itens = B["items_from_graph"]([self.no("U-001", "Unknown", True)])
+        self.assertEqual(itens[0]["criticality"], "noncritical")
+        self.assertTrue(itens[0]["resolved"])
+
+    def test_an_unresolved_open_row_stays_critical(self):
+        for estado in ("Unknown", "Conflicted", "Risky"):
+            itens = B["items_from_graph"]([self.no("U-001", estado, False)])
+            self.assertEqual(itens[0]["criticality"], "critical",
+                             "{} por resolver continua a bloquear".format(estado))
+
+    def test_the_resolved_row_is_kept_not_dropped(self):
+        nodes = [self.no("U-001", "Unknown", True), self.no("U-002", "Unknown", False)]
+        itens = B["items_from_graph"](nodes)
+        self.assertEqual(sorted(i["id"] for i in itens), ["U-001", "U-002"],
+                         "descartar apagava proveniencia; o grafo e aditivo")
+
+    def test_a_closed_row_is_noncritical_whatever_resolved_says(self):
+        for resolvida in (True, False):
+            itens = B["items_from_graph"]([self.no("C-001", "Confirmed", resolvida)])
+            self.assertEqual(itens[0]["criticality"], "noncritical")
+
+    def test_the_budget_goes_to_what_is_still_open(self):
+        """O efeito que se quer: com orcamento apertado, o que entra e o que bloqueia."""
+        nodes = ([self.no("U-{:03d}".format(i), "Unknown", True) for i in range(1, 6)]
+                 + [self.no("U-{:03d}".format(i), "Unknown", False) for i in range(6, 9)])
+        ctx = B["build_context"](B["items_from_graph"](nodes), budget=3)
+        entraram = {i["id"] for i in ctx["included"]}
+        self.assertEqual(entraram, {"U-006", "U-007", "U-008"},
+                         "as resolvidas nao podem empurrar as abertas para fora")
+        self.assertEqual(ctx["omitted_critical"], [],
+                         "nenhuma pergunta aberta ficou de fora")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
