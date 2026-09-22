@@ -17,6 +17,7 @@ TOOLS = ROOT / "library" / "kernel" / "tools"
 R = runpy.run_path(str(TOOLS / "resolve.py"))
 G = runpy.run_path(str(TOOLS / "graph.py"))
 O = runpy.run_path(str(TOOLS / "operation.py"))
+_MIG = runpy.run_path(str(TOOLS / "migrate.py"))
 
 SU = """> Fase actual: Discovery
 
@@ -57,6 +58,11 @@ def new_eng(tmp, name="eng"):
     (eng / "answers.md").write_text("# Respostas\n", encoding="utf-8", newline="\n")
     (eng / "_state.json").write_text('{"phase":"discovery","round":"R-01"}\n',
                                      encoding="utf-8", newline="\n")
+    # Nasce com grafo, como o `/start` o deixa desde P7.5 §W8 (passo 9c). Sem isto a
+    # fixture modelava um engagement que hoje nao existe — e que, desde que `LEGACY_MODE`
+    # bloqueia, nao avancaria: o bloqueio de topo seria a ausencia de grafo, e nao o que
+    # cada caso aqui quer exercer.
+    _MIG["init"](eng)
     return eng
 
 
@@ -504,16 +510,29 @@ class L12_OAnswerPassaPeloMotor(unittest.TestCase):
         self.assertIn(out["new_id"], nodes, "o espelho no grafo sai da mesma operacao")
 
     def test_a_dry_run_publishes_nothing(self):
+        """Nada de novo — e «nada de novo» nao e «nenhum».
+
+        O engagement nasce com grafo desde P7.5 §W8, e nascer e uma operacao: ha um recibo
+        (`graph-init`) antes de o ensaio comecar. Comparar com lista vazia mediria o
+        nascimento em vez do ensaio. Compara-se com o que la estava, que e mais apertado:
+        apanha um recibo a mais **e** um recibo a menos."""
+        def recibos_de(eng):
+            d = eng / "_ops" / "receipts"
+            return sorted(p.name for p in d.glob("*.json")) if d.is_dir() else []
+
         with tempfile.TemporaryDirectory() as tmp:
             eng = new_eng(tmp)
             antes = (eng / "shared-understanding.md").read_text(encoding="utf-8")
+            recibos_antes = recibos_de(eng)
             p = self.corre_cli(eng, "--dry-run")
             depois = (eng / "shared-understanding.md").read_text(encoding="utf-8")
-            recibos = list((eng / "_ops" / "receipts").glob("*.json")) \
-                if (eng / "_ops" / "receipts").is_dir() else []
+            recibos_depois = recibos_de(eng)
         self.assertEqual(p.returncode, 0, p.stderr)
         self.assertEqual(antes, depois, "o ensaio escreveu na SU")
-        self.assertEqual(recibos, [], "o ensaio deixou recibo")
+        self.assertEqual(recibos_depois, recibos_antes, "o ensaio deixou recibo")
+        self.assertEqual(recibos_antes, ["graph-init.json"],
+                         "a fixture deixou de nascer com grafo, e o caso passou a medir "
+                         "outra coisa")
 
     def test_repeating_the_same_answer_does_not_transition_twice(self):
         """Idempotencia pelo coordenador: o mesmo pedido nao cria uma segunda linha."""

@@ -21,6 +21,7 @@ TOOLS = ROOT / "library" / "kernel" / "tools"
 P = runpy.run_path(str(TOOLS / "projection.py"))
 O = runpy.run_path(str(TOOLS / "operation.py"))
 G = runpy.run_path(str(TOOLS / "graph.py"))
+_MIG = runpy.run_path(str(TOOLS / "migrate.py"))
 
 SU = """> Fase actual: Discovery
 
@@ -64,6 +65,11 @@ def new_eng(tmp, name="eng"):
         '{"phase":"discovery","round":"R-01","engagement":"eng","pack":"pp"}\n',
         encoding="utf-8", newline="\n")
     (eng / "context.json").write_text('{}\n', encoding="utf-8", newline="\n")
+    # Nasce com grafo, como o `/start` o deixa desde P7.5 §W8 (passo 9c). Sem isto a
+    # fixture modelava um engagement que hoje nao existe — e que, desde que `LEGACY_MODE`
+    # bloqueia, nao avancaria: o bloqueio de topo seria a ausencia de grafo, e nao o que
+    # cada caso aqui quer exercer.
+    _MIG["init"](eng)
     return eng
 
 

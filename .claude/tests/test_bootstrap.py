@@ -202,9 +202,17 @@ class B04_ReadOnly(unittest.TestCase):
             self.assertFalse((eng / "_graph").exists(), "o bootstrap criou `_graph/`")
 
     def test_legacy_mode_is_declared_not_silent(self):
+        """ALTERADO em P7.5 §W8, e o que mudou foi o contrato, não o teste.
+
+        Este caso afirmava `ready=True`: ausência de grafo era declarada e seguia. A decisão
+        do operador de 2026-09-22 (P7.5 §2) tornou o grafo obrigatório e `LEGACY_MODE` deixou
+        de ser caminho legítimo — bloqueia, com a acção nomeada. O que este caso guardava —
+        que a ausência é DECLARADA e não silenciosa — continua guardado aqui; o que caiu foi
+        o `ready`. Os substitutos do resto vivem em `test_graph_birth.py` (W8a/W8b), incluindo
+        o que impede o bloqueio de bloquear um engagement acabado de nascer."""
         with tempfile.TemporaryDirectory() as tmp:
             boot = B["bootstrap"](new_eng(tmp))
-        self.assertTrue(boot["ready"])
+        self.assertFalse(boot["ready"], "ausência de grafo voltou a deixar avançar")
         self.assertTrue(boot["graph"]["legacy_mode"])
         codes = {l["code"] for l in boot["limitations"]}
         self.assertIn("LEGACY_MODE", codes, "modo legacy não foi declarado")

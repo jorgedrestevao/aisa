@@ -23,10 +23,18 @@ ORDEM (B5) — e a ordem é a garantia
     chamador não tem por onde avançar um gate. A recuperação é acção separada
     (`operation.py recover`), registada, nunca um efeito lateral de ler.
 
-MODO LEGACY
-    Só um grafo GENUINAMENTE ausente autoriza modo legacy, e é declarado. Grafo corrompido,
-    par incoerente, schema não suportado ou ilegível NÃO autorizam fallback silencioso —
-    é a distinção que o B07 exige e que `graph.read()` já produz.
+MODO LEGACY — DEIXOU DE SER UM CAMINHO (P7.5 §2)
+    Ausência de grafo era declarada e seguia: `ready=True` com uma limitação escrita. Desde
+    a decisão de tornar o grafo obrigatório, BLOQUEIA, com a acção que a desbloqueia
+    nomeada. A limitação continua declarada e continua a não se apresentar como migrada; o
+    que deixou de existir é o seguir em frente.
+
+    Um engagement novo não é legado: nasce com grafo (`migrate.py init`, corrido pelo
+    `/start`). Ausência passou a significar uma coisa só — legado por migrar.
+
+    A distinção do B07 mantém-se intacta e continua a importar: grafo corrompido, par
+    incoerente, schema não suportado ou ilegível NÃO são ausência, e o bloqueio que
+    produzem diz outra coisa — `migrate` não é a acção que os resolve.
 
 O QUE ESTE MÓDULO NÃO FAZ
     Não lê a Shared Understanding. O contexto é construído a partir do grafo, que em P3
@@ -187,10 +195,18 @@ def bootstrap(eng: Path, budget: int = DEFAULT_BUDGET) -> dict:
     usable = st["status"] == _G["OK"]
 
     if legacy:
-        limitations.append({"code": "LEGACY_MODE",
+        # P7.5 §2: ausência de grafo bloqueia. A limitação continua DECLARADA e continua a
+        # não se apresentar como migrada — o que deixou de existir é o seguir em frente.
+        limitations.append({"code": "LEGACY_MODE", "blocking": True,
                             "detail": "projecto sem grafo — modo legacy DECLARADO, "
-                                      "não apresentado como migrado"})
-    elif not usable:
+                                      "não apresentado como migrado",
+                            "recovery": "python library/kernel/tools/migrate.py apply "
+                                        "--engagement <slug>  (engagement acabado de "
+                                        "criar: `migrate.py init`)"})
+        return {"ready": False, "engagement": identity, "operation": op,
+                "graph": graph_info, "snapshot": snap, "context": {},
+                "limitations": limitations}
+    if not usable:
         # B07: corrupção não autoriza fallback silencioso
         limitations.append({"code": st["status"].upper(), "detail": st["detail"],
                             "blocking": True,

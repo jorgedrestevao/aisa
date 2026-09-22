@@ -308,6 +308,41 @@ def apply(eng, plan=None):
                      if not plan["complete"] else "migracao completa")}
 
 
+def init(eng):
+    """O grafo com que um engagement NASCE: válido, vazio, publicado pelo coordenador.
+
+    Consequência directa da decisão de P7.5 §2. Com `LEGACY_MODE` a bloquear, ausência de
+    grafo passa a significar uma coisa só — legado por migrar. Um engagement acabado de
+    criar não é legado e não tem nada que migrar: ou nasce com grafo, ou bloqueia à nascença
+    por um trabalho que não existe.
+
+    Vive aqui, e não em `graph.py`, porque publicar é da camada de cima: `graph.py` prepara
+    bytes e não conhece o coordenador (contrato B2.4). Vive aqui, e não num motor novo,
+    porque é o caso degenerado do que este módulo já faz — migrar um engagement sem nada
+    para migrar.
+
+    Idempotente das duas maneiras: um grafo `ok` não é tocado, e repetir devolve o recibo em
+    vez de publicar outra vez. Um grafo PARTIDO nunca é substituído por um vazio — isso
+    apagava a avaria, e o material com ela.
+    """
+    eng = Path(eng)
+    st = _G["read"](eng)
+    if st["status"] == _G["OK"]:
+        return {"result": "already", "status": st["status"],
+                "nodes": len(st["nodes"]), "edges": len(st["edges"]),
+                "note": "o engagement ja tem grafo — nada a criar"}
+    if st["status"] != _G["ABSENT"]:
+        raise MigrationError(
+            "grafo em estado `{}` — nao se substitui por um vazio".format(st["status"]),
+            "NOT_ABSENT", {"status": st["status"], "detail": st["detail"]})
+    recibo = _O["run"](eng, "graph-init", _G["write_set"]([], []))
+    return {"result": "created", "status": _G["read"](eng)["status"],
+            "nodes": 0, "edges": 0,
+            "operation_id": recibo.get("operation_id"),
+            "replayed": bool(recibo.get("replayed")),
+            "note": "grafo vazio publicado — o engagement nasce migrado"}
+
+
 def read_manifest(eng):
     p = mig_dir(eng) / MANIFEST
     try:
@@ -382,7 +417,7 @@ def restore(eng, force=False):
 def main(argv=None):
     import argparse
     ap = argparse.ArgumentParser(description="migracao legacy -> memoria persistente")
-    ap.add_argument("command", choices=["dry-run", "apply", "restore"])
+    ap.add_argument("command", choices=["dry-run", "apply", "restore", "init"])
     ap.add_argument("--engagement", required=True)
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--json", action="store_true")
@@ -395,6 +430,8 @@ def main(argv=None):
             out = dry_run(eng)
         elif a.command == "apply":
             out = apply(eng)
+        elif a.command == "init":
+            out = init(eng)
         else:
             out = restore(eng, force=a.force)
     except (MigrationError, _O["OperationError"], _G["GraphError"]) as exc:

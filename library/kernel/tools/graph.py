@@ -47,7 +47,8 @@ STORE_DIR = "_graph"
 GRAPH_FILE = "graph.jsonl"
 META_FILE = "meta.json"
 
-# Estados do store. `ABSENT` é o único que autoriza modo legacy (contrato B4).
+# Estados do store. `ABSENT` é o único que pode SER modo legacy (contrato B4) — o que
+# deixou de ser é caminho: desde P7.5 §2, o bootstrap bloqueia sobre ele.
 ABSENT = "absent"
 OK = "ok"
 UNREADABLE = "unreadable"
@@ -238,7 +239,9 @@ def read(eng: Path) -> dict:
 
     if not g_exists and not m_exists:
         return {"status": ABSENT, "nodes": [], "edges": [], "meta": {},
-                "detail": "nem `graph.jsonl` nem `meta.json`; modo legacy é legítimo"}
+                "detail": "nem `graph.jsonl` nem `meta.json` — ausência genuína, não "
+                          "estado partido; o que isso autoriza decide-o o bootstrap, e "
+                          "desde P7.5 não autoriza avançar"}
     if g_exists != m_exists:
         return {"status": INCOHERENT_PAIR, "nodes": [], "edges": [], "meta": {},
                 "detail": "existe `{}` e falta `{}` — par incoerente, NÃO é ausência".format(

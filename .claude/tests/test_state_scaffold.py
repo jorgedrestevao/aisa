@@ -136,8 +136,23 @@ class TestNoMigration(unittest.TestCase):
             if os.path.isfile(p))
 
     def test_no_migration_machinery_in_the_start_skill(self):
-        for token in ("migrat", "backfill", "rewrite the existing", "upgrade the SU"):
+        """O contrato fica; o proxy ficou preciso (P7.5 §W8).
+
+        O token cru `migrat` guardava o que esta classe diz: `/start` nao reescreve
+        engagements que ja existem nem faz upgrade de SUs antigas. Desde que o engagement
+        nasce com grafo, o `/start` nomeia `migrate.py init` — que cria um grafo vazio num
+        engagement que acabou de criar e nao toca em nada anterior (o passo 2 para se a
+        pasta ja existir). Guardar o token cru passaria a proibir a frase em vez do
+        comportamento, por isso o que se guarda agora e a maquinaria pelo nome, e que a
+        unica invocacao permitida e `init`."""
+        for token in ("backfill", "rewrite the existing", "upgrade the su",
+                      "migrate the su", "migrar a su"):
             self.assertNotIn(token, START.lower())
+        for verbo in ("migrate.py apply", "migrate.py restore", "migrate.py dry-run"):
+            self.assertNotIn(verbo, START.lower(),
+                             "o /start invoca migracao a serio: " + verbo)
+        self.assertEqual(START.lower().count("migrate.py"), 1,
+                         "mais do que uma invocacao de migracao no /start")
 
     def test_a_pre_v23_su_still_exists_untouched(self):
         legacy = [p for p in self.sus
