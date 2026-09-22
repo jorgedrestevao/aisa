@@ -1,9 +1,6 @@
 # P5 — Migração explícita de engagements existentes
 
-Estado: **GO condicional** — todos os critérios de saída estão cumpridos e verificados, mas
-a regressão completa ainda estava a correr quando este relatório foi escrito. O template
-proíbe GO com evidência por preencher: o GO só é firme quando a linha da tabela de
-verificação estiver preenchida com números medidos.
+Estado: **GO**
 
 ## Identidade e precondições
 
@@ -52,12 +49,12 @@ se ausente.
 
 ## Verificação
 
-| Runner | Collected | Passed | Failed | Errors |
-|---|---:|---:|---:|---:|
-| `python3 <ficheiro>` × 53 | *a medir* | — | — | — |
+| Runner | Collected | Passed | Failed | Skipped | Xfail | Errors |
+|---|---:|---:|---:|---:|---:|---:|
+| `python3 <ficheiro>` × 53 | **2156** | 2139 | **0** | 14 | 3 | **0** |
 
-Os 28 testes de M01–M06 passam isoladamente. A regressão completa — que prova que os dois
-módulos novos não partem nada — estava em curso. **Número por preencher.**
+2128 → 2156 = +28, exactamente os testes novos. Zero regressões. Contagem por classe
+conferida (5+5+3+5+4+5+1 = 28); nada depois do bloco `main`.
 
 ### Casos → evidência
 

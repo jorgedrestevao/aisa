@@ -793,7 +793,7 @@
     "criteria_failing_beyond_suite_verde": [
       {
         "criterion": "motor em 1.13.0",
-        "detail": "accept_phase1.py:387 asserts TOOL_VERSION == '1.13.0'; dashboard.py:44 ships '1.14.0'. The script is behind the engine. Which side to correct is undetermined \u2014 P1."
+        "detail": "accept_phase1.py:387 asserts TOOL_VERSION == '1.13.0'; dashboard.py:44 ships '1.14.0'. The script is behind the engine. Which side to correct is undetermined — P1."
       },
       {
         "criterion": "docs/FRAMEWORK-NEGOCIO.md: tem SCOPE-STATEMENT v1",
@@ -820,8 +820,8 @@
       {
         "engagement": "pricing-bunkers-pilot-4",
         "inputs": [
-          "PRE\u00c7O BANCAS_03_08_26.xlsm",
-          "Processos Pricing - Marinha \u2026 .vtt"
+          "PREÇO BANCAS_03_08_26.xlsm",
+          "Processos Pricing - Marinha … .vtt"
         ],
         "p8_type": "Excel with rules, calculations and dependencies"
       }
@@ -860,5 +860,52 @@
       "criteria": "all pass"
     },
     "note": "Clean run against the corrected tree: boundary fix f04792e, the two documents in d68459d, and the orphan pin in 86221ba. All three runner modes are now green: per-file unittest 48/48, pytest, and the acceptance scripts."
+  },
+  "phase_regressions": {
+    "P0": {
+      "files": 48,
+      "tests": 2009,
+      "failures": 3,
+      "note": "baseline, antes de qualquer alteracao"
+    },
+    "P2": {
+      "files": 50,
+      "tests": 2067,
+      "failures": 0
+    },
+    "P3": {
+      "files": 51,
+      "tests": 2101,
+      "failures": 0
+    },
+    "P4": {
+      "files": 52,
+      "tests": 2128,
+      "failures": 0
+    },
+    "P5": {
+      "files": 53,
+      "tests": 2156,
+      "failures": 0
+    },
+    "note": "Cada fase acrescenta exactamente os seus testes e nenhuma regressao. As 3 falhas do P0 eram o defeito de fronteira POSIX, corrigido em f04792e."
+  },
+  "cases_covered": {
+    "total": 61,
+    "covered": 34,
+    "by_family": {
+      "K": 8,
+      "W": 8,
+      "B": 7,
+      "L": 5,
+      "M": 6
+    },
+    "remaining": {
+      "L(P6)": 5,
+      "C(P6)": 8,
+      "U(P7)": 5,
+      "E(P8)": 5,
+      "S(P9)": 4
+    }
   }
 }
