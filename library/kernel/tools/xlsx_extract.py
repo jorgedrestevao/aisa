@@ -37,7 +37,7 @@ except ImportError:  # pragma: no cover
     print("xlsx_extract.py requires openpyxl (pip install openpyxl)", file=sys.stderr)
     sys.exit(2)
 
-TOOL_VERSION = "1.5.0"
+TOOL_VERSION = "1.6.0"
 ARTEFACT_ID = "aisa.capture.extraction"
 
 MAX_TOP_VALUES = 5
@@ -588,6 +588,83 @@ def extract_conditional_formatting(ws):
     return out
 
 
+CF_RANGE_START = re.compile(r"([A-Z]{1,3})(\d+)")
+MAX_CF_RANGES = 20
+
+
+def _cf_base(sqref: str) -> tuple[int, int]:
+    """(linha, coluna) da celula superior-esquerda do primeiro intervalo da regra.
+
+    E a base a que as referencias da formula sao relativas — a mesma nocao que
+    `normalize_formula` usa para as formulas de coluna."""
+    primeiro = (sqref or "").split()[0].split(":")[0] if (sqref or "").strip() else ""
+    m = CF_RANGE_START.search(primeiro)
+    if not m:
+        return (1, 1)
+    try:
+        return (int(m.group(2)), column_index_from_string(m.group(1)))
+    except Exception:
+        return (1, 1)
+
+
+def group_cf_rules(rules: list) -> list:
+    """Regras de formatacao condicional agrupadas pelo seu padrao R1C1.
+
+    O Excel escreve uma INSTANCIA por linha quando alguem copia linhas com formatacao
+    condicional. Medido no piloto de pricing: 21 982 regras numa folha, 3,3 MB — 77% do
+    ficheiro de extraccao inteiro — a dizer **duas** coisas («e hoje» e «e fim-de-semana»)
+    repetidas dez mil vezes cada. A L2 da captura e mandada ler todos os JSONs contra um
+    orcamento declarado de ~200 KB; a 6,3 MB o passo demora 15+ minutos, e quase tudo o
+    que le e a mesma regra outra vez.
+
+    Normalizar para R1C1 e exactamente o que `analyse_formulas` ja faz as formulas de
+    coluna, pela mesma razao: um fill-down colapsa num padrao. Aqui colapsa em SETE.
+
+    Agrupar **nao e amostrar**. Cada padrao leva quantas instancias tem, os intervalos
+    onde se aplica (ate `MAX_CF_RANGES`, com a truncagem declarada), a cor, e uma formula
+    em A1 — `_cf_thresholds` colhe limiares dela (`$I5>=30`) e `extract_fills` precisa do
+    conjunto de `fill_rgb`. Um literal diferente (`>=30` vs `>=60`) e outro padrao, porque
+    `normalize_formula` so toca em referencias.
+
+    Um registo de erro nao e uma regra: passa intacto, e nunca e agrupado.
+    """
+    saida: list = []
+    indice: dict = {}
+    for regra in rules:
+        if not isinstance(regra, dict) or regra.get("error"):
+            saida.append(regra)
+            continue
+        base_row, base_col = _cf_base(regra.get("range"))
+        try:
+            padrao = tuple(normalize_formula(str(f), base_row, base_col)
+                           for f in (regra.get("formulas") or []))
+        except Exception:
+            padrao = tuple(str(f) for f in (regra.get("formulas") or []))
+        chave = (regra.get("type"), regra.get("operator"), padrao, regra.get("fill_rgb"))
+        alvo = indice.get(chave)
+        if alvo is None:
+            alvo = {
+                "range": regra.get("range"),
+                "type": regra.get("type"),
+                "operator": regra.get("operator"),
+                "formulas": list(regra.get("formulas") or []),
+                "priority": regra.get("priority"),
+                "fill_rgb": regra.get("fill_rgb"),
+                "pattern": " ; ".join(padrao),
+                "instances": 0,
+                "ranges": [],
+                "ranges_truncated": False,
+            }
+            indice[chave] = alvo
+            saida.append(alvo)
+        alvo["instances"] += 1
+        if len(alvo["ranges"]) < MAX_CF_RANGES:
+            alvo["ranges"].append(regra.get("range"))
+        else:
+            alvo["ranges_truncated"] = True
+    return saida
+
+
 def extract_fills(ws_data, columns, data_start: int, data_end: int, cf_rules):
     """Static cell fills per column (CF output is dynamic and never stored in cell.fill,
     so every static fill is a manual paint = candidate state encoding)."""
@@ -793,7 +870,8 @@ def extract(path: str, out_path: str, force: bool, log_path: str | None) -> int:
             sheet["anomalies"] = {}
             errors.append(f"column scan failed: {type(exc).__name__}: {exc}")
         sheet["validations"] = extract_validations(ws_formula)
-        sheet["conditional_formatting"] = extract_conditional_formatting(ws_formula)
+        sheet["conditional_formatting"] = group_cf_rules(
+            extract_conditional_formatting(ws_formula))
         try:
             sheet["fills"], truncated = extract_fills(
                 ws_data, columns, data_start, data_end, sheet["conditional_formatting"])
