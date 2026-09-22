@@ -14,6 +14,11 @@
       "path": "projects/pricing-bunkers-pilot-4/inputs/Processos Pricing - Marinha-20260126_150836-Grava#U00e7#U00e3o da Reuni#U00e3o-pt-BR.vtt",
       "sha256": "19a82a5adc8de65b396f35ea60c8709d6360a5edca00c71ba7e770daf6dce8c5",
       "note": "1808 falas, 62 399 caracteres, sem marcação de orador"
+    },
+    {
+      "path": "(fora do versionamento) Pricing_Bancas_Especificacao/",
+      "sha256_of_01": "284f6b7e117ecbab7fe6f00283b1e7af811ddaf636ece7c94e59e6ef530047a3",
+      "note": "Especificacao fornecida pelo operador em 2026-09-22, que fechou P-10. NAO versionada: sao regras de negocio de pricing do cliente (margens, premios, codigos Platts, logistica por porto), da mesma familia dos engagements em `projects/`, que ficam fora do git por decisao do operador. Referenciada por sha256, como os pilotos. Versiona-la e decisao dele, nao minha."
     }
   ],
   "baseline_identity": "6066c999e85389d6e9efe7a3e0d3f55a9b10c4fa",
@@ -131,15 +136,15 @@
     },
     {
       "id": "P-10",
-      "proposition_or_relation": "A cadeia de cálculo completa através das 13 262 fórmulas — que componente entra em que preço, com que sinal e em que ordem.",
-      "epistemic_state": "Unknown",
+      "proposition_or_relation": "A cadeia de calculo, por componente e por ordem:\n  encargo  = premio + SLI            (SLI x FX medio N so em CIF MED DMA e HSFO; VLSFO e Diesel entram SEM conversao, apesar do cabecalho EUR/t)\n  cedencia = media(cotacao Platts) + encargo   (HSFO<-PUAAY00 · VLSFO<-PUMFD00 · DMA<-AAWZC00)\n  IFO180   = 0,9 x cedencia VLSFO + 0,1 x cedencia DMA\n  margem USD = margem EUR x FX medio\n  PRECO USD = cedencia USD + margem USD   |   EUR = cedencia EUR + margem EUR\n  O03 porto = minimo(produto/periodo) + logistica do porto - 10  (MGO: minimo DMA + logistica - 5 - 10)",
+      "epistemic_state": "Confirmed",
       "criticality": "critical",
-      "source_locator": "Não traçada. Foram traçados: named ranges (134), simetria das folhas de moeda, dimensões e contagens por folha.",
-      "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
-      "expected_resolution": "Exige traçado célula a célula das folhas `Inputs` (7906) e `Outputs` (676), ou explicação do responsável.",
-      "gate_expectation": "O candidato NÃO deve afirmar regras numéricas concretas que não tenham sido traçadas. Inventar a ordem dos componentes é facto inventado.",
-      "review_notes": "É a lacuna maior deste oráculo e está declarada como tal. A estrutura é conhecida; a aritmética não.",
-      "validation": "PENDING_OWNER"
+      "source_locator": "Pricing_Bancas_Especificacao/01_Processo_Entradas_Calculos_Outputs.md seccoes C03, C04, C06, C07",
+      "source_sha256": "284f6b7e117ecbab7fe6f00283b1e7af811ddaf636ece7c94e59e6ef530047a3",
+      "expected_resolution": "Fechado pela especificacao fornecida pelo operador (2026-09-22).",
+      "gate_expectation": "Omitir a decomposicao, ou somar componentes por outra ordem, e erro material.",
+      "review_notes": "Fechado. A spec deriva das mesmas 13 197 formulas que o oraculo nao tinha tracado. Varias sub-regras continuam por decidir pelo NEGOCIO (ver P-12) — isso e decisao pendente, nao lacuna de extraccao.",
+      "validation": "CLOSED_BY_OPERATOR_SPEC"
     },
     {
       "id": "P-11",
@@ -152,6 +157,30 @@
       "gate_expectation": "Não inferir actividade a partir da existência do nome.",
       "review_notes": "",
       "validation": "not_required"
+    },
+    {
+      "id": "P-12",
+      "proposition_or_relation": "A propria especificacao deixa 18 grupos de perguntas por decidir (Q01-Q18). As que tocam a aritmetica: Q04 premios/encargos Supply (que regra de conversao por componente), Q05 indice do DMA e minimo X-Author, Q06 conversoes e ajustes, Q07 densidades e regras HSFO/logistica, Q12 folhas ocultas e GMC.",
+      "epistemic_state": "Unknown",
+      "criticality": "critical",
+      "source_locator": "Pricing_Bancas_Especificacao/06_Duvidas_Decisoes.md — 18 grupos",
+      "source_sha256": "b12fecd4ac0e5dba45c08a5962d5ad7554371f942d2c0876a1c219cb8ea3ee86",
+      "expected_resolution": "Decisao de negocio. Nao e determinavel de nenhum ficheiro.",
+      "gate_expectation": "O candidato NAO deve escolher uma destas regras por conta propria. Implementar Q04/Q06/Q07 sem decisao e inventar comportamento.",
+      "review_notes": "Substitui a lacuna de traçado que P-10 era. A aritmetica esta conhecida; o que falta agora e DECISAO, nao leitura. Mudanca material: o bloqueio passou de «ninguem tracou» para «ninguem decidiu».",
+      "validation": "PENDING_OWNER"
+    },
+    {
+      "id": "P-13",
+      "proposition_or_relation": "O ficheiro carrega defeitos conhecidos e NAO corrigidos: 68 formulas com #REF!, 497 celulas com erro guardado (sobretudo BIOS e folhas ocultas), dupla conversao do premio na referencia do O02, e HSFO a usar premio/desconto da configuracao VLSFO.",
+      "epistemic_state": "Confirmed",
+      "criticality": "critical",
+      "source_locator": "00_LEIA_PRIMEIRO.md («Resultado essencial») e 01_… seccao C06",
+      "source_sha256": "284f6b7e117ecbab7fe6f00283b1e7af811ddaf636ece7c94e59e6ef530047a3",
+      "expected_resolution": "Confirmado pela especificacao.",
+      "gate_expectation": "Replicar o as-is replica os defeitos. Corrigi-los e mudanca de negocio que precisa de aprovacao. Qualquer estimativa que ignore isto subestima.",
+      "review_notes": "Nao foram corrigidos sem validacao de negocio — e a postura certa.",
+      "validation": "PENDING_OWNER"
     }
   ],
   "forbidden_claims": [
@@ -159,9 +188,12 @@
     "Que o processo é totalmente automático — `Data_Manual` e o VBA dizem o contrário (P-05, P-06).",
     "Qualquer regra numérica ou ordem de componentes não traçada (P-10).",
     "Que a cadência semanal está confirmada (P-09 é Assumed).",
-    "Que um par cliente×produto está activo só porque o named range existe (P-11)."
+    "Que um par cliente×produto está activo só porque o named range existe (P-11).",
+    "Escolher por conta propria qualquer das regras que Q04-Q07/Q12 deixam em aberto (P-12).",
+    "Apresentar o as-is como correcto: ha 68 #REF! e 497 celulas com erro guardado (P-13)."
   ],
   "extraction_limits": [
+    "A cadeia aritmetica DEIXOU de ser lacuna: a especificacao do operador fecha-a (P-10). O que resta e decisao de negocio por tomar (P-12), nao leitura por fazer.",
     "13 262 fórmulas. Traçados exaustivamente: named ranges, dimensões, contagens e simetria entre folhas. A cadeia aritmética completa NÃO foi traçada — declarado em P-10 como Unknown crítico.",
     "VBA presente e NÃO descompilado (P-06).",
     "O nome do ficheiro está mangled no disco (`#U00c7` em vez de `Ç`).",
@@ -182,10 +214,11 @@
       "P-04",
       "P-05",
       "P-06",
-      "P-10"
+      "P-12",
+      "P-13"
     ],
     "status": "PENDING",
-    "why": "Autor do oráculo e operador do candidato são o mesmo agente. Além disso P-10 é uma lacuna conhecida: a estrutura está traçada, a aritmética não. Sem validação, P8 mede o candidato contra uma referência incompleta escrita pelo próprio modelo."
+    "why": "P-10 fechou com a especificacao. Restam os itens estruturais por confirmar e, sobretudo, P-12: 18 grupos de decisoes que so o negocio toma."
   },
   "warning": "Itens críticos por validar, e P-10 é lacuna declarada. Referência fraca até o responsável a fechar."
 }
