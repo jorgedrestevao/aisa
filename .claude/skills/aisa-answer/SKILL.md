@@ -71,7 +71,9 @@ description: Record an answer or resolution for a Shared Understanding row (Unkn
    authority, and an unprefixed name matches nothing.
 
 4. **The claim the engine writes is the one this skill extracts** — and its boundary is the
-   judgement that stays here. The `Confirmed` claim may not exceed what the answer or
+   judgement that stays here.
+
+   **Verbatim boundary.** The `Confirmed` claim may not exceed what the answer or
    evidence actually supports: no interpretive clause the respondent did not say ("…so
    connectivity is not an obstacle"), no conclusion the answer only suggests. Runtime
    inference that the answer makes reasonable becomes a **separate** `Assumed` row with its
