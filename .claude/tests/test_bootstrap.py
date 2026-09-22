@@ -246,13 +246,54 @@ class B05_Truncagem(unittest.TestCase):
         ctx = B["build_context"](self.ITEMS, budget=1)
         self.assertEqual(ctx["omitted_critical"], ["U-001", "U-002"])
 
-    def test_a_truncated_context_never_opens_a_gate(self):
-        boot = {"ready": True, "context": B["build_context"](self.ITEMS, budget=3)}
-        self.assertFalse(B["gate_open"](boot), "um excerto abriu um gate")
+    # ---------------------------------------------------------------- MUDANÇA DE CONTRATO
+    #
+    # 2026-09-22, autorizada pelo operador; registada em `docs/evolution/P7.5-integracao.md`.
+    #
+    #   requisito ANTIGO: `gate_open` = `ready AND context.complete`.
+    #   requisito NOVO  : `gate_open` = `ready AND omitted_critical == []`.
+    #
+    # O teste alterado é `test_a_truncated_context_never_opens_a_gate`, que afirmava o
+    # requisito antigo. A garantia que ele protegia — «nenhum gate liberado por excerto» —
+    # é preservada pelos dois testes marcados GARANTIA abaixo: um crítico omitido continua
+    # a fechar o gate, e a truncagem continua declarada. O que deixou de valer é fechar o
+    # gate por uma omissão que não decide nada.
+    #
+    # Motivo: com `DEFAULT_BUDGET = 40` e engagements de 117 e 108 linhas, `complete` é
+    # sempre falso depois de migrar, e nenhum comando avançaria de fase — o requisito
+    # antigo era mais estrito do que B05 pede.
+
+    def test_a_truncated_context_opens_the_gate_when_no_critical_is_out(self):
+        """Requisito NOVO. Com `budget=3` os três críticos entram e só sobram não-críticos."""
+        ctx = B["build_context"](self.ITEMS, budget=3)
+        self.assertFalse(ctx["complete"], "o contexto É parcial — isso não mudou")
+        self.assertEqual(ctx["omitted_critical"], [], "mas nada do que bloqueia ficou fora")
+        self.assertTrue(B["gate_open"]({"ready": True, "context": ctx}))
+
+    def test_an_omitted_critical_still_closes_the_gate(self):
+        """GARANTIA preservada: «nenhum gate liberado por excerto» continua a valer onde conta."""
+        ctx = B["build_context"](self.ITEMS, budget=1)
+        self.assertEqual(ctx["omitted_critical"], ["U-001", "U-002"])
+        self.assertFalse(B["gate_open"]({"ready": True, "context": ctx}),
+                         "um excerto que perde um crítico não pode abrir um gate")
+
+    def test_the_truncation_is_still_declared_even_with_the_gate_open(self):
+        """GARANTIA preservada: abrir o gate não apaga a declaração de parcialidade."""
+        ctx = B["build_context"](self.ITEMS, budget=3)
+        self.assertTrue(B["gate_open"]({"ready": True, "context": ctx}))
+        self.assertFalse(ctx["complete"])
+        self.assertEqual(len(ctx["omitted"]), 10)
+        self.assertIn("NÃO permite concluir", ctx["note"])
 
     def test_a_complete_context_does_open_the_gate(self):
         boot = {"ready": True, "context": B["build_context"](self.ITEMS, budget=99)}
         self.assertTrue(B["gate_open"](boot))
+
+    def test_a_bootstrap_that_is_not_ready_never_opens_the_gate(self):
+        """GARANTIA preservada: o contexto não sobrepõe a pendência."""
+        ctx = B["build_context"](self.ITEMS, budget=99)
+        self.assertTrue(ctx["complete"])
+        self.assertFalse(B["gate_open"]({"ready": False, "context": ctx}))
 
     def test_bootstrap_reports_the_truncation_as_a_limitation(self):
         nodes = [{"id": "U-{:03d}".format(i), "type": "question",
@@ -392,6 +433,34 @@ class B08_LinhaResolvidaNaoGastaOrcamentoComoCritica(unittest.TestCase):
         for resolvida in (True, False):
             itens = B["items_from_graph"]([self.no("C-001", "Confirmed", resolvida)])
             self.assertEqual(itens[0]["criticality"], "noncritical")
+
+    def test_the_declared_criticality_wins_over_the_state(self):
+        """A SU declara a criticidade numa coluna. Inferi-la do estado dava 50 criticos
+        num engagement que declara 15, e 50 nao cabem num orcamento de 40."""
+        nodes = [
+            {"id": "U-001", "type": "su-row",
+             "props": {"state": "Unknown", "criticidade": "Critical", "resolved": False}},
+            {"id": "U-002", "type": "su-row",
+             "props": {"state": "Unknown", "criticidade": "Med", "resolved": False}},
+            {"id": "U-003", "type": "su-row",
+             "props": {"state": "Unknown", "criticidade": "Low", "resolved": False}},
+        ]
+        por_id = {i["id"]: i["criticality"] for i in B["items_from_graph"](nodes)}
+        self.assertEqual(por_id["U-001"], "critical")
+        self.assertEqual(por_id["U-002"], "noncritical", "`Med` nao bloqueia")
+        self.assertEqual(por_id["U-003"], "noncritical", "`Low` nao bloqueia")
+
+    def test_an_undeclared_criticality_falls_back_to_critical(self):
+        """A tabela `Risky` da SU NAO tem coluna de criticidade — e um risco por mitigar e
+        material. Sem declaracao, o lado seguro da duvida e contar como bloqueio."""
+        nodes = [{"id": "R-001", "type": "su-row",
+                  "props": {"state": "Risky", "criticidade": "", "resolved": False}}]
+        self.assertEqual(B["items_from_graph"](nodes)[0]["criticality"], "critical")
+
+    def test_a_resolved_row_is_noncritical_however_it_was_declared(self):
+        nodes = [{"id": "U-001", "type": "su-row",
+                  "props": {"state": "Unknown", "criticidade": "Critical", "resolved": True}}]
+        self.assertEqual(B["items_from_graph"](nodes)[0]["criticality"], "noncritical")
 
     def test_the_budget_goes_to_what_is_still_open(self):
         """O efeito que se quer: com orcamento apertado, o que entra e o que bloqueia."""

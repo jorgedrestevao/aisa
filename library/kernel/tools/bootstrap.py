@@ -108,6 +108,10 @@ def build_context(items: list[dict], budget: int = DEFAULT_BUDGET) -> dict:
                      if omitted else "")}
 
 
+# Grafias aceites da coluna `criticidade` da SU para «isto bloqueia».
+CRITICAS_DECLARADAS = {"critical", "critica", "crítica", "alta", "high"}
+
+
 def items_from_graph(nodes: list[dict]) -> list[dict]:
     """Itens de contexto a partir do grafo.
 
@@ -125,8 +129,17 @@ def items_from_graph(nodes: list[dict]) -> list[dict]:
         prov = n.get("provenance") or {}
         aberta = props.get("state") in ("Unknown", "Conflicted", "Risky")
         resolvida = bool(props.get("resolved"))
+        # `criticidade` vem da coluna que a SU declara; sem ela, uma linha aberta conta
+        # como critica, que e o lado seguro da duvida. Com ela, o que bloqueia e o que o
+        # engagement DIZ que bloqueia — no piloto de tickets, 15 e nao 50.
+        declarada = str(props.get("criticidade") or "").strip().lower()
+        if declarada:
+            critica = aberta and not resolvida and declarada in CRITICAS_DECLARADAS
+        else:
+            critica = aberta and not resolvida
         out.append({"id": n.get("id"), "text": props.get("text", ""),
-                    "criticality": "critical" if (aberta and not resolvida) else "noncritical",
+                    "criticality": "critical" if critica else "noncritical",
+                    "criticidade": props.get("criticidade", ""),
                     "resolved": resolvida,
                     "provenance": prov,
                     "depends_on": [e for e in (props.get("depends_on") or [])]})
@@ -213,11 +226,28 @@ def bootstrap(eng: Path, budget: int = DEFAULT_BUDGET) -> dict:
 
 
 def gate_open(boot: dict) -> bool:
-    """Um gate exige bootstrap pronto E contexto completo (B6).
+    """Um gate exige bootstrap pronto E nenhum item crítico fora do contexto (B6).
 
-    Contexto parcial NUNCA autoriza declarar que não há bloqueios — é a razão de esta
-    função não olhar só para `ready`."""
-    return bool(boot.get("ready")) and bool(boot.get("context", {}).get("complete"))
+    MUDANÇA DE CONTRATO (2026-09-22, autorizada pelo operador; `ACCEPTANCE.md` §3).
+
+      antes: `ready AND context.complete` — qualquer omissão fechava o gate.
+      agora: `ready AND context.omitted_critical == []`.
+
+    Porquê. B05 diz que um excerto não autoriza declarar que **não há bloqueios**. Se
+    nenhum item crítico ficou de fora, essa conclusão é legítima: o que bloqueia está
+    todo no contexto, e o que ficou de fora não bloqueia. Exigir contexto completo era
+    mais estrito do que o contrato pede, e tornava o gate impossível de abrir num
+    engagement real — `DEFAULT_BUDGET` é 40 e os pilotos têm 117 e 108 linhas, logo
+    `complete` seria sempre falso e nenhum comando avançaria de fase.
+
+    O que NÃO muda, e é a garantia que se preserva: a truncagem continua declarada
+    (`complete` falso, `omitted` nomeado, `CONTEXT_TRUNCATED` nas limitações), e **um
+    crítico omitido continua a fechar o gate**. O que se deixou de fazer foi confundir
+    «o contexto não traz tudo» com «o contexto não traz o que decide»."""
+    if not boot.get("ready"):
+        return False
+    ctx = boot.get("context") or {}
+    return not (ctx.get("omitted_critical") or [])
 
 
 def switched(previous: dict | None, current: dict) -> bool:

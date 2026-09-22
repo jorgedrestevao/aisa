@@ -204,6 +204,12 @@ def _nodes_from(plan, rows_by_id):
         nodes.append({"id": m["id"], "type": "su-row",
                       "props": {"state": m["state"] or "",
                                 "text": r.get("claim", ""),
+                                # A SU DECLARA a criticidade numa coluna propria. Sem a
+                                # projectar, quem le o grafo so tem o estado e infere
+                                # «aberta => critica»: no piloto de tickets isso dava 50
+                                # criticos em vez dos 15 declarados, e 50 nao cabem num
+                                # orcamento de 40. A informacao existia e era deitada fora.
+                                "criticidade": r.get("criticidade", ""),
                                 "resolved": str(r.get("resolved")) == "True"},
                       "provenance": {"lens": r.get("lens", ""), "ronda": r.get("ronda", ""),
                                      "support": r.get("support", ""),
