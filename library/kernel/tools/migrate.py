@@ -52,7 +52,16 @@ SU_FILE = "shared-understanding.md"
 DECISIONS_FILE = "decisions.md"
 ANSWERS_FILE = "answers.md"
 STATE_FILE = "_state.json"
+# As autoridades TEXTUAIS que a migracao le e pode reescrever.
 TOUCHED = (SU_FILE, DECISIONS_FILE, ANSWERS_FILE, STATE_FILE)
+
+# O grafo tambem e estado que a migracao muda — e durante muito tempo nao estava aqui. Os
+# ficheiros do grafo so entravam em `new_files`, e SO quando nao existiam; um grafo que ja
+# existia (um engagement nascido com `init`, por exemplo) ficava com o conteudo da migracao
+# e o `restore` declarava `restored` na mesma, sem o verificar. Reverter e devolver o
+# estado inteiro, nao a parte dele que e texto.
+GRAPH_FILES = ("_graph/graph.jsonl", "_graph/meta.json")
+TOUCHED_ALL = TOUCHED + GRAPH_FILES
 
 PROJECTABLE = "projectable"
 ALREADY = "already_represented"
@@ -77,7 +86,7 @@ def mig_dir(eng):
 
 def _digests(eng):
     eng = Path(eng)
-    out = {rel: _O["digest"](eng / rel) for rel in TOUCHED}
+    out = {rel: _O["digest"](eng / rel) for rel in TOUCHED_ALL}
     gd = Path(eng) / "_graph"
     for rel in ("_graph/graph.jsonl", "_graph/meta.json"):
         out[rel] = _O["digest"](eng / rel)
@@ -263,7 +272,7 @@ def apply(eng, plan=None):
     bdir = mig_dir(eng) / BACKUP
     bdir.mkdir(parents=True, exist_ok=True)
     backed, new_files = {}, []
-    for rel in TOUCHED:
+    for rel in TOUCHED_ALL:
         src = eng / rel
         if src.exists():
             dst = bdir / rel.replace("/", "__")
@@ -273,7 +282,7 @@ def apply(eng, plan=None):
                 raise MigrationError("backup nao confere em `{}`".format(rel), "BACKUP_MISMATCH",
                                      {"path": rel})
             backed[rel] = back
-    for rel in ("_graph/graph.jsonl", "_graph/meta.json"):
+    for rel in GRAPH_FILES:
         if not (eng / rel).exists():
             new_files.append(rel)
 
@@ -391,6 +400,8 @@ def restore(eng, force=False):
             {"changed": drifted,
              "detail": "o trabalho novo e preservado; reconciliar antes de reverter"})
 
+    # --- tudo se verifica ANTES de um byte se mexer, e depois publica-se de uma vez
+    conteudos = {}
     for rel, want in man["backed_up"].items():
         src = mig_dir(eng) / BACKUP / rel.replace("/", "__")
         if not src.is_file():
@@ -399,7 +410,19 @@ def restore(eng, force=False):
         if _O["digest"](src) != want:
             raise MigrationError("backup de `{}` nao confere".format(rel), "BACKUP_CORRUPT",
                                  {"path": rel})
-        shutil.copy2(src, eng / rel)
+        conteudos[rel] = src.read_text(encoding="utf-8")
+
+    # Escrever e apagar a mao era a unica parte da migracao fora da barreira: sem recibo,
+    # sem exclusao, sem recuperacao se morresse a meio. A reposicao vai pelo coordenador
+    # como qualquer outra escrita.
+    #
+    # O LIMITE, declarado: o coordenador escreve, nao apaga. Os ficheiros que a migracao
+    # CRIOU (um grafo que nao existia antes) continuam a ser removidos a mao, depois, fora
+    # da barreira. Um grafo que ja existia nao passa por aqui — volta pelo seu backup, que
+    # e o caso que esta funcao deixava por fazer.
+    if conteudos:
+        op_restore = "restore-{}".format(man["plan_hash"][:16])
+        _O["run"](eng, op_restore, conteudos)
 
     # Reverter e desfazer a operacao, logo o recibo dela deixa de descrever a
     # realidade. Deixa-lo para tras fazia com que uma re-migracao a partir do mesmo
@@ -422,9 +445,14 @@ def restore(eng, force=False):
     if gd.is_dir() and not any(gd.iterdir()):
         gd.rmdir()
 
+    # A verificacao final e sobre TUDO o que o manifesto diz que mudou — o que voltou pelo
+    # backup e o que tinha de desaparecer. Comparar so `backed_up` deixava um ficheiro
+    # criado pela migracao sobreviver a um `restored`.
     after = _digests(eng)
-    mismatched = {rel: {"expected": man["before"][rel], "actual": after.get(rel, "")}
-                  for rel in man["backed_up"] if after.get(rel, "") != man["before"][rel]}
+    esperado = dict(man["before"])
+    mismatched = {rel: {"expected": esperado.get(rel, ""), "actual": after.get(rel, "")}
+                  for rel in set(man["backed_up"]) | set(man.get("new_files", []))
+                  if after.get(rel, "") != esperado.get(rel, "")}
     if mismatched:
         raise MigrationError("restore nao reproduziu os hashes originais", "RESTORE_MISMATCH",
                              {"paths": mismatched})

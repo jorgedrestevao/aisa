@@ -50,10 +50,23 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BOOTSTRAP = REPO_ROOT / "library" / "kernel" / "tools" / "bootstrap.py"
 
-# As autoridades do engagement. Escrever numa destas muda o que o aisa SABE — e por isso
-# exige que o estado tenha sido reconstruído primeiro. `_capture/`, `_render/`,
+# As autoridades do engagement, à raiz. Escrever numa destas muda o que o aisa SABE — e por
+# isso exige que o estado tenha sido reconstruído primeiro. `_capture/`, `_render/`,
 # `_simulation/` e companhia são derivados: ficam de fora de propósito.
 AUTORIDADES = {"shared-understanding.md", "decisions.md", "answers.md", "_state.json"}
+
+# Autoridade que não vive à raiz, e que quatro nomes de ficheiro não apanhavam.
+#
+# O grafo É autoridade operacional desde que o bootstrap constrói o contexto a partir dele
+# e o `drift` o compara com a SU: uma edição à mão aqui muda o que o sistema julga saber,
+# tal como uma edição na SU. O `_ops/` é a barreira — marcador de pendência e recibos; uma
+# edição à mão neste sítio apaga a prova de que uma operação aconteceu, ou inventa uma que
+# não aconteceu.
+#
+# Nenhum dos dois é escrito por um agente no seu trabalho normal: quem lá escreve é
+# `operation.py`, em Python, que não passa por este hook. Uma escrita pela ferramenta Write
+# ou Edit nestes caminhos é, por construção, uma edição à mão de estado coordenado.
+DIRECTORIOS_AUTORIDADE = ("_graph/", "_ops/")
 
 
 def engagements_root() -> Path:
@@ -86,7 +99,9 @@ def engagement_of(file_path: str) -> tuple[Path | None, str]:
         alvo = Path(file_path)
     except (OSError, ValueError):
         return None, ""
-    if alvo.name not in AUTORIDADES:
+    partes_alvo = alvo.parts
+    dentro_de_dir = any(seg.rstrip("/") in partes_alvo for seg in DIRECTORIOS_AUTORIDADE)
+    if alvo.name not in AUTORIDADES and not dentro_de_dir:
         return None, ""
 
     base = engagements_root()
@@ -107,7 +122,14 @@ def engagement_of(file_path: str) -> tuple[Path | None, str]:
             continue
         if len(rel.parts) < 2:
             continue                      # um ficheiro solto na raiz não é engagement
-        return base_real / rel.parts[0], alvo.name
+        dentro = "/".join(rel.parts[1:])
+        # Um ficheiro com o nome de uma autoridade mas enterrado num derivado não é a
+        # autoridade: `_render/decisions.md` não é `decisions.md`.
+        if len(rel.parts) == 2 and alvo.name in AUTORIDADES:
+            return base_real / rel.parts[0], alvo.name
+        if any(dentro.startswith(seg) for seg in DIRECTORIOS_AUTORIDADE):
+            return base_real / rel.parts[0], dentro
+        continue
     return None, ""
 
 

@@ -30,6 +30,18 @@ Nothing here resolves a row, executes a proof, changes a phase or approves anyth
 
 1. **Resolve the engagement.** Scan the engagements root (`$AISA_ENGAGEMENTS_ROOT` or `projects/`) for folders with `_state.json`; if more than one and none is named, ask which.
 
+1b. **Perguntar ao kernel o que o impede, ANTES de responder o que falta.** Do repo root:
+
+    ```
+    python library/kernel/tools/projection.py --engagement <slug> --json
+    ```
+
+    Isto corre a reconstrução comum (`bootstrap.py`) e devolve `ready`, `blockers` e `gate`. **`ready: false` → o `/status` não apresenta um estado limpo.** A resposta abre com o bloqueio do kernel, em linguagem de negócio, e com a acção que o desfaz (`blockers[0].action`); os blocos 2 a 7 saem na mesma, mas precedidos dessa linha e nunca em vez dela.
+
+    Porquê antes e não depois: `dashboard.py` conta o que está nos ficheiros; não diz se os ficheiros são de uma revisão só. Sobre uma operação pendente, ou sobre um grafo que discorda da SU, as contagens estão certas e a conclusão está errada — e a diferença entre as duas não aparece em contagem nenhuma. Um leitor que emite conclusões antes de apresentar limitações apresenta estado misto como estado.
+
+    **Falhou ou não existe** → dizer `verificação incompleta — kernel não consultado: <razão>` e continuar; nunca apresentar o resultado como se tivesse sido verificado.
+
 2. **Run the motor and read the model.** From the repo root:
    ```
    python library/kernel/tools/dashboard.py --engagement <slug> --json <tmp>/aisa-status-<slug>.json --quiet --force

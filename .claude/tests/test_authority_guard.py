@@ -44,9 +44,14 @@ def engagement(base: Path, nome="eng", com_grafo=True):
     (eng / "decisions.md").write_text("# Decisions\n", encoding="utf-8", newline="\n")
     (eng / "answers.md").write_text("# Respostas\n", encoding="utf-8", newline="\n")
     if com_grafo:
+        # `mirror_of` nao e decoracao: e o que declara que este no ESPELHA aquela linha.
+        # O `drift` so olha para nos que o tenham, e desde F05/F08 o bootstrap tambem
+        # recusa uma linha da autoridade sem no que a espelhe. Sem isto, a fixture dizia
+        # ter grafo e nao espelhava nada — e o guarda recusava com razao.
         nodes = [{"id": "C-001", "type": "su-row",
-                  "props": {"state": "Confirmed", "text": "facto", "resolved": False},
-                  "provenance": {}}]
+                  "props": {"state": "Confirmed", "text": "facto", "resolved": False,
+                            "criticidade": ""},
+                  "provenance": {"mirror_of": "SU:C-001"}}]
         body, meta = G["serialize"](nodes, [])
         (eng / "_graph").mkdir(exist_ok=True)
         (eng / "_graph" / "graph.jsonl").write_text(body, encoding="utf-8", newline="\n")

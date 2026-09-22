@@ -75,6 +75,32 @@ def projection_freshness(eng):
 authority_from_rows = _G["authority_from_rows"]
 
 
+def drift_blocker(blocking_drift: list) -> dict:
+    """O bloqueio de desvio, numa forma so.
+
+    Desde que o bootstrap tambem bloqueia sobre desvio (F05), este bloqueio nasce em dois
+    sitios: na saida antecipada, quando o bootstrap ja recusou, e aqui em baixo, quando
+    chegou ate ao fim. Duas construcoes davam duas formas — e o que o caso guarda e que o
+    bloqueio NOMEIA o campo que diverge e a linha onde diverge, nao o codigo generico.
+    """
+    primeiro = blocking_drift[0]
+    campos = sorted({d.get("field") for d in blocking_drift if d.get("field")})
+    faltam = [d for d in blocking_drift if d["code"] == "MIRROR_SOURCE_MISSING"]
+    return _blocker(
+        what="espelho do grafo divergente da autoridade — {} linha(s){}{}".format(
+            len(blocking_drift),
+            ", campos: " + ", ".join(campos) if campos else "",
+            ", {} sem linha na SU".format(len(faltam)) if faltam else ""),
+        why="o grafo nao prevalece sobre a SU; avancar assim decide sobre duas verdades",
+        evidence="{} ({}): grafo={!r} autoridade={!r}".format(
+            primeiro.get("id"), primeiro.get("field") or primeiro["code"],
+            primeiro.get("graph"), primeiro.get("authority"))
+        if primeiro.get("field") else
+        "{}: o grafo espelha `{}`, que a SU ja nao tem".format(
+            primeiro.get("id"), primeiro.get("mirror_of")),
+        action="/status", kind=primeiro["code"])
+
+
 def operational_state(eng, today=None):
     """Fase, bloqueios, incerteza visivel e proxima accao — de autoridades verificadas."""
     eng = Path(eng)
@@ -86,7 +112,12 @@ def operational_state(eng, today=None):
 
     # 1. pendencia fecha tudo — antes de ler conteudo (contrato B5)
     if not boot["ready"]:
+        desvio_bloqueante = [d for d in (boot.get("drift") or [])
+                             if d["code"] in ("MIRROR_DRIFT", "MIRROR_SOURCE_MISSING")]
         for lim in boot["limitations"]:
+            if lim["code"] == "AUTHORITY_DRIFT" and desvio_bloqueante:
+                out["blockers"].append(drift_blocker(desvio_bloqueante))
+                continue
             out["blockers"].append(_blocker(
                 what=lim.get("detail", lim["code"]),
                 why="enquanto durar, qualquer avanco decide sobre estado misto",
@@ -97,6 +128,10 @@ def operational_state(eng, today=None):
         out["next_action"] = {"text": "Recuperar antes de qualquer outra coisa.",
                               "command": out["blockers"][0]["action"]}
         out["gate"] = {"open": False, "reason": "bootstrap nao pronto"}
+        # A divergencia que o bootstrap ja calculou vem com ele: desde que ela BLOQUEIA
+        # (F05), esta saida antecipada e o caminho normal para um engagement divergente, e
+        # devolver a vista sem `drift` escondia exactamente a razao do bloqueio.
+        out["drift"] = boot.get("drift", [])
         return out
 
     model = _D["build_model"](eng, today or date.today())
@@ -150,22 +185,7 @@ def operational_state(eng, today=None):
         "consulted": ["criterios de fase", "operacao pendente", "espelho do grafo"],
     }
     if blocking_drift:
-        primeiro = blocking_drift[0]
-        campos = sorted({d.get("field") for d in blocking_drift if d.get("field")})
-        faltam = [d for d in blocking_drift if d["code"] == "MIRROR_SOURCE_MISSING"]
-        out["blockers"].append(_blocker(
-            what="espelho do grafo divergente da autoridade — {} linha(s){}{}".format(
-                len(blocking_drift),
-                ", campos: " + ", ".join(campos) if campos else "",
-                ", {} sem linha na SU".format(len(faltam)) if faltam else ""),
-            why="o grafo nao prevalece sobre a SU; avancar assim decide sobre duas verdades",
-            evidence="{} ({}): grafo={!r} autoridade={!r}".format(
-                primeiro.get("id"), primeiro.get("field") or primeiro["code"],
-                primeiro.get("graph"), primeiro.get("authority"))
-            if primeiro.get("field") else
-            "{}: o grafo espelha `{}`, que a SU ja nao tem".format(
-                primeiro.get("id"), primeiro.get("mirror_of")),
-            action="/status", kind=primeiro["code"]))
+        out["blockers"].append(drift_blocker(blocking_drift))
 
     out["next_action"] = (status_block.get("milestone") or {}).get("next") or {
         "text": "Sem accao pendente identificada.", "command": "/status"}

@@ -36,10 +36,27 @@ MODO LEGACY — DEIXOU DE SER UM CAMINHO (P7.5 §2)
     incoerente, schema não suportado ou ilegível NÃO são ausência, e o bloqueio que
     produzem diz outra coisa — `migrate` não é a acção que os resolve.
 
-O QUE ESTE MÓDULO NÃO FAZ
-    Não lê a Shared Understanding. O contexto é construído a partir do grafo, que em P3
-    ainda não tem conhecimento real — ligar as autoridades de negócio é P4/P6. As funções
-    de orçamento são puras e testadas por si; o que falta é a fonte, não o mecanismo.
+AUTORIDADE — LÊ-SE A SU, E LÊ-SE PARA COMPARAR (F05/F08, auditoria de 212cdc6)
+
+    Este módulo declarava que NÃO lia a Shared Understanding: em P3 o grafo ainda não
+    tinha conhecimento real e o contexto saía só dele. Isso deixou de poder ser verdade
+    quando o grafo passou a espelhar a SU.
+
+    O defeito medido: a projecção bloqueava sobre `MIRROR_DRIFT` e o bootstrap devolvia
+    `ready` sem uma única limitação, para o MESMO estado. E quem confia no bootstrap —
+    `resolve.apply`, o guarda de escrita, os gates — ficava com a resposta que não aplica
+    a regra. Duas respostas incompatíveis não são uma tolerância: são um sítio por onde
+    passa o que o outro recusa.
+
+    Por isso lê-se a SU aqui, e lê-se para uma coisa só: comparar o espelho com a
+    autoridade, com a MESMA regra que a projecção aplica — `state`, `criticidade` e
+    `resolved` divergentes bloqueiam; texto divergente informa. O contexto continua a
+    construir-se a partir do grafo.
+
+    E uma linha da autoridade SEM nó nenhum também bloqueia. Reconstruir a partir do grafo
+    não vê o que a SU tem a mais, e um contexto que não sabe o que lhe falta dá-se por
+    completo. Medido nos dois pilotos antes de o tornar bloqueante: 117/117 e 108/108
+    espelhadas, zero desvio.
 """
 from __future__ import annotations
 
@@ -50,6 +67,7 @@ import sys
 from pathlib import Path
 
 _HERE = Path(__file__).resolve().parent
+_D = runpy.run_path(str(_HERE / "dashboard.py"))
 _G = runpy.run_path(str(_HERE / "graph.py"))
 _O = runpy.run_path(str(_HERE / "operation.py"))
 
@@ -69,6 +87,26 @@ def snapshot(eng: Path) -> dict:
     body = json.dumps(digests, sort_keys=True, ensure_ascii=False)
     return {"authorities": digests,
             "revision": hashlib.sha256(body.encode("utf-8")).hexdigest()}
+
+
+def authority_check(eng: Path, nodes: list) -> tuple:
+    """`(autoridade, linhas sem nó, desvio)` — a comparação, sem decidir nada.
+
+    Separada de propósito: quem decide o que cada caso vale é o `bootstrap`, e quem quiser
+    ver o mesmo sem bloquear (a projecção, um relatório) chama isto.
+    """
+    eng = Path(eng)
+    su = eng / "shared-understanding.md"
+    linhas = []
+    if su.exists():
+        try:
+            _h, linhas, _s, _d = _D["parse_su"](su.read_text(encoding="utf-8"))
+        except Exception:                                       # noqa: BLE001
+            linhas = []
+    autoridade = _G["authority_from_rows"](linhas)
+    espelhadas = {(n.get("provenance") or {}).get("mirror_of") for n in nodes}
+    sem_no = sorted(k for k in autoridade if k not in espelhadas)
+    return autoridade, sem_no, _G["drift"](nodes, autoridade)
 
 
 # -------------------------------------------------------------------- contexto
@@ -154,6 +192,54 @@ def items_from_graph(nodes: list[dict]) -> list[dict]:
     return out
 
 
+READ_TRIES = 3
+
+
+def _state_marker(eng: Path) -> tuple:
+    """O que tem de estar igual no fim da leitura e no princípio.
+
+    Pendência sozinha não chega, e é essa a armadilha: uma escrita que COMEÇA e ACABA
+    durante a leitura não deixa pendência nenhuma para a segunda consulta encontrar. O que
+    a apanha é o snapshot das autoridades — que muda — e a revisão do grafo.
+    """
+    op = _O["status"](eng)
+    snap = snapshot(eng)
+    st = _G["read"](eng)
+    return op, snap, st
+
+
+def consistent_read(eng: Path, tries: int = READ_TRIES):
+    """`(op, snapshot, grafo, tentativas)` de UMA revisão — ou o que impediu.
+
+    O bootstrap verificava a pendência e só depois lia o conteúdo, sem exclusão. Entre as
+    duas coisas cabia uma publicação inteira, e o resultado saía com autoridades de
+    revisões diferentes a dizer `ready`. A exclusão dos escritores não protege este leitor:
+    ela impede dois escritores, não um escritor e um leitor.
+
+    Aqui não se toma o lock — um leitor que bloqueia escritores serializa o sistema inteiro,
+    e `resolve.apply` chama isto antes de escrever. Lê-se de forma optimista e valida-se: o
+    marcador de estado antes e depois. Diferentes, repete-se; ao fim de `tries`, declara-se
+    — nunca se declara pronto sobre um alvo em movimento.
+    """
+    ultimo = None
+    for tentativa in range(1, tries + 1):
+        antes = _state_marker(eng)
+        op, snap, st = antes
+        depois = _state_marker(eng)
+        ultimo = (op, snap, st)
+        if (antes[0]["state"] == depois[0]["state"]
+                and antes[1].get("revision") == depois[1].get("revision")
+                and antes[2].get("revision", "") == depois[2].get("revision", "")):
+            return ultimo[0], ultimo[1], ultimo[2], tentativa, None
+        # Uma escrita aconteceu durante a leitura. O que se leu vale para nada; repete-se.
+    return ultimo[0], ultimo[1], ultimo[2], tries, {
+        "code": "CONCURRENT_WRITE", "blocking": True,
+        "detail": "o estado mudou durante a leitura, {} vez(es) seguidas".format(tries),
+        "recovery": "repetir quando o escritor terminar; se persistir, `operation.py "
+                    "status --engagement <slug>` diz quem está a escrever",
+        "note": "ler sobre uma publicação a meio decide sobre estado misto"}
+
+
 # ------------------------------------------------------------------- bootstrap
 
 def bootstrap(eng: Path, budget: int = DEFAULT_BUDGET) -> dict:
@@ -173,8 +259,16 @@ def bootstrap(eng: Path, budget: int = DEFAULT_BUDGET) -> dict:
                                  "detail": "não existe: {}".format(resolved)}]}
     identity = {"path": str(eng), "resolved": resolved, "slug": eng.name}
 
-    # 2. recuperação pendente — antes de qualquer leitura de conteúdo
-    op = _O["status"](eng)
+    # 2-4. pendência, snapshot e grafo, TODOS da mesma revisão (F02)
+    op, snap, st, tentativas, instavel = consistent_read(eng)
+    if instavel:
+        limitations.append(instavel)
+        return {"ready": False, "engagement": identity, "operation": op,
+                "graph": {"status": st.get("status", ""),
+                          "revision": st.get("revision", "")},
+                "snapshot": snap, "context": {}, "limitations": limitations,
+                "read_attempts": tentativas,
+                "detail": "bootstrap parou: o estado mexeu-se debaixo da leitura"}
     if op["state"] != _O["CLEAN"]:
         limitations.append({"code": op["state"].upper(), "detail": op["detail"],
                             "recovery": op.get("recovery", "")})
@@ -183,11 +277,6 @@ def bootstrap(eng: Path, budget: int = DEFAULT_BUDGET) -> dict:
                 "limitations": limitations,
                 "detail": "bootstrap parou no passo 2: recuperação é acção separada"}
 
-    # 3. snapshot
-    snap = snapshot(eng)
-
-    # 4. autoridades / grafo
-    st = _G["read"](eng)
     legacy = st["status"] == _G["ABSENT"]
     graph_info = {"status": st["status"], "legacy_mode": legacy,
                   "revision": st.get("revision", ""),
@@ -223,6 +312,34 @@ def bootstrap(eng: Path, budget: int = DEFAULT_BUDGET) -> dict:
             return {"ready": False, "engagement": identity, "operation": op,
                     "graph": graph_info, "snapshot": snap, "context": {},
                     "limitations": limitations}
+
+    # 4b. autoridade vs espelho — a MESMA regra, no mesmo sítio para toda a gente
+    autoridade, sem_no, desvio = authority_check(eng, st.get("nodes", []))
+    bloqueante = [d for d in desvio
+                  if d["code"] in ("MIRROR_DRIFT", "MIRROR_SOURCE_MISSING")]
+    if bloqueante:
+        primeiro = bloqueante[0]
+        limitations.append({
+            "code": "AUTHORITY_DRIFT", "blocking": True,
+            "detail": "{} linha(s) em que o grafo e a autoridade discordam".format(
+                len(bloqueante)),
+            "first": primeiro,
+            "recovery": "reconciliar o grafo com a SU — a SU prevalece",
+            "note": "campos materiais; divergência só de texto não bloqueia"})
+        return {"ready": False, "engagement": identity, "operation": op,
+                "graph": graph_info, "snapshot": snap, "context": {},
+                "limitations": limitations, "drift": desvio}
+    if sem_no:
+        limitations.append({
+            "code": "AUTHORITY_UNMIRRORED", "blocking": True,
+            "detail": "{} linha(s) da autoridade sem representação no grafo".format(
+                len(sem_no)),
+            "rows": [k.split(":", 1)[-1] for k in sem_no[:20]],
+            "recovery": "python library/kernel/tools/migrate.py apply --engagement <slug>",
+            "note": "o contexto vem do grafo; o que não está lá não se declara completo"})
+        return {"ready": False, "engagement": identity, "operation": op,
+                "graph": graph_info, "snapshot": snap, "context": {},
+                "limitations": limitations, "drift": desvio}
 
     # 5. contexto
     ctx = build_context(items_from_graph(st.get("nodes", [])), budget)

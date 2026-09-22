@@ -126,14 +126,25 @@ class TestCaptureVisibleInScaffold(unittest.TestCase):
 class TestNoMigration(unittest.TestCase):
     """Existing engagements are not rewritten; older SUs stay readable."""
 
+    # A garantia obrigatória exerce-se sobre material VERSIONADO. `projects/` é gitignored
+    # (só `.gitkeep` entra no repo), e enquanto a garantia dependia dele a suite inteira só
+    # era verde em máquinas com engagements privados presentes — num clone limpo este caso
+    # falhava com «no pre-v2.3 SU left to prove tolerance against».
+    FIXTURE_ANTIGA = os.path.join(ROOT, ".claude", "tests", "fixtures", "su-schemas",
+                                  "pre-v2.3-shared-understanding.md")
+
     @classmethod
     def setUpClass(cls):
         cls.dash = load_dashboard()
-        cls.sus = sorted(
+        cls.fixtures = [cls.FIXTURE_ANTIGA] if os.path.isfile(cls.FIXTURE_ANTIGA) else []
+        # Os engagements reais continuam a ser lidos quando existem — como INTEGRAÇÃO, a
+        # somar à garantia, nunca a substituí-la.
+        cls.reais = sorted(
             p for p in (os.path.join(ROOT, "projects", d, "shared-understanding.md")
                         for d in os.listdir(os.path.join(ROOT, "projects"))
                         if os.path.isdir(os.path.join(ROOT, "projects", d)))
             if os.path.isfile(p))
+        cls.sus = cls.fixtures + cls.reais
 
     def test_no_migration_machinery_in_the_start_skill(self):
         """O contrato fica; o proxy ficou preciso (P7.5 §W8).
@@ -155,10 +166,20 @@ class TestNoMigration(unittest.TestCase):
                          "mais do que uma invocacao de migracao no /start")
 
     def test_a_pre_v23_su_still_exists_untouched(self):
+        """A tolerância prova-se contra a fixture versionada, não contra `projects/`.
+
+        Os engagements reais somam-se quando existem; se desaparecerem, a garantia
+        mantém-se. O contrário — que era o que estava — fazia a suite depender de material
+        privado sem o dizer."""
+        if not self.fixtures:
+            self.skipTest("fixture pré-v2.3 ausente: "
+                          ".claude/tests/fixtures/su-schemas/ — é ela que prova isto")
         legacy = [p for p in self.sus
                   if "| custo |" not in re.search(r"## Unknown\n\n(\|.+\|)\n",
                                                   io.open(p, encoding="utf-8").read()).group(1)]
         self.assertTrue(legacy, "no pre-v2.3 SU left to prove tolerance against")
+        self.assertIn(self.FIXTURE_ANTIGA, legacy,
+                      "a fixture versionada deixou de ser pré-v2.3 — foi reescrita?")
 
     def test_parser_reads_every_existing_su_and_infers_absent_columns(self):
         for path in self.sus:

@@ -32,6 +32,7 @@ Standalone: python .claude/hooks/phase-gate-check.py --engagement <slug> --skill
 from __future__ import annotations
 
 import argparse
+import runpy
 import datetime as dt
 import sys
 from pathlib import Path
@@ -93,11 +94,53 @@ def report(g: dict, slug: str, override: bool, reason: str) -> None:
         g["note"]), file=sys.stderr)
 
 
+def _kernel_limitations(eng: Path) -> list[str]:
+    """As limitações que o kernel declara para este engagement, em frases.
+
+    O gate calculava o veredicto sem nunca perguntar se o estado era sequer reconstruível:
+    sobre uma operação pendente, ou sobre um grafo que discorda da SU, o veredicto é sobre
+    estado misto — e um veredicto sobre estado misto vale menos do que nenhum, porque fica
+    escrito em `gate-log.md` como se valesse.
+
+    Continua a não BLOQUEAR: este hook é soft por desenho (CLAUDE.md, princípio 5) e sai
+    sempre 0. O que muda é que a limitação aparece ANTES da conclusão, em vez de a
+    conclusão aparecer sozinha.
+    """
+    caminho = (Path(__file__).resolve().parents[2]
+               / "library" / "kernel" / "tools" / "bootstrap.py")
+    if not caminho.is_file():
+        return []
+    try:
+        B = runpy.run_path(str(caminho))
+        boot = B["bootstrap"](eng)
+    except Exception as exc:                                        # noqa: BLE001
+        return ["o kernel não pôde ser consultado ({}: {})".format(
+            type(exc).__name__, exc)]
+    if boot.get("ready"):
+        return []
+    fora = []
+    for lim in boot.get("limitations") or []:
+        recup = lim.get("recovery") or ""
+        fora.append("{}{}".format(lim.get("detail") or lim.get("code", ""),
+                                  " → " + recup if recup else ""))
+    return fora or ["o kernel não está pronto e não nomeou a limitação"]
+
+
 def run(eng: Path, skill: str, args_text: str, how: str) -> int:
     D = load_dashboard()
     transition = D["GATE_TRANSITIONS"].get(skill, "")
     if not transition:
         return 0
+
+    # A limitação do kernel acompanha o veredicto; NÃO o substitui.
+    #
+    # A primeira versão disto fazia o gate deixar de avaliar quando o kernel não estava
+    # pronto — e isso é converter um gate METODOLÓGICO soft num bloqueio de integridade,
+    # que é coisa diferente e que a própria auditoria avisou para não fazer. Os critérios
+    # de fase continuam a ser calculados e escritos; o que se acrescenta é a limitação, à
+    # frente da conclusão, para quem lê o `gate-log.md` saber sobre que estado ela foi
+    # emitida.
+    impedimentos = _kernel_limitations(eng)
     try:
         g = D["gate_state"](eng, transition)
     except Exception as exc:                                        # noqa: BLE001
@@ -113,8 +156,14 @@ def run(eng: Path, skill: str, args_text: str, how: str) -> int:
     # `refers: none` says exactly that: this override answers a different reality.
     prev = previous_id(eng, transition) if override else ""
     refers = prev if prev == g["id"] else "none"
-    _append(eng, log_line(g, eng.name, override, reason, refers, how))
+    linha = log_line(g, eng.name, override, reason, refers, how)
+    if impedimentos:
+        linha = linha.rstrip("\n") + " · kernel: {}\n".format(" · ".join(impedimentos))
+    _append(eng, linha)
     report(g, eng.name, override, reason)
+    if impedimentos:
+        print("[phase-gate-check] kernel: {} — o veredicto acima foi calculado sobre "
+              "este estado".format(" · ".join(impedimentos)), file=sys.stderr)
     return 0
 
 

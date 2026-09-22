@@ -125,15 +125,23 @@ class F02_LeitorContraEscritaEmCurso(unittest.TestCase):
             O["_atomic_write"](e / "answers.md", "resposta a meio")
             raise RuntimeError("interrupção injectada")
 
+        # A escrita entra UMA vez. Desde que a leitura valida a revisão (F02), o
+        # `snapshot` é chamado mais do que uma vez por leitura — injectar sempre punha o
+        # escritor a bater na sua própria pendência, que é outro cenário.
+        injectado = []
+
         def snapshot_com_escritor(e):
-            og["_publish"] = publica_e_morre
-            try:
-                O["run"](e, "escritor-em-corrida",
-                         {"answers.md": "resposta a meio", "decisions.md": "decisao nova"})
-            except RuntimeError:
-                pass
-            finally:
-                og["_publish"] = pub_real
+            if not injectado:
+                injectado.append(True)
+                og["_publish"] = publica_e_morre
+                try:
+                    O["run"](e, "escritor-em-corrida",
+                             {"answers.md": "resposta a meio",
+                              "decisions.md": "decisao nova"})
+                except RuntimeError:
+                    pass
+                finally:
+                    og["_publish"] = pub_real
             return snap_real(e)
 
         bg["snapshot"] = snapshot_com_escritor
@@ -375,6 +383,19 @@ class F06_OEspelhoFechaComALinha(unittest.TestCase):
                         "responder a uma pergunta bloqueou a acção seguinte")
 
 
+def eng_nascido_e_povoado(tmp):
+    """A sequencia real: nasce vazio com `init`, ganha conhecimento, e so depois migra.
+
+    Escrever `init` sobre uma SU ja povoada deixou de ser possivel (F08) — e bem. O caso
+    que o F07 exercita e outro: um engagement que JA TINHA grafo quando a migracao correu.
+    """
+    vazia = FIX["HEAD"].format(confirmed="", assumed="", unknown="", conflicted="")
+    eng = FIX["make"](tmp, vazia)
+    M["init"](eng)
+    (eng / "shared-understanding.md").write_text(FIX["NOVO"], encoding="utf-8", newline="\n")
+    return eng
+
+
 # =============================================================================
 # F07 · P1 — restore declara sucesso sem restaurar um grafo preexistente
 # =============================================================================
@@ -386,8 +407,7 @@ class F07_RestoreDevolveTudoOQueAMigracaoMudou(unittest.TestCase):
 
     def test_a_pre_existing_empty_graph_comes_back_empty(self):
         with tempfile.TemporaryDirectory() as tmp:
-            eng = FIX["make"](tmp, FIX["NOVO"])
-            M["init"](eng)
+            eng = eng_nascido_e_povoado(tmp)
             antes = (eng / "_graph" / "graph.jsonl").read_bytes()
             M["apply"](eng)
             out = M["restore"](eng)
@@ -398,8 +418,7 @@ class F07_RestoreDevolveTudoOQueAMigracaoMudou(unittest.TestCase):
 
     def test_the_node_count_returns_to_what_it_was(self):
         with tempfile.TemporaryDirectory() as tmp:
-            eng = FIX["make"](tmp, FIX["NOVO"])
-            M["init"](eng)
+            eng = eng_nascido_e_povoado(tmp)
             M["apply"](eng)
             M["restore"](eng)
             st = G["read"](eng)
@@ -417,8 +436,7 @@ class F07_RestoreDevolveTudoOQueAMigracaoMudou(unittest.TestCase):
     def test_restore_publishes_through_the_coordinator(self):
         """Escrever e apagar à mão é a única parte da migração fora da barreira."""
         with tempfile.TemporaryDirectory() as tmp:
-            eng = FIX["make"](tmp, FIX["NOVO"])
-            M["init"](eng)
+            eng = eng_nascido_e_povoado(tmp)
             M["apply"](eng)
             M["restore"](eng)
             recibos = sorted(p.stem for p in (eng / "_ops" / "receipts").glob("*.json"))
@@ -513,6 +531,43 @@ class F09_BaseDeCoberturaPeloQueEConsumido(unittest.TestCase):
         self.assertEqual(recibos, [],
                          "a base de cobertura conta recibos operacionais como fontes: "
                          + ", ".join(recibos))
+
+    def test_a_declared_graph_dependency_enters_by_fingerprint(self):
+        """Excluir os bytes do grafo sem pôr nada no lugar perdia a dependência. `graph.py`
+        já tinha `as_coverage_source` para isto; o `compute_basis` é que nunca a chamava."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = eng_migrado(tmp)
+            base = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation",
+                                      graph_consumed=["C-001"])
+        caminhos = [f["path"] for f in base["sources"]]
+        self.assertIn("_graph#consumed", caminhos,
+                      "uma revisão que declara consumir grafo ficou sem dependência nenhuma")
+        self.assertEqual([c for c in caminhos if c.startswith("_graph/")], [],
+                         "os bytes do grafo voltaram à base")
+
+    def test_navigation_is_current_but_a_changed_consumed_node_is_stale(self):
+        """As duas direcções no mesmo caso: sem isto, «nunca fica stale» passaria."""
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = eng_migrado(tmp)
+            consumido = ["C-001"]
+            base = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation",
+                                      graph_consumed=consumido)
+            st = G["read"](eng)
+            arestas = st["edges"] + [{"src": "C-001", "rel": "ve_tambem", "dst": "U-001",
+                                      "props": {}, "provenance": {}}]
+            O["run"](eng, "so-navegacao", G["write_set"](st["nodes"], arestas))
+            depois_nav = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation",
+                                            graph_consumed=consumido)
+            nav = C["check_freshness"]({"basis": base}, depois_nav)["status"]
+
+            nos = [dict(n, props=dict(n["props"], text="outro texto"))
+                   if n["id"] == "C-001" else n for n in st["nodes"]]
+            O["run"](eng, "muda-consumido", G["write_set"](nos, arestas))
+            depois_mud = C["compute_basis"](eng, C["build_inventory"](eng), "reconciliation",
+                                            graph_consumed=consumido)
+            mudou = C["check_freshness"]({"basis": base}, depois_mud)["status"]
+        self.assertEqual(nav, "current", "navegação tornou a base stale")
+        self.assertEqual(mudou, "stale", "mudar o nó consumido não tornou a base stale")
 
     def test_a_consumed_dependency_that_changes_still_goes_stale(self):
         """O controlo: uma base que nunca fica stale não é uma base."""

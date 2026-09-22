@@ -103,6 +103,19 @@ TARGET_DIRS = ("_blueprint/", "_render/")
 COVERAGE_DIR = "_coverage/"
 SYNTHESIS_DIR = "_synthesis/"
 
+# Estado OPERACIONAL: recibos, marcador de pendência, staging. Não é fonte de conclusão
+# nenhuma — é o registo de que uma escrita aconteceu. Entrava como fonte `freshness` pela
+# regra por defeito, e bastava uma operação qualquer para tornar `stale` uma revisão que
+# nada do que ela leu tinha mudado.
+OPERATIONAL_DIRS = ("_ops/", "_migration/")
+
+# O grafo NÃO entra por bytes. Uma aresta de navegação muda `graph.jsonl` e não muda nada
+# do que a revisão consumiu; comparar os bytes fazia disso um `stale`. O que entra — quando
+# entra — é o fingerprint canónico do subconjunto declarado como consumido
+# (`graph.as_coverage_source`, contrato C4). Excluir sem substituir seria perder a
+# dependência; por isso a substituição é explícita e não uma omissão.
+GRAPH_DIR = "_graph/"
+
 # §6.3: comparados por fingerprint semântico, nunca pelos bytes.
 INFORMATIVE = ("shared-understanding.md", "decisions.md")
 
@@ -328,6 +341,42 @@ def find_engagement(spec: str | None, repo: Path | None = None) -> Path:
 
 
 # =================================================================== caminhos §5.3
+
+_GRAPH_MODULE = {}
+
+
+def _graph_module(eng: Path):
+    """`graph.py`, carregado à conta-gotas — só quando uma revisão declara consumir grafo.
+
+    Preguiçoso de propósito: a esmagadora maioria das revisões não consome relações do
+    grafo, e este módulo é chamado dezenas de vezes por corrida. Pagar o carregamento
+    sempre por causa de um caso raro seria o mesmo erro que hashear o grafo inteiro por
+    causa de uma aresta.
+    """
+    caminho = Path(__file__).resolve().parent / "graph.py"
+    if "mod" not in _GRAPH_MODULE:
+        _GRAPH_MODULE["mod"] = runpy.run_path(str(caminho))
+    return _GRAPH_MODULE["mod"]
+
+
+def graph_dependency(eng: Path, consumed) -> dict | None:
+    """A dependência do grafo como FONTE, pelo fingerprint do que foi consumido.
+
+    `graph.py` já tinha `as_coverage_source` para isto — e `compute_basis` nunca a
+    chamava, por isso o que entrava eram os bytes de `graph.jsonl` e `meta.json`. Excluir
+    esses bytes sem pôr isto no lugar perdia a dependência em vez de a arrumar.
+
+    Sem `consumed` declarado não há entrada nenhuma: uma revisão que não consome relações
+    não deve ficar `stale` por causa delas.
+    """
+    if not consumed:
+        return None
+    g = _graph_module(eng)
+    st = g["read"](Path(eng))
+    if st.get("status") != g["OK"]:
+        return None
+    return g["as_coverage_source"](st["nodes"], st["edges"], consumed)
+
 
 def engagement_state(eng: Path) -> tuple[dict, str]:
     """`_state.json`, com verificação de **raiz apenas** — e essa é a razão de ser.
@@ -913,6 +962,8 @@ def _manifest_use(rel: str, stage: str, synthesis_authorities: set[str]) -> str 
         return None
     if rel.startswith(COVERAGE_DIR) or rel.startswith(TARGET_DIRS):
         return None
+    if rel.startswith(OPERATIONAL_DIRS) or rel.startswith(GRAPH_DIR):
+        return None
     if rel.startswith(SYNTHESIS_DIR):
         return "freshness" if (stage == "render" and rel in synthesis_authorities) else None
     if rel in INFORMATIVE:
@@ -993,9 +1044,18 @@ def inventory_digest(inventory: dict) -> str:
     return digest(payload)
 
 
+def _sources_with_graph(eng: Path, stage: str, synthesis_authorities, graph_consumed):
+    """As fontes de ficheiro mais, se declarada, a dependência do grafo — ordenadas."""
+    fontes = build_manifest(eng, stage, synthesis_authorities)
+    dep = graph_dependency(eng, graph_consumed)
+    if dep:
+        fontes = sorted(fontes + [dep], key=lambda e: e["path"])
+    return fontes
+
+
 def compute_basis(eng: Path, inventory: dict, stage: str, target: dict | None = None,
                   authorities=(), readers: ReaderAdapter | None = None,
-                  synthesis_authorities=()) -> dict:
+                  synthesis_authorities=(), graph_consumed=()) -> dict:
     """A base que uma revisão desta etapa declararia agora (contrato §4.2).
 
     `target` entra na assinatura porque a etapa o exige, e é validado aqui; a comparação
@@ -1038,7 +1098,7 @@ def compute_basis(eng: Path, inventory: dict, stage: str, target: dict | None = 
         "inventory_sha256": inventory_digest(inventory),
         "su_fingerprint": su_fingerprint(eng, readers),
         "decision_fingerprint": decision_fingerprint(eng, readers),
-        "sources": build_manifest(eng, stage, synthesis_authorities),
+        "sources": _sources_with_graph(eng, stage, synthesis_authorities, graph_consumed),
         "authorities": sorted(auth, key=lambda a: a["path"]),
         "decision_ref": (live or {}).get("id", ""),
         "contract_version": CONTRACT_VERSION,
