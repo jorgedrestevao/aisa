@@ -303,5 +303,32 @@ class K08_IsolamentoDeCaminhos(unittest.TestCase):
         self.assertTrue(str(ok).endswith("graph.jsonl"))
 
 
+class Costura_GrafoEcoordenador(unittest.TestCase):
+    """A porta que P4 vai usar: `write_set()` produz o que `operation.run()` publica.
+
+    Não é um caso de `cases.json`. Existe porque o grafo e o coordenador têm staging
+    próprios e, sem esta porta, P4 teria de escolher um deles à sorte."""
+
+    def test_write_set_carries_both_store_files(self):
+        ws = G["write_set"]([N1, N2], [E1])
+        self.assertEqual(sorted(ws), ["_graph/graph.jsonl", "_graph/meta.json"])
+
+    def test_write_set_refuses_an_invalid_graph(self):
+        with self.assertRaises(G["GraphError"]) as ctx:
+            G["write_set"]([N1, dict(N1)], [])
+        self.assertEqual(ctx.exception.code, "INTEGRITY")
+
+    def test_published_through_the_coordinator_the_store_reads_back(self):
+        O = runpy.run_path(str(ROOT / "library" / "kernel" / "tools" / "operation.py"))
+        with tempfile.TemporaryDirectory() as tmp:
+            eng = Path(tmp) / "eng"
+            eng.mkdir()
+            O["run"](eng, "op-graph", G["write_set"]([N1, N2], [E1]))
+            st = G["read"](eng)
+        self.assertEqual(st["status"], G["OK"])
+        self.assertEqual([n["id"] for n in st["nodes"]], ["C-001", "U-002"])
+        self.assertEqual(st["revision"], G["revision_of"]([N1, N2], [E1]),
+                         "a revisão publicada não bate com a calculada")
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -278,6 +278,21 @@ def serialize(nodes: list[dict], edges: list[dict]) -> tuple[str, str]:
     return body, json.dumps(meta, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def write_set(nodes: list[dict], edges: list[dict]) -> dict:
+    """O conjunto de escrita para `operation.run()` — caminhos relativos ao engagement.
+
+    É esta a porta que os escritores de negócio usam (P4): valida, e devolve bytes para o
+    coordenador publicar. Não toca no disco. `stage()` abaixo é a variante de ensaio, para
+    quem quer inspeccionar os bytes sem publicar; o coordenador tem o seu próprio staging e
+    não consome o de `stage()`."""
+    problems = validate(nodes, edges)
+    if problems:
+        raise GraphError("mutação inválida — não publicada", "INTEGRITY", {"problems": problems})
+    body, meta = serialize(nodes, edges)
+    return {"{}/{}".format(STORE_DIR, GRAPH_FILE): body,
+            "{}/{}".format(STORE_DIR, META_FILE): meta}
+
+
 def stage(eng: Path, nodes: list[dict], edges: list[dict], staging: Path) -> dict:
     """Valida e escreve para STAGING. A publicação é de `operation.py` (contrato B2.4)."""
     problems = validate(nodes, edges)
