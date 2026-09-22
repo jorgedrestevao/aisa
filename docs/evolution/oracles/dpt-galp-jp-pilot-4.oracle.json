@@ -130,15 +130,15 @@
     },
     {
       "id": "T-10",
-      "proposition_or_relation": "Quem mantém o `Priority_Store`, com que cadência e sob que critério de decisão.",
-      "epistemic_state": "Unknown",
+      "proposition_or_relation": "O `Priority_Store` e mantido por UMA pessoa, diariamente — a cada extraccao.",
+      "epistemic_state": "Confirmed",
       "criticality": "critical",
       "source_locator": "Não determinável do ficheiro",
       "source_sha256": "94dc0669a1c5b653a226b2443e71f3e22af40e3a1cbb290a822b3cd817bc0e40",
-      "expected_resolution": "Só o responsável do processo pode responder.",
-      "gate_expectation": "O candidato NÃO deve confirmar dono nem cadência a partir do ficheiro. Inferir isto é facto inventado.",
-      "review_notes": "A fonte mostra o mecanismo, não a governação. É `Unknown` por ausência de evidência, não por descuido.",
-      "validation": "PENDING_OWNER"
+      "expected_resolution": "Declarado pelo operador (2026-09-22).",
+      "gate_expectation": "Dono unico e cadencia diaria. Uma solucao multi-utilizador resolve um conflito de edicao que hoje nao existe — nao inventar esse requisito.",
+      "review_notes": "Fechado. Explica os 37 de 89 com `Exec. Order`: a ordenacao fina e aplicada a um subconjunto, por uma pessoa, no tempo que tem.",
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "T-11",
@@ -178,8 +178,7 @@
       "T-02",
       "T-03",
       "T-04",
-      "T-05",
-      "T-10"
+      "T-05"
     ],
     "status": "PENDING",
     "why": "O autor do oráculo e o operador do candidato são o mesmo agente. Ler a fonte directamente cumpre a letra da ACCEPTANCE.md, mas não dá independência real. Os itens críticos só contam como referência de P8 depois de o responsável do processo os confirmar ou corrigir."

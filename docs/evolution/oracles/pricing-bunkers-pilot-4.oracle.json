@@ -35,8 +35,8 @@
       "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
       "expected_resolution": "Confirmado por comparação de conjuntos: interseção = união.",
       "gate_expectation": "Tratá-las como quatro regras distintas multiplica por 4 o esforço estimado. É erro material de dimensionamento.",
-      "review_notes": "Moeda (USD/EUR) × unidade (tonelada/m³). A conversão é apresentação.",
-      "validation": "PENDING_OWNER"
+      "review_notes": "Moeda (USD/EUR) × unidade (tonelada/m³). A conversão é apresentação. | MEDIDO NO FICHEIRO NAO AUTORITATIVO (.xlsm). A afirmacao nao esta desmentida — esta por re-medir sobre o .xlsx, que este ambiente nao tem.",
+      "validation": "REMEASURE_ON_AUTHORITATIVE_FILE"
     },
     {
       "id": "P-02",
@@ -47,8 +47,8 @@
       "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
       "expected_resolution": "Confirmado por parsing dos 134 nomes.",
       "gate_expectation": "Perder a decomposição é perder o modelo de dados. Um preço escalar não representa isto.",
-      "review_notes": "A transcrição corrobora: «o prémio de cedência do supply», «está relacionado à margem».",
-      "validation": "PENDING_OWNER"
+      "review_notes": "A transcrição corrobora: «o prémio de cedência do supply», «está relacionado à margem». | Confirmado pela especificacao do ficheiro autoritativo.",
+      "validation": "CLOSED_BY_SPEC"
     },
     {
       "id": "P-03",
@@ -59,8 +59,8 @@
       "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
       "expected_resolution": "Confirmado por leitura dos cabeçalhos e ausência de fórmulas.",
       "gate_expectation": "Qualquer solução tem de resolver a ingestão destas cotações. Omiti-la é omitir a dependência externa central.",
-      "review_notes": "ECB para câmbio, Platts e ICE para produto. São fornecedores de dados de mercado, não ficheiros internos.",
-      "validation": "PENDING_OWNER"
+      "review_notes": "ECB para câmbio, Platts e ICE para produto. São fornecedores de dados de mercado, não ficheiros internos. | Confirmado pela especificacao do ficheiro autoritativo.",
+      "validation": "CLOSED_BY_SPEC"
     },
     {
       "id": "P-04",
@@ -71,8 +71,8 @@
       "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
       "expected_resolution": "Confirmado por resolução dos named ranges.",
       "gate_expectation": "O histórico é parte do mecanismo, não arquivo. Uma solução que só guarde o presente perde-o.",
-      "review_notes": "1461 linhas ≈ 4 anos de dias.",
-      "validation": "PENDING_OWNER"
+      "review_notes": "1461 linhas ≈ 4 anos de dias. | MEDIDO NO FICHEIRO NAO AUTORITATIVO (.xlsm). A afirmacao nao esta desmentida — esta por re-medir sobre o .xlsx, que este ambiente nao tem.",
+      "validation": "REMEASURE_ON_AUTHORITATIVE_FILE"
     },
     {
       "id": "P-05",
@@ -83,20 +83,20 @@
       "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
       "expected_resolution": "Confirmado por resolução dos named ranges.",
       "gate_expectation": "Afirmar que o processo é totalmente automático contradiz a existência de `Data_Manual`.",
-      "review_notes": "A transcrição diz «não exige intervenção manual» sobre ALGO — não foi determinado sobre o quê. Não usar essa frase para negar este facto.",
-      "validation": "PENDING_OWNER"
+      "review_notes": "A transcrição diz «não exige intervenção manual» sobre ALGO — não foi determinado sobre o quê. Não usar essa frase para negar este facto. | A spec CORRIGE os meus locators: os nomes globais apontam para `Relatorio Precos!C5/B5`, e as 5 folhas ocultas redefinem-nos localmente (C7/C6). Eu li os locais como se fossem globais. O facto — ha override manual — mantem-se, e ganha profundidade: ha seletores independentes no modelo.",
+      "validation": "CLOSED_BY_SPEC"
     },
     {
       "id": "P-06",
-      "proposition_or_relation": "O livro contém **macros VBA** (`xl/vbaProject.bin`). Há automatismo que as fórmulas não mostram.",
+      "proposition_or_relation": "As macros VBA do .xlsm sao LEGADO e nao estao em uso. O ficheiro autoritativo (.xlsx) nao tem VBA sequer.",
       "epistemic_state": "Confirmed",
       "criticality": "critical",
       "source_locator": "Entrada `xl/vbaProject.bin` no zip do .xlsm",
       "source_sha256": "677e7963b162aba7e8155fbd2819489268d97a328f1858812877ed826100d158",
-      "expected_resolution": "Confirmado por listagem do arquivo. **Não descompilado.**",
-      "gate_expectation": "Estimar o processo só pelas fórmulas subestima-o. O VBA é âmbito não medido.",
-      "review_notes": "É a maior incógnita conhecida deste piloto: existe, é material, e não foi lido.",
-      "validation": "PENDING_OWNER"
+      "expected_resolution": "Declarado pelo operador (2026-09-22) e coerente com a spec, que descreve `.xlsx sem VBA executavel`.",
+      "gate_expectation": "Ambito morto — NAO entra em estimativa. Antes era o oposto: 'estimar so pelas formulas subestima'. Ja nao subestima.",
+      "review_notes": "Fechado. Duas evidencias independentes concordam: a declaracao do operador e a spec do ficheiro autoritativo.",
+      "validation": "CLOSED_BY_OPERATOR"
     },
     {
       "id": "P-07",
@@ -167,7 +167,7 @@
       "source_sha256": "b12fecd4ac0e5dba45c08a5962d5ad7554371f942d2c0876a1c219cb8ea3ee86",
       "expected_resolution": "Decisao de negocio. Nao e determinavel de nenhum ficheiro.",
       "gate_expectation": "O candidato NAO deve escolher uma destas regras por conta propria. Implementar Q04/Q06/Q07 sem decisao e inventar comportamento.",
-      "review_notes": "Substitui a lacuna de traçado que P-10 era. A aritmetica esta conhecida; o que falta agora e DECISAO, nao leitura. Mudanca material: o bloqueio passou de «ninguem tracou» para «ninguem decidiu».",
+      "review_notes": "Substitui a lacuna de traçado que P-10 era. A aritmetica esta conhecida; o que falta agora e DECISAO, nao leitura. Mudanca material: o bloqueio passou de «ninguem tracou» para «ninguem decidiu». | O operador declarou (2026-09-22) que JA HA RESPOSTAS para alguns dos 18 grupos, sem as indicar. Continua Unknown: saber que existem respostas nao e te-las. NAO inferir nenhuma.",
       "validation": "PENDING_OWNER"
     },
     {
@@ -179,8 +179,8 @@
       "source_sha256": "284f6b7e117ecbab7fe6f00283b1e7af811ddaf636ece7c94e59e6ef530047a3",
       "expected_resolution": "Confirmado pela especificacao.",
       "gate_expectation": "Replicar o as-is replica os defeitos. Corrigi-los e mudanca de negocio que precisa de aprovacao. Qualquer estimativa que ignore isto subestima.",
-      "review_notes": "Nao foram corrigidos sem validacao de negocio — e a postura certa.",
-      "validation": "PENDING_OWNER"
+      "review_notes": "Nao foram corrigidos sem validacao de negocio — e a postura certa. | Confirmado pela especificacao do ficheiro autoritativo.",
+      "validation": "CLOSED_BY_SPEC"
     }
   ],
   "forbidden_claims": [
@@ -209,16 +209,26 @@
   "owner_validation": {
     "required_for": [
       "P-01",
-      "P-02",
-      "P-03",
       "P-04",
-      "P-05",
-      "P-06",
-      "P-12",
-      "P-13"
+      "P-12"
     ],
     "status": "PENDING",
     "why": "P-10 fechou com a especificacao. Restam os itens estruturais por confirmar e, sobretudo, P-12: 18 grupos de decisoes que so o negocio toma."
   },
-  "warning": "Itens críticos por validar, e P-10 é lacuna declarada. Referência fraca até o responsável a fechar."
+  "warning": "Itens críticos por validar, e P-10 é lacuna declarada. Referência fraca até o responsável a fechar.",
+  "authoritative_source": {
+    "decided_by": "operator",
+    "date": "2026-09-22",
+    "file": "PREÇO BANCAS_03_08_26.xlsx",
+    "sha256": "cf40be3ed65983d51e689d9d34ba1714fdb204794d34e89352be667be1692b52",
+    "sheets": 19,
+    "has_vba": false,
+    "ruling": "O .xlsx da especificacao e a versao actual. O .xlsm que o engagement carrega (sha 677e7963…, 18 folhas, COM VBA) esta desactualizado.",
+    "consequence": [
+      "O input do piloto tem de ser SUBSTITUIDO pelo .xlsx antes de P8.",
+      "As medicoes feitas sobre o .xlsm sao medicoes de um ficheiro nao autoritativo. P-01 e P-04 ficam por re-medir; nao sao falsas, sao de outra versao.",
+      "Os locators da spec (`Motor!C24:H24`, `Relatorio!B5`) resolvem no .xlsx e NAO no .xlsm — as folhas `Motor`, `Relatorio Precos` e `Relatorio Precos Bios` nao existem no .xlsm, que tem `Outputs` e `Outputs BIOS` em vez.",
+      "O ficheiro autoritativo NAO existe neste ambiente. Ate chegar, P8 nao pode correr sobre a fonte certa."
+    ]
+  }
 }
