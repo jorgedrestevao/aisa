@@ -37,7 +37,7 @@ Não existem skills `aisa-dashboard` nem `aisa-resume`: `/dashboard` chama o mot
 |---|---:|---|
 | `dashboard.py` | 7939 | modelo de estado + página; `build_model()`, `--json`, `--serve`, `--url` |
 | `coverage.py` | 3943 | inventário, veredictos, relatório, publicação |
-| `xlsx_extract.py` | 3079 | L1 extração + L3 replay de `.xlsx`/`.xlsm` |
+| `xlsx_extract.py` | 3227 | L1 extração + L3 replay de `.xlsx`/`.xlsm` |
 | `text_extract.py` | 722 | tier LT: `.docx` (python-docx), `.pdf` (pypdf), `.vtt`/`.srt`/`.txt`/`.md`/`.csv` (stdlib) |
 | `fields_draft.py` | 499 | rascunho de campos/contratos a partir de L1 |
 

@@ -729,6 +729,109 @@ def extract_named_ranges(wb):
     return out
 
 
+def extract_tables(wb):
+    """As tabelas (ListObjects) do livro: nome, folha e intervalo.
+
+    Uma referencia estruturada — `Galp_Marinha_v2[quotation_dt]` — nomeia uma tabela, e
+    sem esta lista nao ha como dizer ONDE ela vive. No piloto de pricing e a diferenca
+    entre «2 698 chamadas recusadas» e «ler `UlyssesQuotes!A1:J525`»."""
+    out = []
+    for ws in wb.worksheets:
+        try:
+            tabelas = getattr(ws, "tables", None) or {}
+            for nome in tabelas:
+                alvo = tabelas[nome]
+                ref = alvo if isinstance(alvo, str) else getattr(alvo, "ref", None)
+                out.append({"name": str(nome), "sheet": ws.title, "ref": ref})
+        except Exception:
+            continue
+    return out
+
+
+INDIRECT_LITERAL_RE = re.compile(r'(?i)\bINDIRECT\s*\(\s*"([^"]*)"')
+STRUCTURED_REF_RE = re.compile(r"([A-Za-z_\u00C0-\u024F][\w.\u00C0-\u024F]{0,60})\s*\[")
+BARE_NAME_RE = re.compile(r"(?<![\w.!$])([A-Za-z_\u00C0-\u024F][\w.\u00C0-\u024F]{2,60})(?![\w(\[])")
+MAX_READ_TARGETS = 8
+
+
+def _external_target(target: str) -> bool:
+    """`[1]folha!A1` = outro ficheiro. Ler ESTE Excel nao resolve isso."""
+    return bool(re.match(r"\s*\[\d+\]", str(target or "")))
+
+
+def read_targets(formula: str, workbook: dict, sheetnames=()) -> list[dict]:
+    """O que ha a LER para resolver esta chamada — o alvo, nao a formula.
+
+    Uma chamada recusada ja dizia ONDE esta (a celula). Nao dizia o que abrir. Medido no
+    piloto de pricing: 10 262 recusas que sao TRES alvos — uma folha, uma tabela de 525
+    linhas, e uma familia de 82 intervalos nomeados de que basta ler UM.
+
+    Deriva-se do texto, dos nomes e das tabelas do proprio livro. Nada se computa e nada
+    se infere: um prefixo que nao casa com nome nenhum nao produz alvo, e um alvo noutro
+    ficheiro sai marcado `external` — o relatorio nunca pode sugerir que se resolve a ler
+    este Excel (e o caso do canal Apttus/X-Author).
+    """
+    texto = str(formula or "")
+    nomes = [n for n in ((workbook or {}).get("named_ranges") or [])
+             if isinstance(n, dict) and n.get("name")]
+    por_nome = {}
+    for n in nomes:
+        por_nome.setdefault(str(n["name"]), str(n.get("target") or ""))
+    tabelas = {str(t["name"]): t for t in ((workbook or {}).get("tables") or [])
+               if isinstance(t, dict) and t.get("name")}
+
+    saida: list[dict] = []
+    vistos: set = set()
+
+    def add(alvo: dict) -> None:
+        chave = (alvo["kind"], alvo["name"])
+        if chave in vistos or len(saida) >= MAX_READ_TARGETS:
+            return
+        vistos.add(chave)
+        saida.append(alvo)
+
+    # 1. o literal de um INDIRECT: nome exacto, ou o prefixo de uma familia de nomes
+    for literal in INDIRECT_LITERAL_RE.findall(texto):
+        if not literal:
+            continue
+        raiz = literal.split("[")[0]
+        if raiz in tabelas:
+            t = tabelas[raiz]
+            add({"kind": "table", "name": raiz,
+                 "where": "{}!{}".format(t.get("sheet") or "?", t.get("ref") or "?")})
+            continue
+        if raiz in por_nome:
+            add({"kind": "named", "name": raiz, "where": por_nome[raiz],
+                 "external": _external_target(por_nome[raiz])})
+            continue
+        familia = sorted(k for k in por_nome if k.startswith(raiz))
+        if familia:
+            add({"kind": "named-family", "name": raiz + "*", "count": len(familia),
+                 "where": por_nome[familia[0]], "example": familia[0],
+                 "external": _external_target(por_nome[familia[0]])})
+
+    # 2. referencias estruturadas: `Tabela[coluna]`
+    for nome in STRUCTURED_REF_RE.findall(texto):
+        if nome in tabelas:
+            t = tabelas[nome]
+            add({"kind": "table", "name": nome,
+                 "where": "{}!{}".format(t.get("sheet") or "?", t.get("ref") or "?")})
+
+    # 3. folhas citadas explicitamente
+    sem_strings = STRING_SEG_RE.sub('""', texto)
+    for m in REF_RE.finditer(sem_strings):
+        folha = _unquote_sheet(m.group("sheet"))
+        if folha and folha in set(sheetnames or ()):
+            add({"kind": "sheet", "name": folha, "where": folha})
+
+    # 4. nomes usados directamente
+    for nome in BARE_NAME_RE.findall(sem_strings):
+        if nome in por_nome:
+            add({"kind": "named", "name": nome, "where": por_nome[nome],
+                 "external": _external_target(por_nome[nome])})
+    return saida
+
+
 def extract_flags(path: str, wb, wb_data):
     flags = {"vba_present": False, "vba_modules": [], "external_links": [],
              "pivot_tables": [], "protected_sheets": []}
@@ -833,6 +936,7 @@ def extract(path: str, out_path: str, force: bool, log_path: str | None) -> int:
     doc["status"] = "ok"
     doc["workbook"] = {
         "named_ranges": extract_named_ranges(wb_formula),
+        "tables": extract_tables(wb_formula),
         "flags": extract_flags(path, wb_formula, wb_data),
     }
 
@@ -1015,6 +1119,8 @@ class Replayer:
         self.not_replayable: Counter = Counter()
         self.nr_example: dict[str, str] = {}
         self.nr_cells: dict[str, set] = defaultdict(set)   # pattern -> {(sheet, coord)} (P9: TO-READ ranges)
+        # pattern -> {(kind, name): alvo} -- o que ha a LER, nao onde a recusa esta
+        self.nr_targets: dict[str, dict] = defaultdict(dict)
         self.lookup_targets: set[tuple[str, str]] = set()   # (sheet, col letter) used as match column
         self.criterion_cols: set[tuple[str, str]] = set()   # (sheet, col letter) feeding lookup values
         self.checked_cells = 0
@@ -1153,7 +1259,26 @@ class Replayer:
         self.not_replayable[pattern] += 1
         self.nr_example.setdefault(pattern, f"{sheet_name}!{coord}")
         self.nr_cells[pattern].add((sheet_name, coord))
+        try:
+            for alvo in read_targets(raw, self.x.get("workbook") or {}, self.wb.sheetnames):
+                self.nr_targets[pattern].setdefault((alvo["kind"], alvo["name"]), alvo)
+        except Exception:
+            pass          # o alvo e um extra de leitura; nunca pode derrubar o replay
         return True
+
+    def to_read_targets(self) -> list[dict]:
+        """Os alvos distintos de TODAS as chamadas recusadas, do maior para o menor.
+
+        E a resposta a «por onde comeco»: no piloto de pricing, 10 262 recusas dao TRES
+        alvos. A contagem de cada um e quantas chamadas o citam — e por isso a ordem
+        util, nao a alfabetica."""
+        juntos: dict = {}
+        for pattern, alvos in self.nr_targets.items():
+            chamadas = self.not_replayable.get(pattern, 0)
+            for chave, alvo in alvos.items():
+                acc = juntos.setdefault(chave, dict(alvo, calls=0))
+                acc["calls"] += chamadas
+        return sorted(juntos.values(), key=lambda a: (-a["calls"], a["kind"], a["name"]))
 
     def to_read_ranges(self) -> dict[str, list[str]]:
         """P9: per not-replayable pattern, the compact ranges to READ — `Sheet!F9:F1469` — one per
@@ -1919,6 +2044,13 @@ CHECK_ORDER = ["lookup integrity", "key uniqueness", "whitespace/casing",
                "staleness", "pattern exceptions", "clone divergence", "layout labels", "orphan references"]
 
 
+def _target_label(alvo: dict) -> str:
+    """O alvo numa celula de tabela — sem partir o markdown."""
+    nome = str(alvo.get("name") or "?").replace("|", "\\|")
+    marca = " (outside this file)" if alvo.get("external") else ""
+    return f"`{nome}`{marca}"
+
+
 def render_replay_md(extraction: dict, rep: Replayer, out_path: str) -> tuple[int, dict]:
     sev_rank = Finding.ORDER
     findings = sorted(rep.findings, key=lambda f: (sev_rank[f.severity], CHECK_ORDER.index(f.check), f.location))
@@ -1970,14 +2102,30 @@ def render_replay_md(extraction: dict, rep: Replayer, out_path: str) -> tuple[in
     lines.append("")
     if rep.not_replayable:
         ranges = rep.to_read_ranges()
-        lines.append("| formula / reason | cells | example | to_read |")
-        lines.append("|---|---|---|---|")
+        lines.append("| formula / reason | cells | example | to_read | what to read |")
+        lines.append("|---|---|---|---|---|")
         for pattern, count in rep.not_replayable.most_common():
             safe = pattern.replace("|", "\\|")
             rs = ranges.get(pattern, [])
             shown = ", ".join(f"`{r}`" for r in rs[:6]) + (f" (+{len(rs) - 6})" if len(rs) > 6 else "")
-            lines.append(f"| {safe} | {count} | `{rep.nr_example[pattern]}` | {shown} |")
+            alvos_p = ", ".join(_target_label(a) for a in rep.nr_targets.get(pattern, {}).values())
+            lines.append(f"| {safe} | {count} | `{rep.nr_example[pattern]}` | {shown} | {alvos_p} |")
         lines.append("")
+        alvos = rep.to_read_targets()
+        if alvos:
+            lines.append("**What to read** — the declined calls point at a short, finite set of "
+                         "targets. Reading the target resolves the whole family; the cells above "
+                         "are where the calls sit, not what has to be opened.")
+            lines.append("")
+            lines.append("| target | kind | where | calls |")
+            lines.append("|---|---|---|---|")
+            for a in alvos:
+                nota = " — **outside this file**" if a.get("external") else ""
+                extra = (f" (one of {a['count']}, e.g. `{a.get('example')}`)"
+                         if a.get("count") else "")
+                lines.append("| `{}` | {} | `{}`{}{} | {} |".format(
+                    a["name"], a["kind"], a.get("where") or "?", extra, nota, a["calls"]))
+            lines.append("")
         lines.append(f"These are **TO-READ** for the process model — {rep.to_read_count()} range(s) to read, "
                      "never inferred. A declined call is not an Unknown: the formula is legible, it was "
                      "not recomputed (`states.md` → *Confirmed threshold*, rule 2).")
