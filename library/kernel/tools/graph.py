@@ -267,6 +267,138 @@ def empty_store() -> dict:
             "nodes": 0, "edges": 0}
 
 
+# ---------------------------------------------------------------- inspecção (E04)
+#
+# Percorrer, exportar e abrir proveniência. TUDO read-only e TUDO derivado do que está
+# escrito: nenhuma função desta secção inventa um nó, uma aresta ou uma raiz para tornar o
+# grafo visualmente conectado. Componentes separados são reportados como separados —
+# `ACCEPTANCE.md` §7 exige-o por escrito. Contexto parcial é legítimo desde que declare a
+# fronteira e o export dê acesso ao resto.
+
+
+def neighbours(edges: list[dict], node_id: str) -> dict:
+    """Arestas que tocam `node_id`, por sentido. Não toca em nós; não confirma que existem."""
+    out = [e for e in edges if e.get("src") == node_id]
+    inc = [e for e in edges if e.get("dst") == node_id]
+    return {"out": sorted(out, key=_edge_key), "in": sorted(inc, key=_edge_key)}
+
+
+def traverse(nodes: list[dict], edges: list[dict], start: str, depth: int | None = None,
+             rels: tuple | None = None) -> dict:
+    """Navegação a partir de `start`, em ambos os sentidos, até `depth` saltos.
+
+    Navegar é seguir o que existe. Uma ponta que não corresponde a nenhum nó (o
+    `EDGE_END_UNKNOWN` que `validate` reporta) é devolvida em `dangling`, NUNCA materializada
+    como nó. Com `depth` a limitar, `truncated` fica a `True` e `frontier` diz exactamente o
+    que ficou por abrir — quem quiser o resto chama `export`.
+    """
+    known = {n.get("id") for n in nodes if n.get("id")}
+    if start not in known:
+        return {"start": start, "found": False, "reached": [], "edges": [], "dangling": [],
+                "truncated": False, "frontier": [], "depth": depth,
+                "detail": "nó inexistente — não se inventa para dar resposta"}
+
+    keep = set(rels) if rels else None
+    reached, walked, dangling = {start}, [], set()
+    frontier, nivel = [start], 0
+    while frontier:
+        if depth is not None and nivel >= depth:
+            break
+        seguinte = []
+        for nid in frontier:
+            viz = neighbours(edges, nid)
+            for e in viz["out"] + viz["in"]:
+                if keep is not None and e.get("rel") not in keep:
+                    continue
+                if e not in walked:
+                    walked.append(e)
+                outro = e.get("dst") if e.get("src") == nid else e.get("src")
+                if not outro:
+                    continue
+                if outro not in known:
+                    dangling.add(outro)
+                elif outro not in reached:
+                    reached.add(outro)
+                    seguinte.append(outro)
+        frontier = seguinte
+        nivel += 1
+
+    por_abrir = sorted(frontier)
+    return {"start": start, "found": True, "reached": sorted(reached),
+            "edges": sorted(walked, key=_edge_key), "dangling": sorted(dangling),
+            "truncated": bool(por_abrir), "frontier": por_abrir, "depth": depth,
+            "detail": ("contexto parcial: {} nós por abrir, `export` dá o resto".format(
+                len(por_abrir)) if por_abrir else "")}
+
+
+def components(nodes: list[dict], edges: list[dict]) -> list[list[str]]:
+    """Componentes fracamente ligados, REAIS. Dois componentes ficam dois (E04)."""
+    known = {n.get("id") for n in nodes if n.get("id")}
+    vistos: set = set()
+    saida = []
+    for nid in sorted(known):
+        if nid in vistos:
+            continue
+        t = traverse(nodes, edges, nid)
+        grupo = [x for x in t["reached"] if x in known]
+        vistos.update(grupo)
+        saida.append(sorted(grupo))
+    return sorted(saida, key=lambda g: (-len(g), g[0] if g else ""))
+
+
+PROV_SOURCE_KEYS = ("mirror_of", "locator", "source", "answered_by")
+
+
+def provenance(nodes: list[dict], edges: list[dict], node_id: str) -> dict:
+    """Abre a proveniência de um nó: de onde veio e a que autoridade responde.
+
+    Sem proveniência, diz-se sem proveniência. A ausência é um facto sobre o grafo, não um
+    buraco a tapar com um valor plausível.
+    """
+    alvo = next((n for n in nodes if n.get("id") == node_id), None)
+    if alvo is None:
+        return {"id": node_id, "found": False, "detail": "nó inexistente"}
+    prov = alvo.get("provenance") or {}
+    ligacoes = [{"key": k, "value": prov[k]} for k in PROV_SOURCE_KEYS
+                if prov.get(k) not in (None, "")]
+    return {"id": node_id, "found": True, "type": alvo.get("type", ""),
+            "provenance": prov, "sources": ligacoes,
+            "authority": prov.get("mirror_of", ""),
+            "has_provenance": bool(prov),
+            "edges": neighbours(edges, node_id),
+            "detail": "" if prov else "nó sem proveniência declarada"}
+
+
+def export(nodes: list[dict], edges: list[dict]) -> dict:
+    """O grafo inteiro na forma canónica — o acesso ao resto quando o contexto foi parcial."""
+    linhas = canonical_lines(nodes, edges)
+    return {"revision": revision_of(nodes, edges), "nodes": len(nodes), "edges": len(edges),
+            "lines": linhas, "body": "\n".join(linhas) + ("\n" if linhas else "")}
+
+
+def inspect(eng: Path, start: str | None = None, depth: int | None = None) -> dict:
+    """Vista de inspecção do store de um engagement — o que E04 percorre.
+
+    Não decide nada. Se o store não estiver legível, devolve a razão e mais nada: um grafo
+    ilegível não se resume, declara-se.
+    """
+    st = read(eng)
+    if st["status"] != OK:
+        return {"status": st["status"], "detail": st["detail"], "inspectable": False}
+    nodes, edges = st["nodes"], st["edges"]
+    comps = components(nodes, edges)
+    saida = {"status": OK, "inspectable": True, "revision": st["revision"],
+             "nodes": len(nodes), "edges": len(edges),
+             "integrity": validate(nodes, edges),
+             "components": comps, "component_count": len(comps),
+             "types": sorted({str(n.get("type", "")) for n in nodes}),
+             "relations": sorted({str(e.get("rel", "")) for e in edges})}
+    if start:
+        saida["traversal"] = traverse(nodes, edges, start, depth)
+        saida["provenance"] = provenance(nodes, edges, start)
+    return saida
+
+
 # ------------------------------------------------- dependencia consumida (C04/C05)
 
 CONSUMED_PATH = "_graph#consumed"
@@ -357,9 +489,11 @@ def _cli_status(eng: Path) -> dict:
 def main(argv=None) -> int:
     import argparse
     ap = argparse.ArgumentParser(description="grafo do engagement (read-only na CLI)")
-    ap.add_argument("command", choices=["status", "verify"])
+    ap.add_argument("command", choices=["status", "verify", "inspect", "export"])
     ap.add_argument("--engagement", required=True)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--start", help="no de partida para percorrer (inspect)")
+    ap.add_argument("--depth", type=int, help="saltos maximos; sem isto vai ate ao fim")
     a = ap.parse_args(argv)
 
     eng = Path(a.engagement)
@@ -371,6 +505,16 @@ def main(argv=None) -> int:
 
     if a.command == "status":
         out = _cli_status(eng)
+    elif a.command == "inspect":
+        out = inspect(eng, a.start, a.depth)
+    elif a.command == "export":
+        st = read(eng)
+        if st["status"] != OK:
+            print("grafo ilegivel ({}): {}".format(st["status"], st["detail"]),
+                  file=sys.stderr)
+            return 1
+        print(export(st["nodes"], st["edges"])["body"], end="")
+        return 0
     else:
         st = read(eng)
         out = dict(_cli_status(eng),
@@ -380,7 +524,7 @@ def main(argv=None) -> int:
     else:
         for k, v in out.items():
             print("{:22} {}".format(k, v))
-    if out["status"] in (UNREADABLE, INVALID_FORMAT, UNSUPPORTED_SCHEMA, INCOHERENT_PAIR):
+    if out.get("status") in (UNREADABLE, INVALID_FORMAT, UNSUPPORTED_SCHEMA, INCOHERENT_PAIR):
         return 1
     if a.command == "verify" and out.get("integrity"):
         return 1

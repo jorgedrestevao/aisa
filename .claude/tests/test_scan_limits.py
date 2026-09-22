@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import runpy
+import shutil
 import sys
 import tempfile
 import unittest
@@ -219,10 +220,24 @@ class TestMemoryFailureDegrades(unittest.TestCase):
         self.assertNotIn("sheets", written, "as referências grandes são largadas antes de escrever")
 
     def test_failure_handler_survives_an_unwritable_target(self):
-        """Se nem o artefacto se consegue escrever, o processo continua a sair com 0."""
+        """Se nem o artefacto se consegue escrever, o processo continua a sair com 0.
+
+        O alvo tem de ser mesmo inescrevivel: `_write_json` cria os directorios, portanto um
+        caminho tipo `Z:/...` e so um caminho relativo em POSIX -- escrevia-se com exito, na
+        raiz do repo, e o teste passava sem nunca tocar no ramo que diz testar. Um pai que e
+        ficheiro regular falha com ENOTDIR em POSIX e em Windows, sem depender de permissoes.
+        """
+        tmp = Path(tempfile.mkdtemp(prefix="scan-unwritable-"))
+        barreira = tmp / "sou-um-ficheiro"
+        barreira.write_text("x", encoding="utf-8")
+        alvo = barreira / "sem-permissao" / "x.json"
         doc = {"identity": {"filename": "x.xlsx"}}
-        rc = X["_fail_extraction"](doc, "Z:/inexistente/sem-permissao/x.json", "x.xlsx", MemoryError(), None)
+        rc = X["_fail_extraction"](doc, str(alvo), "x.xlsx", MemoryError(), None)
         self.assertEqual(rc, 0)
+        self.assertFalse(alvo.exists(), "o alvo era inescrevivel: nada pode ter ficado escrito")
+        self.assertEqual([p.name for p in tmp.iterdir()], ["sou-um-ficheiro"],
+                         "a degradacao nao inventa caminhos alternativos")
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 if __name__ == "__main__":
