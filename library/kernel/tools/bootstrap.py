@@ -413,7 +413,23 @@ def switched(previous: dict | None, current: dict) -> bool:
 
 # --------------------------------------------------------------------------- CLI
 
+def utf8_console() -> None:
+    """A consola em UTF-8, venha ela como vier.
+
+    Uma consola Windows fala cp1252 e este motor imprime portugues, setas e aspas
+    angulares. Medido numa sessao real: `bootstrap.py --json` rebentou com
+    UnicodeEncodeError em '\\u2192' — e o `migrate.py apply` que o guarda manda correr
+    para recuperar rebentaria da mesma forma. `errors="replace"` porque um caracter
+    perdido na consola e ruido; um processo morto a meio de uma recuperacao nao e."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
+
 def main(argv=None) -> int:
+    utf8_console()
     import argparse
     ap = argparse.ArgumentParser(description="bootstrap técnico (read-only)")
     ap.add_argument("--engagement", required=True)

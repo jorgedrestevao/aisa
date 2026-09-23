@@ -352,7 +352,23 @@ def apply(eng, **kw):
     return dict(p, receipt=receipt, replayed=bool(receipt.get("replayed")))
 
 
+def utf8_console() -> None:
+    """A consola em UTF-8, venha ela como vier.
+
+    Uma consola Windows fala cp1252 e este motor imprime portugues, setas e aspas
+    angulares. Medido numa sessao real: `bootstrap.py --json` rebentou com
+    UnicodeEncodeError em '\\u2192' — e o `migrate.py apply` que o guarda manda correr
+    para recuperar rebentaria da mesma forma. `errors="replace"` porque um caracter
+    perdido na consola e ruido; um processo morto a meio de uma recuperacao nao e."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
+
 def main(argv=None):
+    utf8_console()
     import argparse
     ap = argparse.ArgumentParser(description="resolver uma linha da SU")
     ap.add_argument("--engagement", required=True)
@@ -731,6 +747,60 @@ def mirror_write_set(eng, su_new, extra_nodes=(), extra_edges=()):
            for rel, corpo in ws.items()):
         return {}
     return ws
+
+
+# O que o espelho resolve, e SO isto. O bootstrap para por ordem — pendencia, legacy, grafo
+# ilegivel, integridade, desvio, linha sem no — e por isso, quando para num dos dois
+# ultimos, tudo o que vem antes ja passou. Pendencia, grafo partido ou modo legacy nao sao
+# deste escritor: sao do `operation.py recover` e do `migrate.py`.
+MIRROR_RECOVERABLE = ("AUTHORITY_UNMIRRORED", "AUTHORITY_DRIFT")
+
+
+def sync_mirror(eng):
+    """Por o grafo ao que a SU diz, depois de uma escrita que nao passou pelo coordenador.
+
+    Sessao real de Discovery: a SEGUNDA escrita de uma lente foi recusada pelo guarda de
+    autoridade. As lentes acrescentam linhas a SU pela ferramenta Edit; `on-su-change.py`
+    so regenerava o dashboard; nada espelhava. `AUTHORITY_UNMIRRORED` -> `ready=False` ->
+    `deny` na escrita seguinte. Todo o endurecimento do P7.5 assumiu que as escritas de
+    conhecimento passam pelo coordenador, e o caminho dominante do Discovery nao passa.
+
+    A regra ja estava escrita — quem escreve a autoridade escreve o espelho dela — e
+    faltava-lhe um escritor para o caminho Edit/Write. E este, chamado pelo hook
+    `on-su-mirror.py`.
+
+    Publica pelo coordenador, como toda a gente: mesma exclusao, mesmo recibo. A SU entra
+    no conjunto de escrita com os bytes que foram LIDOS — nao muda nada, mas assim a
+    precondicao cobre-a e, se ela mudar entre a leitura e o lock, `BASE_CHANGED` recusa
+    em vez de publicar o espelho de uma SU que ja nao existe.
+    """
+    eng = Path(eng)
+    boot = _B["bootstrap"](eng)
+    codigos = [l.get("code") for l in boot.get("limitations", [])]
+    if not boot.get("ready"):
+        # Sem ramo proprio para LEGACY_MODE: cai aqui, e a recuperacao que o bootstrap lhe
+        # da (`migrate.py apply` / `init`) e exactamente o conselho certo. Um salto
+        # silencioso escondia-o.
+        fora = [c for c in codigos if c not in MIRROR_RECOVERABLE]
+        if fora:
+            recup = [l.get("recovery") for l in boot.get("limitations", [])
+                     if l.get("code") in fora and l.get("recovery")]
+            return {"status": "refused", "blocking": fora, "published": [],
+                    "recovery": recup[0] if recup else
+                    "python library/kernel/tools/operation.py recover --engagement <slug>"}
+
+    lido = read_base(eng, (SU_FILE,))
+    ws = mirror_write_set(eng, lido[SU_FILE]["text"])
+    if not ws:
+        return {"status": "unchanged", "published": []}
+    write_set = dict(ws, **{SU_FILE: lido[SU_FILE]["text"]})
+    expected = _expected_for(eng, write_set, lido)
+    base = "|".join("{}={}".format(k, expected[k]) for k in sorted(expected))
+    op_id = "mirror-" + hashlib.sha256(base.encode("utf-8")).hexdigest()[:16]
+    recibo = _O["run"](eng, op_id, write_set, expected=expected)
+    return {"status": "mirrored", "operation_id": op_id, "receipt": recibo,
+            "published": recibo.get("published", []),
+            "was": codigos}
 
 
 def _expected_for(eng, write_set, base=None):

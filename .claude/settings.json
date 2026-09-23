@@ -46,6 +46,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/on-su-mirror.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
             "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/on-su-change.py\""
           },
           {
@@ -80,6 +89,7 @@
   },
   "env": {
     "AISA_KERNEL_VERSION": "0.2.0",
+    "PYTHONUTF8": "1",
     "AISA_GUARD_MODE": "enforce",
     "AISA_DASHBOARD_RELOAD": "5",
     "AISA_DASHBOARD_DEBOUNCE": "2"
