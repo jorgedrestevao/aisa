@@ -73,7 +73,9 @@ Uma sessão que recebe o resumo não prova recuperação nenhuma.
 >   "checkpoint": "cp<N>-<nome>",
 >   "phase": "<fase>",
 >   "facts": [{"id": "C-001", "state": "Confirmed"}],
+>   "assumptions": [{"id": "A-001", "state": "Assumed"}],
 >   "open_questions": [{"id": "U-002", "state": "Unknown"}],
+>   "risks": [{"id": "R-003", "state": "Risky"}, {"id": "X-004", "state": "Conflicted"}],
 >   "decisions": [{"id": "D-001"}],
 >   "coverage": {"status": "<fresh|stale|absent>"},
 >   "blockers": [{"id": "U-002"}],
@@ -82,12 +84,30 @@ Uma sessão que recebe o resumo não prova recuperação nenhuma.
 > }
 > ```
 >
+> Cada linha vai para o campo do seu estado: `Confirmed` → `facts`, `Assumed` →
+> `assumptions`, `Unknown` → `open_questions`, `Risky` e `Conflicted` → `risks`. Em
+> `blockers` entra o que bloqueia, seja qual for o estado.
+>
 > Não inventes ids. Se não encontrares algo, deixa a lista vazia — uma lista vazia é uma
 > resposta; um id inventado não é.
 >
 > Em `recovered_via`, diz **por que mecanismos** reconstruíste, com honestidade brutal: se
 > leste `shared-understanding.md` directamente, escreve isso. Não escrevas `bootstrap` se
 > não o correste.
+
+**Porque é que há um campo por estado.** A primeira corrida real (`cp1-discovery`) deu
+NO-GO com 5 críticos — `LOST_CRITICAL` sobre A-001..A-005 — e a sessão não tinha perdido
+nada. Este formulário só tinha `facts` e `open_questions`; o `compare.py` exigia recuperar
+linhas materiais em cinco estados. A sessão seguiu o formulário à letra e reprovou por isso.
+Pior: o juiz não olhava ao campo, só ao id e ao estado, e uma sessão que desobedecesse
+(Assumed em `facts`) passava. Agora o juiz lê os quatro campos, e o estado certo na gaveta
+errada é `FIELD_MISMATCH` — aviso, não crítico, porque arrumar mal não é perder.
+
+**A correcção que NÃO se faz:** copiar as linhas em falta do `truth.json` para o report.
+Isso é preencher o candidato a partir da referência (`ACCEPTANCE.md` §5) e dá GO sem medir
+coisa nenhuma. Um report produzido sob um formulário partido não se edita: guarda-se como
+corrida N no `.notes.md`, com a causa, e o checkpoint repete-se numa sessão nova contra o
+**mesmo** `truth.json` — que continua válido, porque foi congelado antes.
 
 **Porque é que `recovered_via` existe.** Sem ele o comparador mede ids recuperados e dá GO —
 mesmo quando a recuperação veio de ler a SU à moda antiga, que é exactamente o que E01
@@ -132,6 +152,7 @@ Sai `0` em GO, `1` em NO-GO. O que ele procura:
 | `PHASE_MISMATCH` | crítico | fase reportada ≠ fase nos ficheiros |
 | `REPORT_INCOMPLETE` | crítico | a resposta não traz os campos pedidos |
 | `LOST` / `STATE_DRIFT` | aviso | perda ou desvio não material |
+| `FIELD_MISMATCH` | aviso | estado certo, campo errado (ex.: Assumed em `facts`) |
 
 ---
 

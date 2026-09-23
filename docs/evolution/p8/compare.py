@@ -63,6 +63,22 @@ AVISO = "warning"
 CAMPOS_OBRIGATORIOS = ("engagement", "checkpoint", "phase", "facts", "open_questions",
                        "decisions", "coverage", "blockers", "next_step")
 
+# Onde cada estado se arruma no report. O juiz exige recuperar linhas materiais em CINCO
+# estados; ate aqui o formulario do protocolo (§2.3) so tinha lugar para dois, e a primeira
+# corrida real de E01 deu NO-GO com 5 criticos sobre Assumed que a sessao nao tinha onde
+# por. `assumptions` e `risks` nao entram em CAMPOS_OBRIGATORIOS: os reports ja gravados nao
+# passam a incompletos por o schema crescer — a perda de uma linha material continua a ser
+# apanhada por LOST_CRITICAL, que e onde deve ser.
+CAMPO_DO_ESTADO = {
+    "Confirmed": "facts",
+    "Assumed": "assumptions",
+    "Unknown": "open_questions",
+    "Risky": "risks",
+    "Conflicted": "risks",
+}
+# `blockers` e uma vista transversal (qualquer estado pode bloquear), nao uma gaveta.
+CAMPOS_LINHAS = ("facts", "assumptions", "open_questions", "risks", "blockers")
+
 # Mecanismos que contam como reconstrucao pelo kernel. `ACCEPTANCE.md` §6 exige «apenas
 # mecanismos oficiais do projeto»; com o grafo obrigatorio, ler `shared-understanding.md`
 # a olho deixou de ser um deles.
@@ -174,13 +190,18 @@ def check(t: dict, report: dict) -> dict:
 
     idx = _index(t)
     reportados: dict[str, str] = {}
-    for campo in ("facts", "open_questions", "blockers"):
+    gavetas: dict[str, set] = {}
+    for campo in CAMPOS_LINHAS:
         for item in (report.get(campo) or []):
             rid = item.get("id") if isinstance(item, dict) else str(item)
             if not rid:
                 continue
             estado = item.get("state", "") if isinstance(item, dict) else ""
-            reportados[rid] = estado
+            # um id em `blockers` sem estado nao apaga o estado dito na sua gaveta
+            if estado or rid not in reportados:
+                reportados[rid] = estado
+            if campo != "blockers":
+                gavetas.setdefault(rid, set()).add(campo)
 
     # inventado: id que não existe em lado nenhum
     for rid, estado in sorted(reportados.items()):
@@ -195,6 +216,17 @@ def check(t: dict, report: dict) -> dict:
                 "FALSE_CONFIRMED" if falso_confirmado else "STATE_DRIFT",
                 CRITICO if falso_confirmado else AVISO,
                 "estado reportado {!r} != estado real {!r}".format(estado, real), id=rid))
+            continue
+        # Estado certo, gaveta errada. Aviso: o id foi recuperado, e arrumar mal nao e
+        # perder. Mas deixa de ser silencioso — antes, meter uma Assumed em `facts` passava.
+        esperado = CAMPO_DO_ESTADO.get(real)
+        onde = gavetas.get(rid, set())
+        if esperado and onde and esperado not in onde:
+            achados.append(_achado(
+                "FIELD_MISMATCH", AVISO,
+                "linha {} reportada em {} e pertence a {!r}".format(
+                    real, "/".join(sorted(onde)), esperado),
+                id=rid, field=sorted(onde), expected=esperado))
 
     # perdido: o que a verdade tem e a sessão não devolveu
     for rid, r in sorted(idx.items()):
@@ -271,7 +303,7 @@ def leak(t_outro: dict, report: dict) -> dict:
     """§6: trocar entre dois engagements e verificar que nada do primeiro entra no segundo."""
     idx_outro = set(_index(t_outro)) | set(t_outro.get("decisions", []))
     achados = []
-    for campo in ("facts", "open_questions", "blockers", "decisions"):
+    for campo in CAMPOS_LINHAS + ("decisions",):
         for item in (report.get(campo) or []):
             rid = item.get("id") if isinstance(item, dict) else str(item)
             if rid and rid in idx_outro:
