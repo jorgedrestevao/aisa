@@ -184,5 +184,56 @@ class S4_OFormularioEOJuizConcordam(unittest.TestCase):
                             "o exemplo de {} mostra um estado que la nao pertence".format(campo))
 
 
+class S5_RepetirUmCheckpoint(unittest.TestCase):
+    """Repetir `cp1` e guardar a corrida 1 como evidencia — sem a deixar contar.
+
+    O protocolo manda guardar a corrida falhada, e `summary` lia TODOS os `*.verdict.json`
+    em `runs/`: a corrida 1 guardada mantinha o agregado em NO-GO para sempre. As duas
+    instrucoes contradiziam-se.
+
+    E a correccao obvia — ignorar `_superseded/` — abria a porta contraria: mover uma
+    corrida falhada para la SEM a repetir dava GO. Por isso uma corrida substituida so sai
+    da conta quando existe uma corrida activa do MESMO engagement e checkpoint."""
+
+    def grava(self, pasta, nome, eng, cp, veredicto, criticos):
+        pasta.mkdir(parents=True, exist_ok=True)
+        (pasta / nome).write_text(json.dumps(
+            {"engagement": eng, "checkpoint": cp, "case": "E01", "critical": criticos,
+             "warnings": 0, "verdict": veredicto}), encoding="utf-8")
+
+    def test_a_superseded_run_with_a_rerun_does_not_count(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            self.grava(d / "eng-a" / "_superseded" / "r1", "cp1.verdict.json",
+                       "eng-a", "cp1-discovery", "NO-GO", 5)
+            self.grava(d / "eng-a", "cp1.verdict.json", "eng-a", "cp1-discovery", "GO", 0)
+            s = C["summary"](d)
+        self.assertEqual(s["verdict"], "GO")
+        self.assertEqual(s["runs"], 1)
+        self.assertEqual(s["superseded"], 1, "a corrida substituida desapareceu sem registo")
+
+    def test_a_superseded_run_without_a_rerun_is_critical(self):
+        """Esconder uma corrida falhada nao e repeti-la."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            self.grava(d / "eng-a" / "_superseded" / "r1", "cp1.verdict.json",
+                       "eng-a", "cp1-discovery", "NO-GO", 5)
+            self.grava(d / "eng-a", "cp2.verdict.json", "eng-a", "cp2-resolution", "GO", 0)
+            s = C["summary"](d)
+        self.assertEqual(s["verdict"], "NO-GO")
+        self.assertIn("eng-a/cp1-discovery", s.get("superseded_without_rerun", []))
+
+    def test_only_superseded_runs_are_not_a_go(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            self.grava(d / "eng-a" / "_superseded" / "r1", "cp1.verdict.json",
+                       "eng-a", "cp1-discovery", "NO-GO", 5)
+            s = C["summary"](d)
+        self.assertNotEqual(s["verdict"], "GO")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

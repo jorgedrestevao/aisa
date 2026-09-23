@@ -281,10 +281,6 @@ class T6_OInputRealQueEstavaPorLer(unittest.TestCase):
         self.assertGreater(len(corpo), 500)
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=1)
-
-
 class T7_OsLocatorsDosFormatosNovos(unittest.TestCase):
     """Acrescentar o extractor e nao acrescentar a classe de locator e meio trabalho.
 
@@ -336,3 +332,7 @@ class T7_OsLocatorsDosFormatosNovos(unittest.TestCase):
                           "`registo.csv` · linha 2"):
                 gaps = self.D["locator_target_gaps"](texto, self.classes(texto), alvo)
                 self.assertEqual(gaps, [], "{} -> {}".format(texto, gaps))
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=1)

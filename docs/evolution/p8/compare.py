@@ -401,19 +401,35 @@ def _veredicto(engagement, checkpoint, caso, achados) -> dict:
             "verdict": "NO-GO" if criticos else "GO"}
 
 
+SUPERSEDED_DIR = "_superseded"
+
+
 def summary(runs: Path) -> dict:
-    """Agrega o que estiver em `runs/`. Sem ficheiros, sem veredicto — não se conclui do vazio."""
-    veredictos = [json.loads(p.read_text(encoding="utf-8"))
-                  for p in sorted(runs.rglob("*.verdict.json"))]
-    if not veredictos:
+    """Agrega o que estiver em `runs/`. Sem ficheiros, sem veredicto — não se conclui do vazio.
+
+    Uma corrida repetida deixa a anterior em `runs/<slug>/_superseded/rN/` — guardada como
+    evidencia, fora da conta. Antes disto `summary` lia tudo, e a corrida 1 de `cp1`
+    guardada mantinha o agregado em NO-GO para sempre. Mas ignorar `_superseded/` sem mais
+    abria a porta contraria: esconder uma corrida falhada sem a repetir dava GO. Por isso
+    uma substituida so sai da conta quando ha uma corrida ACTIVA do mesmo engagement e
+    checkpoint; sem ela, e critica."""
+    activos, substituidos = [], []
+    for p in sorted(runs.rglob("*.verdict.json")):
+        v = json.loads(p.read_text(encoding="utf-8"))
+        (substituidos if SUPERSEDED_DIR in p.relative_to(runs).parts else activos).append(v)
+    if not activos and not substituidos:
         return {"verdict": "SEM EXECUÇÃO", "runs": 0,
                 "detail": "nenhum veredicto em {} — P8 não corre sozinho".format(runs)}
-    criticos = sum(v.get("critical", 0) for v in veredictos)
-    return {"runs": len(veredictos), "critical": criticos,
-            "warnings": sum(v.get("warnings", 0) for v in veredictos),
-            "by_case": sorted({v.get("case", "") for v in veredictos}),
-            "no_go": [v["engagement"] + "/" + str(v.get("checkpoint"))
-                      for v in veredictos if v.get("verdict") == "NO-GO"],
+    chave = lambda v: "{}/{}".format(v.get("engagement", ""), v.get("checkpoint"))
+    com_activo = {chave(v) for v in activos}
+    orfaos = sorted({chave(v) for v in substituidos} - com_activo)
+    criticos = sum(v.get("critical", 0) for v in activos) + len(orfaos)
+    return {"runs": len(activos), "critical": criticos,
+            "warnings": sum(v.get("warnings", 0) for v in activos),
+            "by_case": sorted({v.get("case", "") for v in activos}),
+            "no_go": [chave(v) for v in activos if v.get("verdict") == "NO-GO"],
+            "superseded": len(substituidos),
+            "superseded_without_rerun": orfaos,
             "verdict": "NO-GO" if criticos else "GO"}
 
 
